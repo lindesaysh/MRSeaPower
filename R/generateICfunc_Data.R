@@ -1,11 +1,11 @@
-generateIC<-function(data, corrs, panels, newdata, nsim){
+generateIC<-function(data, corrs, panels, newdata, nsim, dots=TRUE){
 
   bids<-unique(data[,panels])
   #nsim=ncol(newdata)
   numRep=nsim # number of draws to be taken
 
   for(iter in 1:length(bids)){
-    if((iter/100)%%1 == 0){cat(iter, '\n')}else{cat('.')}
+    if(dots){if((iter/100)%%1 == 0){cat(iter, '\n')}else{cat('.')}}
 
     if(iter==1){
       totalrepVars<-NULL

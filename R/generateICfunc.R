@@ -1,18 +1,18 @@
-generateIC.toy<-function(data, corrs, block, newdata, nsim){
+generateIC.toy<-function(data, corrs, block, newdata, nsim, dots=TRUE){
   require(Hmisc)
   require(Matrix)
   bids<-unique(data[,block])
   numRep=nsim # number of draws to be taken
-  
+
   for(iter in 1:length(bids)){
-    if((iter/10)%%1 == 0){cat(iter, '\n')}else{cat('.')}
-    
+    if(dots){if((iter/10)%%1 == 0){cat(iter, '\n')}else{cat('.')}}
+
     tempid<-which(data[,block]==bids[iter])
-    
+
     vars<-t(newdata[tempid,1:nsim])
-    
+
     numVar=length(tempid)  # number of variables to consider
-    
+
     bcorr<-na.omit(corrs)
     if(bcorr[1]!=1){
       bcorr[1]<-1
@@ -22,7 +22,7 @@ generateIC.toy<-function(data, corrs, block, newdata, nsim){
       sigma[i,(i:ncol(sigma))]<-bcorr[1:(ncol(sigma)-(i-1))]
     }
     sigma[lower.tri(sigma)]<-t(sigma)[lower.tri(sigma)]
-    
+
     entryR=qnorm((1:numRep)/(numRep+1))
     absDiff=numVar*numVar-numVar
     for (j in 1:200) { #Pick a "good" r matrix - note: 100 is different to numrep
@@ -39,17 +39,17 @@ generateIC.toy<-function(data, corrs, block, newdata, nsim){
       }
       #cat(thisAbsDiff,', ' , absDiff, '\n')
     }
-    
-    P=t(chol(sigma)) 
+
+    P=t(chol(sigma))
     R_star=R%*%t(P)
     T=rcorr_sub(R)
     # NB T=rcorr(R_star)#from dodgey Haas code
-    
+
     Q=try(t(chol(T$r)), silent=TRUE)
     if(class(Q)=='try-error'){
-      Q=t(chol(nearPD(T$r)$mat))  
+      Q=t(chol(nearPD(T$r)$mat))
     }
-    
+
     S=P%*%solve(Q)
     Rb_star=R%*%t(S)
     #NB Rb_star=R_star%*%t(S)#from dodgey Haas code
@@ -61,7 +61,7 @@ generateIC.toy<-function(data, corrs, block, newdata, nsim){
       iin<-vars
       outs<-t(t(order(Rb_star)))
     }
-    
+
     for (i in 1:numVar) {repVars[outs[,i],i]<-iin[,i]}
     if(iter==1){totalrepVars<-NULL}
     totalrepVars <- rbind(totalrepVars, t(repVars))
@@ -72,22 +72,22 @@ generateIC.toy<-function(data, corrs, block, newdata, nsim){
 
 # ~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~
-rcorr_sub<-function (x, y, type = c("pearson", "spearman")) 
+rcorr_sub<-function (x, y, type = c("pearson", "spearman"))
 {
   type <- match.arg(type)
-  if (!missing(y)) 
+  if (!missing(y))
     x <- cbind(x, y)
   x[is.na(x)] <- 1e+50
   storage.mode(x) <- "double"
   p <- as.integer(ncol(x))
-  if (p < 1) 
+  if (p < 1)
     stop("must have >1 column")
   n <- as.integer(nrow(x))
-  if (n < 5) 
+  if (n < 5)
     stop("must have >4 observations")
-  h <- .Fortran("rcorr", x, n, p, itype = as.integer(1 + (type == 
-                                                            "spearman")), hmatrix = double(p * p), npair = integer(p * 
-                                                                                                                     p), double(n), double(n), double(n), double(n), double(n), 
+  h <- .Fortran("rcorr", x, n, p, itype = as.integer(1 + (type ==
+                                                            "spearman")), hmatrix = double(p * p), npair = integer(p *
+                                                                                                                     p), double(n), double(n), double(n), double(n), double(n),
                 integer(n), PACKAGE = "Hmisc")
   npair <- matrix(h$npair, ncol = p)
   h <- matrix(h$hmatrix, ncol = p)
@@ -95,7 +95,7 @@ rcorr_sub<-function (x, y, type = c("pearson", "spearman"))
   nam <- dimnames(x)[[2]]
   dimnames(h) <- list(nam, nam)
   dimnames(npair) <- list(nam, nam)
-  # P <- matrix(2 * (1 - pt(abs(h) * sqrt(npair - 2)/sqrt(1 - 
+  # P <- matrix(2 * (1 - pt(abs(h) * sqrt(npair - 2)/sqrt(1 -
   #                                                         h * h), npair - 2)), ncol = p)
   # P[abs(h) == 1] <- 0
   # diag(P) <- NA

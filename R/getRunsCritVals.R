@@ -1,8 +1,9 @@
 
-getRunsCritVals<-function(n.sim, simData, model, data, plot=FALSE, returnDist=FALSE){
+getRunsCritVals<-function(n.sim, simData, model, data, plot=FALSE, returnDist=FALSE,dots=TRUE){
   runsstatH0<-vector(length=n.sim)
 for(i in 1:n.sim){
-  if((i/500)%%1 == 0){cat(i, '\n')}else{cat('.')}
+  if(dots==TRUE){if((i/500)%%1 == 0){cat(i, '\n')}else{cat('.')}}
+
   data$response=simData[,i]
   sim_glm<- update(model, response ~ ., data=data)
   runs<-runs.test(residuals(sim_glm, type='pearson'))
