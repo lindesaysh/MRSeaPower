@@ -153,7 +153,7 @@ summary.gamMRSea<-function (object, dispersion = NULL, varshortnames=NULL, ...)
   ans <- c(object[keep], list(deviance.resid = residuals(object,
                                                          type = "deviance"), coefficients = coef.table, aliased = aliased,
                               dispersion = dispersion, df = c(object$rank, df.r, df.f),
-                              cov.unscaled = covmat.unscaled, cov.scaled = covmat, panelid=panelid))
+                              cov.unscaled = covmat.unscaled, cov.scaled = covmat, cov.robust=vbeta, panelid=panelid))
   class(ans) <- "summary.gamMRSea"
   return(ans)
 }

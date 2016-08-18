@@ -1,9 +1,9 @@
-update.gammrsea<-function (object, formula., ..., evaluate = TRUE) 
+update.gammrsea<-function (object, formula., ..., evaluate = TRUE)
 {
-  if (is.null(call <- getCall(object))) 
+  if (is.null(call <- getCall(object)))
     stop("need an object with call component")
   extras <- match.call(expand.dots = FALSE)$...
-  if (!missing(formula.)) 
+  if (!missing(formula.))
     call$formula <- update.formula(formula(object), formula.)
   if (length(extras)) {
     existing <- !is.na(match(names(extras), names(call)))
@@ -17,6 +17,7 @@ update.gammrsea<-function (object, formula., ..., evaluate = TRUE)
     newmodel<-eval(call, parent.frame())
     newmodel$panels<-object$panels
     newmodel$varshortnames<-object$varshortnames
+    newmodel$splineParams<-object$splineParams
     class(newmodel)<-class(object)
     newmodel
   }
