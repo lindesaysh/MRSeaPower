@@ -4,6 +4,7 @@ getRunsCritVals<-function(n.sim, simData, model, data, plot=FALSE, returnDist=FA
 for(i in 1:n.sim){
   if(dots==TRUE){if((i/500)%%1 == 0){cat(i, '\n')}else{cat('.')}}
 
+  splineParams = model$splineParams
   data$response=simData[,i]
   sim_glm<- update(model, response ~ ., data=data)
   runs<-runs.test(residuals(sim_glm, type='pearson'))

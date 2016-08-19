@@ -46,6 +46,10 @@ summary.gamMRSea<-function (object, dispersion = NULL, varshortnames=NULL, ...)
     panelid<-object$panels
   }
 
+  if(!is.null(object$varshortnames)){
+    varshortnames=object$varshortnames
+  }
+
   vbeta<-sandcov(object, panelid)
 
   bob <- attr(object$coefficients, "names")

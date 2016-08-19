@@ -1,4 +1,4 @@
-update.gammrsea<-function (object, formula., ..., evaluate = TRUE)
+update.gamMRSea<-function (object, formula., ..., evaluate = TRUE)
 {
   if (is.null(call <- getCall(object)))
     stop("need an object with call component")
