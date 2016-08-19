@@ -1,5 +1,6 @@
 powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefid, predictionGrid=NULL, g2k=NULL, splineParams=NULL, bootstrapCI=TRUE, sigdif=TRUE, n.boot=1000){
 
+  require(mvtnorm)
   data<-model$data
   if(is.null(nsim)){nsim=ncol(newdat)}
 

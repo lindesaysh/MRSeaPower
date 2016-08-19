@@ -124,6 +124,7 @@ apply(runspowsim_out$rawrob, 2, sum)/nsim
 ```
 
 ```{r poweroutfow, cache=TRUE}
+griddata<-read.csv('../../../Data/FoW/Zone.csv', header=T)
 predictdata<-rbind(data.frame(griddata, TideState=1, WindStrength=0, SeaState=0, SimpPrecipitation='SHOWERS', CloudCover=0, areatime=1, eventphase=0), data.frame(griddata, TideState=1, WindStrength=0, SeaState=0, SimpPrecipitation='SHOWERS', CloudCover=0,areatime=1, eventphase=1))
 
 powerout<-powerSimOverallChange(newdatcor, fowsim_glm, empdistpower, nsim=100, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=NULL, splineParams=NULL, sigdif=TRUE, n.boot=500)
@@ -137,5 +138,10 @@ powerout<-powerSimOverallChange(newdatcor, fowsim_glm, empdistpower, nsim=100, p
 ```{r}
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
 plotdata
+```
+
+
+```{r}
+#lazyLoad(filebase = 'FoWPower_cache/html/poweroutfow_e9cd6eba643105e8af4b9b2a338149a2')
 ```
 

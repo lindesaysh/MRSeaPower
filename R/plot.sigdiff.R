@@ -6,7 +6,7 @@
 #'
 
 plot.sigdiff<-function(powerout, coordinates, tailed='two', error.rate=0.05, family=FALSE){
-
+require(ggplot2)
   nsim=length(powerout$rawrob)
   if(family==FALSE){
     pmatrixfull=matrix(unlist(powerout$significant.differences$inividual), ncol=2*nsim)
@@ -17,8 +17,8 @@ plot.sigdiff<-function(powerout, coordinates, tailed='two', error.rate=0.05, fam
   }
 
   pmatrix<-switch(tailed,
-                  two=indmatrix[,-seq(1, 2*nsim, by=2)],
-                  one=indmatrix[,seq(1, 2*nsim, by=2)]
+                  two=pmatrixfull[,-seq(1, 2*nsim, by=2)],
+                  one=pmatrixfull[,seq(1, 2*nsim, by=2)]
   )
 
 
