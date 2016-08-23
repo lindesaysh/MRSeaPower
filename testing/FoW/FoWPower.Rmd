@@ -1,14 +1,14 @@
 ---
-title: "Falls of Warness"
+title: "Fall of Warness"
 author: "Lindesay Scott-Hayward"
 date: "11 August 2016"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig=TRUE, dev='png', warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(echo = TRUE, fig=TRUE, dev='png', warning=FALSE, message=FALSE, comment='')
 ```
-# Real Data: Falls of Warness
+# Real Data: Fall of Warness
 
 ```{r fow, echo=FALSE}
 #devtools::load_all(pkg = '../../../../Packages/MRSea package/MRSea')
@@ -16,6 +16,14 @@ devtools::load_all(pkg = '../../../MRSea/MRSea')
 devtools::load_all(pkg = '../../../MRSeaPower')
 data(fowshco)
 ```
+
+```{r, fig.cap='Plot of the data with average counts per grid cell.'}
+require(fields)
+quilt.plot(dat$x.pos, dat$y.pos, dat$response, nrow=18, ncol=14, asp=1)
+
+```
+
+
 
 ### Fit Initial Model
 ```{r fowinitglm}
@@ -33,7 +41,7 @@ d<-as.numeric(summary(init_glm)$dispersion)
 newdat<-generateNoise(nsim, fitted(init_glm), family='poisson', d=d)
 ```
 
-`r nsim` sets of noisy data are simulated from the model using an overdispersed Poisson distribution where $\hat{\phi} = $ `r round(summary(init_glm)$dispersion)`.
+`r nsim` sets of noisy data are simulated from the model using an overdispersed Poisson distribution where $$\hat{\phi} = $$ `r round(summary(init_glm)$dispersion)`.
 
 ```{r critvalsfow, cache=T, fig.cap='Figure showing the distribution of test statistics from a runs test. The red lines show the lower 2.5% and upper 97.5% critical values of the empirical distribution and the blue lines are from the Normal ($N(0,1)$) distribution.'}
 empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
@@ -58,50 +66,61 @@ corrs<-getCorrelationMat(dat$blockid, dat$response, dots=FALSE)
 newdatcor<-generateIC(data = dat, corrs = corrs, panels = 'blockid', newdata = newdat, nsim = nsim, dots = FALSE)
 ```
 
-The generated data are consistent with the original data:
+Are the generated data consistent with the original data?
 
 #### Mean
-```{r}
-hist(apply(newdat, 2, mean), main='', xlab='mean(response)')
+```{r meanplot, fig.cap='Histogram of the mean of the simulated data, with the red line representing the mean of the original data.'}
+hist(apply(newdatcor, 2, mean), main='', xlab='mean(response)')
 abline(v=mean(dat$response), col='red', lwd=2, lty=3)
 ```
 
+In this case the mean of the original data sits inside the distribution of simulated means. 
+
 #### Variance
-```{r}
-hist(apply(newdat, 2, var), main='', xlab='var(response)')
+```{r varplot, fig.cap='Histogram of the variance of the simulated data, with the red line representing the variance of the original data.'}
+hist(apply(newdatcor, 2, var), main='', xlab='var(response)')
 abline(v=var(dat$response), col='red', lwd=2, lty=3)
 var(dat$response)
 ```
 
+Unfortunately the variance of the simulated data is lower than that of the original data ($$\sigma^2 = $$ ```r round(var(dat$response), 3)```).  This could be due to the overly simplistic model being unable to return the variability seen in the data.  This model is then used to simulate from.
+
 #### Correlation
 
-```{r}
+```{r acfplot}
 par(mfrow=c(1,2))
 acf(dat$response, main='Data')
 acf(newdatcor[,50], main='Sim Data')
 ```
 
+The correlation seen in the data matches well with the example shown from the simulated data.  This indicates the IC method is working well.
+
 #### Check the dispersion parameter
 
 ```{r}
-fowsim_glm<-update(init_glm, newdat[,1] ~ .)
+fowsim_glm<-update(init_glm, newdatcor[,1] ~ .)
 summary(fowsim_glm)$dispersion
 ```
 
-#### Data distribution
 
-```{r}
+#### Data spatial distribution
+
+```{r datadistribution, fig.cap='Figure showing the spatial distribution of the original data, the fitted values from the model and two examples of the simulated data.'}
 require(fields)
 par(mfrow=c(2,2))
-quilt.plot(dat$x.pos, dat$y.pos, dat$response, main='Original Data')
-quilt.plot(dat$x.pos, dat$y.pos, fitted(init_glm), main='Fitted Values')
-quilt.plot(dat$x.pos, dat$y.pos, newdatcor[,1], main='Simulated Data A')
-quilt.plot(dat$x.pos, dat$y.pos, newdatcor[,10], main='Simulated Data B')
+quilt.plot(dat$x.pos, dat$y.pos, dat$response, main='Original Data', nrow=18, ncol=14, asp=1)
+quilt.plot(dat$x.pos, dat$y.pos, fitted(init_glm), main='Fitted Values', nrow=18, ncol=14, asp=1)
+quilt.plot(dat$x.pos, dat$y.pos, newdatcor[,1], main='Simulated Data A', nrow=18, ncol=14, asp=1)
+quilt.plot(dat$x.pos, dat$y.pos, newdatcor[,10], main='Simulated Data B', nrow=18, ncol=14, asp=1)
 ```
+
+These plots show that the spatial distribution of the data is well represented by the simulated data. 
 
 ### Power Analysis
 
-Generate data for power analysis with impact of 10\%
+Now that we know we can generate data that represents the original fairly well, we now generate data for the power analysis with a change imposed of **10\%**; a 10\% decline in animal numbers post event.
+
+First the change is imposed on the data, then the noise is added (in-line with the dispersion seen in the initial model) and finally the correlation. 
 
 ```{r powerdatgen, cache=TRUE}
 nsim=500
@@ -110,13 +129,13 @@ newdat<-generateNoise(nsim, impdata$truth, family='poisson', d=d)
 newdatcor<-generateIC(data = impdata, corrs = rbind(corrs, corrs), panels = 'panels', newdata = newdat, nsim = nsim, dots = FALSE)
 ```
 
-Update the initial model to include the eventphase term, indicating overall change.
+Update the initial model to include the eventphase term, indicating overall change. This model forms the foundation of the power analysis to follow.
 
 ```{r}
 fowsim_glm<-glm(newdatcor[,1] ~  as.factor(TideState) + WindStrength + SeaState + SimpPrecipitation + CloudCover + Depth  + as.factor(eventphase) + offset(log(areatime)), data=impdata, family=quasipoisson)
 ```
 
-Using the simulated data with noise but no correlation, estimate the new values for the empirical distribution for the runs test.
+The new values for the empirical distribution of the runs test are estimated using the noisy but un-correlated simulated data. This is differenct to the distribution generated earlier as we have another term in the model (eventphase).
 
 ```{r empdistpower, cache=TRUE}
 # make sure that the independent data is used to get the null distribution
@@ -126,7 +145,7 @@ empdistpower<-getRunsCritVals(n.sim = nsim, simData=newdat,
 ```
 
 
-```{r, powerouta, cache=TRUE}
+```{r, powerouta, cache=TRUE, eval=FALSE, echo=FALSE}
 runspowsim_out<-runsPowerSim(newdatcor, fowsim_glm, empdistpower, nsim, powercoefid = length(coef(fowsim_glm)))
   
 apply(runspowsim_out$rawrob, 2, sum)/nsim
@@ -136,7 +155,7 @@ apply(runspowsim_out$rawrob, 2, sum)/nsim
 
 ```
 
-If an offset is present in the model, when setting up the prediction grid the area of each gridcell should be provided so that an accurate estimate of the abundance can be made at the outputs stage. 
+If an offset is present in the model, the area of each gridcell should be provided when setting up the prediction grid so that an accurate estimate of the abundance pre and post event can be made at the outputs stage. 
 
 ```{r predgridsetup}
 data("fowshco.grid")
@@ -150,53 +169,47 @@ powerout<-powerSimOverallChange(newdatcor, fowsim_glm, empdistpower, nsim=nsim, 
 
 # Power Outputs:
 
-### Power to detect Change
-```{r}
-(length(which(powerout$imppvals<=0.05))/nsim)*100
-```
+To calculate the summary, the values for certain parameters are given under the null hypothesis of 'no change'.  If these parameters are not provided, then the summary will not show the comparisons (see below)
 
-### Coverage of impact coefficient
+### Summary output
 
 ```{r}
-truebeta<--0.69
-impact.coverage(truebeta, powerout$betacis)
+summary(powerout, truebeta=log(0.9))
 ```
+
+In order to assess the summary calculations, we estimate the null parameters to provide the full summary. 
+
+```{r nulloutput, cache=TRUE}
+null.output<-pval.coverage.null(newdat.ind = newdat, newdat.corr = newdatcor, model = fowsim_glm, nsim = 500, powercoefid = length(coef(fowsim_glm)))
+```
+
+```{r}
+summary(powerout, null.output, truebeta=log(0.9))
+```
+
+We expect to see the null power to be 5\%, indicating a 5\% error rate for inclusion of the eventphase term when the data do not contain any change.  We also expect that the coverage for the null coefficient is 95\%.  This indicates that 5\% of the time, the confidence intervals for the eventphase coefficient did not include the truth (0; no change).
 
 
 ### Proportion of significant differences:
-```{r sigdiff.ind}
+```{r sigdiff.ind, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences in that cell under the null hypothesis of no-change.'}
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
 plotdata
 ```
 
-```{r sigdiff.fam}
+```{r sigdiff.fam, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences across all grid cells under the null hypothesis of no-change.'}
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=TRUE)
 plotdata
 ```
 
-### Mean sightings probability before and after
+### Distance to event site plot
 
-```{r}
-powerout$Abundance
-```
-
-### Distance to impact site plot
-
-```{r}
+```{r disttoimp, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
 d2impPlot<-plot.d2imp(powerout)
 d2impPlot
 ```
 
-### Summary output
-```{r nulloutput, cache=T}
-null.output<-pval.coverage.null(newdat.ind = newdat, newdat.corr = newdatcor, model = fowsim_glm, nsim = 500, powercoefid = length(coef(fowsim_glm)))
 
-summary(powerout, null.output, truebeta=log(0.9))
-
-```
-
-
-```{r}
-#lazyLoad(filebase = 'FoWPower_cache/html/poweroutfow_9f91ed9b2403db21866c9985fcb778fe')
+```{r, echo=FALSE, eval=FALSE}
+lazyLoad(filebase = 'FoWPower_cache/html/poweroutfow_9f91ed9b2403db21866c9985fcb778fe')
 ```
 

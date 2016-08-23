@@ -72,17 +72,23 @@ summary.gamMRSea<-function (object, dispersion = NULL, varshortnames=NULL, ...)
         bob[smoothid][k] <- paste("s(x.pos, y.pos)b", k,
                                   sep = "")
       }
-      for (i in 1:length(factorlist)) {
-        a <- grep(facls[i], bob[intid])
-        if (length(a) > 0) {
-          a <- i
-          break
-        }
-      }
+      
+      int<-attr(terms(formula(test)), 'term.labels')[grep(":", attr(terms(formula(test)), 'term.labels'))]
+      factorlist<-names(which(attr(terms(test), 'dataClasses')=='factor'))
+      a<-which(!is.na(pmatch(names(facs), int)))
+      
+      # for (i in 1:length(factorlist)) {
+      #   a <- grep(factorlist[i], int)
+      #   if (length(a) > 0) {
+      #     a <- i
+      #     break
+      #   }
+      # }
+      
       counter <- 1
       for (k in 1:length(smoothid)) {
         for (i in 1:(length(intid)/length(smoothid))) {
-          textin <- paste(facls[a], i, ":s(x.pos, y.pos)b",
+          textin <- paste(factorlist[a], i, ":s(x.pos, y.pos)b",
                           k, sep = "")
           bob[intid[counter]] <- textin
           counter <- counter + 1

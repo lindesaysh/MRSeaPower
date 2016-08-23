@@ -1,0 +1,275 @@
+---
+title: "Fall of Warness Power: Spatial"
+author: "Lindesay Scott-Hayward"
+date: "23 August 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig=TRUE, dev='png', warning=FALSE, message=FALSE)
+```
+# Real Data: Falls of Warness
+
+```{r fow, echo=FALSE}
+#devtools::load_all(pkg = '../../../../Packages/MRSea package/MRSea')
+devtools::load_all(pkg = '../../../MRSea/MRSea')
+devtools::load_all(pkg = '../../../MRSeaPower')
+data(fowshco)
+```
+
+### Fit Initial Model
+```{r fowinitglm}
+init_glm<-glm(response ~  as.factor(TideState) + as.factor(WindStrength) + as.factor(SeaState) + as.factor(SimpPrecipitation) + as.factor(CloudCover) + offset(log(areatime)), data=dat, family=quasipoisson)
+```
+
+
+### Run SALSA1D
+```{r salsa1d, cache=TRUE}
+require(mgcv)
+factorlist<-c('TideState', 'WindStrength','SeaState',  'SimpPrecipitation', 'CloudCover')
+varlist<-c('Depth', 'MonthInt')
+
+salsa1dlist<-list(fitnessMeasure='QAIC', minKnots_1d = c(1,1), maxKnots_1d=c(5,5), startKnots_1d = c(1,1), degree=c(2,2), maxIterations=100, gaps=c(0,0))
+
+salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('MonthInt'), splineParams = NULL, datain=dat)
+
+```
+
+```{r}
+summary(salsa1dout$bestModel, varshortnames=varlist)
+anova(salsa1dout$bestModel, varshortnames=varlist)
+
+```
+
+Tide state is not significant so this is removed from the model and the process repeated:
+  
+```{r salsa1db, cache=TRUE}
+init_glm<-glm(response ~  as.factor(WindStrength) + as.factor(SeaState) + as.factor(SimpPrecipitation) + as.factor(CloudCover) + offset(log(areatime)), data=dat, family=quasipoisson)
+
+factorlist<-c('WindStrength','SeaState',  'SimpPrecipitation', 'CloudCover')
+varlist<-c('Depth', 'MonthInt')
+
+salsa1dlist<-list(fitnessMeasure='QAIC', minKnots_1d = c(1,1), maxKnots_1d=c(5,5), startKnots_1d = c(1,1), degree=c(2,2), maxIterations=100, gaps=c(0,0))
+
+salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('MonthInt'), splineParams = NULL, datain=dat)
+```
+
+```{r}
+summary(salsa1dout$bestModel, varshortnames=varlist)
+anova(salsa1dout$bestModel, varshortnames=varlist)
+```
+
+
+```{r}
+bestModel1D<-make.gamMRSea(salsa1dout$bestModel, panelid = dat$newbid, splineParams = salsa1dout$splineParams, varshortnames = varlist)
+splineParams<-bestModel1D$splineParams
+```
+
+
+```{r}
+runPartialPlots(bestModel1D, data = dat, factorlist.in = factorlist, varlist.in = varlist, showKnots = T)
+```
+
+
+### Run SALSA2D
+
+```{r salsa2dsetup, cache=TRUE}
+knotgrid<-getKnotgrid(cbind(dat$x.pos, dat$y.pos))
+distMats<-makeDists(cbind(dat$x.pos, dat$y.pos), na.omit(knotgrid))
+# choose sequence of radii
+r_seq<-getRadiiChoices(8, distMats$dataDist)
+ 
+salsa2dlist<-list(fitnessMeasure = 'QAIC', knotgrid = knotgrid, knotdim = c(100, 100),  startKnots=2, minKnots=2, maxKnots=20, r_seq=r_seq, gap=0)
+```
+
+```{r runsalsa2d, cache=TRUE}
+salsa2dOutput<-runSALSA2D(bestModel1D, salsa2dlist, d2k=distMats$dataDist, k2k=distMats$knotDist, splineParams=splineParams, tol=0, chooserad=F, panels=NULL)
+```
+
+```{r}
+summary(salsa2dOutput$bestModel, varshortnames=varlist)
+anova(salsa2dOutput$bestModel, varshortnames=varlist)
+```
+
+```{r}
+bestModel<-salsa2dOutput$bestModel
+splineParams<-salsa2dOutput$splineParams
+aR<-splineParams[[1]]$invInd[splineParams[[1]]$knotPos]
+radiusIndices<-splineParams[[1]]$radiusIndices
+radii<-splineParams[[1]]$radii
+dists<-splineParams[[1]]$dist
+```
+
+
+### Runs Test Check
+
+Data generated under the null hypothesis of the runs test; independence and with no change induced at this stage.
+
+```{r fownoise}
+nsim<-500
+d<-as.numeric(summary(bestModel)$dispersion)
+newdat<-generateNoise(nsim, fitted(bestModel), family='poisson', d=d)
+```
+
+`r nsim` sets of noisy data are simulated from the model using an overdispersed Poisson distribution where $\hat{\phi} = $ `r round(summary(init_glm)$dispersion)`.
+
+```{r critvalsfow, cache=T, fig.cap='Figure showing the distribution of test statistics from a runs test. The red lines show the lower 2.5% and upper 97.5% critical values of the empirical distribution and the blue lines are from the Normal ($N(0,1)$) distribution.'}
+empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+                                 model = bestModel, data = dat, plot=TRUE, 
+                                 returnDist = TRUE, dots=FALSE)
+```
+
+Evaluate the runs test using the empirical distribution to determine if the data are independent
+```{r runsacffow}
+runs.test(residuals(bestModel, type='pearson'), critvals = empdistribution)
+acf(residuals(bestModel, type='pearson'))
+```
+
+The residuals are considered independent so for the power analysis, the data will be generated as independent. 
+
+### Data Generation
+
+<!-- Data are generated with no change but with the same dispersion and correlation as the original data so that the data generation process can be checked. -->
+
+```{r cordatfow, cache=TRUE, eval=FALSE, echo=FALSE}
+corrs<-getCorrelationMat(dat$blockid, dat$response, dots=FALSE)
+newdatcor<-generateIC(data = dat, corrs = corrs, panels = 'blockid', newdata = newdat, nsim = nsim, dots = FALSE)
+```
+
+Are the generated data consistent with the original data?
+
+#### Mean
+```{r meanplotfowsp, fig.cap='Histogram of the mean of the simulated data, with the red line representing the mean of the original data.'}
+hist(apply(newdat, 2, mean), main='', xlab='mean(response)')
+abline(v=mean(dat$response), col='red', lwd=2, lty=3)
+```
+
+#### Variance
+```{r varplotfowsp, fig.cap='Histogram of the variance of the simulated data, with the red line representing the variance of the original data.'}
+hist(apply(newdat, 2, var), main='', xlab='var(response)')
+abline(v=var(dat$response), col='red', lwd=2, lty=3)
+var(dat$response)
+```
+
+#### Correlation
+
+```{r acffowsp}
+par(mfrow=c(1,2))
+acf(dat$response, main='Data')
+acf(newdat[,50], main='Sim Data')
+```
+
+#### Check the dispersion parameter
+
+```{r}
+fowsim_glm<-update(bestModel, newdat[,1] ~ .)
+summary(fowsim_glm)$dispersion
+```
+
+#### Data distribution
+
+```{r datadistfowsp, fig.cap='Figure showing the spatial distribution of the original data, the fitted values from the model and two examples of the simulated data.'}
+require(fields)
+par(mfrow=c(2,2))
+quilt.plot(dat$x.pos, dat$y.pos, dat$response, main='Original Data', nrow=18, ncol=14, asp=1)
+quilt.plot(dat$x.pos, dat$y.pos, fitted(init_glm), main='Fitted Values', nrow=18, ncol=14, asp=1)
+quilt.plot(dat$x.pos, dat$y.pos, newdat[,1], main='Simulated Data A', nrow=18, ncol=14, asp=1)
+quilt.plot(dat$x.pos, dat$y.pos, newdat[,10], main='Simulated Data B', nrow=18, ncol=14, asp=1)
+```
+
+### Power Analysis
+
+Generate data for power analysis with impact of 10\%
+
+```{r powerdatgen, cache=TRUE}
+nsim=500
+impdata<-genOverallchangeData(log(0.9), init_glm, data = dat, panels = 'newbidNum')
+newdat<-generateNoise(nsim, impdata$truth, family='poisson', d=d)
+```
+
+```{r}
+sum(newdat[impdata$eventphase==0,1])
+sum(newdat[impdata$eventphase==1,1])
+```
+
+Update the initial model to include the eventphase term, indicating overall change.
+
+```{r}
+dists<-rbind(dists, dists)
+fowsim_glm<-update(bestModel, newdat[,1]~. + eventphase, data=impdata)
+```
+
+Using the simulated data with noise but no correlation, estimate the new values for the empirical distribution for the runs test.
+
+```{r empdistpower, cache=TRUE}
+# make sure that the independent data is used to get the null distribution
+empdistpower<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+                                 model = fowsim_glm, data = impdata, plot=TRUE, 
+                                 returnDist = TRUE, dots=FALSE)
+```
+
+
+If an offset is present in the model, when setting up the prediction grid the area of each gridcell should be provided so that an accurate estimate of the abundance can be made at the outputs stage. 
+
+```{r predgridsetup}
+data("fowshco.grid")
+predictdata<-rbind(data.frame(fowshco.grid, TideState=1, WindStrength=0, SeaState=1, SimpPrecipitation='NONE', CloudCover=7, MonthInt=6, areatime=fowshco.grid$Area, eventphase=0), data.frame(fowshco.grid, TideState=1, WindStrength=0, SeaState=1, SimpPrecipitation='NONE', CloudCover=7, MonthInt=6,areatime=fowshco.grid$Area, eventphase=1))
+```
+
+```{r poweroutfow, cache=TRUE, dependson='predgridsetup'}
+nsim=100
+powerout<-powerSimOverallChange(newdatcor, fowsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=NULL, splineParams=NULL, sigdif=TRUE, n.boot=500, impact.loc=c(510700, 6555700))
+```
+
+# Power Outputs:
+
+### Power to detect Change
+```{r}
+(length(which(powerout$imppvals<=0.05))/nsim)*100
+```
+
+### Coverage of impact coefficient
+
+```{r}
+truebeta<--0.69
+impact.coverage(truebeta, powerout$betacis)
+```
+
+
+### Proportion of significant differences:
+```{r sigdiff.ind}
+plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
+plotdata
+```
+
+```{r sigdiff.fam}
+plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=TRUE)
+plotdata
+```
+
+### Mean sightings probability before and after
+
+```{r}
+powerout$Abundance
+```
+
+### Distance to impact site plot
+
+```{r}
+d2impPlot<-plot.d2imp(powerout)
+d2impPlot
+```
+
+### Summary output
+```{r nulloutput, cache=T}
+null.output<-pval.coverage.null(newdat.ind = newdat, newdat.corr = newdatcor, model = fowsim_glm, nsim = 500, powercoefid = length(coef(fowsim_glm)))
+
+summary(powerout, null.output, truebeta=log(0.9))
+
+```
+
+
+```{r}
+#lazyLoad(filebase = 'FoWPower_cache/html/poweroutfow_9f91ed9b2403db21866c9985fcb778fe')
+```
+

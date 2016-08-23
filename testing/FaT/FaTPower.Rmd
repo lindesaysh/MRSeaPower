@@ -28,9 +28,9 @@ fat$panel<-as.numeric(as.factor(paste(fat$survey, fat$trip.code, sep='')))
 fat$foldid<-getCVids(fat, 5, 'panel')
 ```
 
-```{r rawplot}
+```{r rawplot, fig.cap='Plot of the data with mean probability of sighting per grid cell.'}
 require(fields)
-quilt.plot(fat$x.pos, fat$y.pos, fat$response)
+quilt.plot(fat$x.pos, fat$y.pos, fat$response, asp=1)
 ```
 
 
@@ -122,7 +122,7 @@ corrs<-getCorrelationMat(fat$panel, fat$response, dots=FALSE)
 newdatcor<-generateIC(data = fat, corrs = corrs, panels = 'panel', newdata = newdat, nsim = nsim, dots = FALSE)
 ```
 
-```{r}
+```{r acfplot}
 par(mfrow=c(1,2))
 acf(fat$response, main='data')
 acf(newdatcor[,1], main='simulated data')
@@ -133,13 +133,13 @@ acf(newdatcor[,1], main='simulated data')
 The generated data are consistent with the original data:
   
 #### Mean
-```{r}
+```{r meanplotfat, fig.cap='Histogram of the mean of the simulated data, with the red line representing the mean of the original data.'}
 hist(apply(newdat, 2, mean), main='', xlab='mean(response)')
 abline(v=mean(fat$response), col='red', lwd=2, lty=3)
 ```
 
 #### Variance
-```{r}
+```{r varplotfat, fig.cap='Histogram of the variance of the simulated data, with the red line representing the variance of the original data.'}
 hist(apply(newdat, 2, var), main='', xlab='var(response)')
 abline(v=var(fat$response), col='red', lwd=2, lty=3)
 var(fat$response)
@@ -147,12 +147,12 @@ var(fat$response)
 
 #### Data distribution
 
-```{r}
+```{r datadistributionfat, fig.cap='Figure showing the spatial distribution of the original data, the fitted values from the model and two examples of the simulated data.'}
 par(mfrow=c(2,2))
-quilt.plot(fat$x.pos, fat$y.pos, fat$response, main='Original Data')
-quilt.plot(fat$x.pos, fat$y.pos, fitted(bestModel), main='Fitted Values')
-quilt.plot(fat$x.pos, fat$y.pos, newdat[,1], main='Simulated Data A')
-quilt.plot(fat$x.pos, fat$y.pos, newdat[,10], main='Simulated Data B')
+quilt.plot(fat$x.pos, fat$y.pos, fat$response, main='Original Data', asp=1)
+quilt.plot(fat$x.pos, fat$y.pos, fitted(bestModel), main='Fitted Values', asp=1)
+quilt.plot(fat$x.pos, fat$y.pos, newdat[,1], main='Simulated Data A', asp=1)
+quilt.plot(fat$x.pos, fat$y.pos, newdat[,10], main='Simulated Data B', asp=1)
 ```
 
 
@@ -204,7 +204,7 @@ empdistpower<-getRunsCritVals(n.sim = nsim, simData=newdat,
 ```
 
 
-```{r, powerouta, cache=TRUE}
+```{r, powerouta, cache=TRUE, echo=FALSE, eval=FALSE}
 runspowsim_out<-runsPowerSim(newdat, fatsim_glm, empdistpower, nsim, powercoefid = length(coef(fatsim_glm)))
 
 apply(runspowsim_out$rawrob, 2, sum)/nsim
@@ -233,48 +233,35 @@ powerout<-powerSimOverallChange(newdat, fatsim_glm, empdistpower, nsim=nsim, pow
 
 # Power Outputs:
 
-### Power to detect Change
-```{r}
-(length(which(powerout$imppvals<=0.05))/nsim)*100
+
+## Summary output
+
+```{r nulloutput, cache=TRUE}
+null.output<-pval.coverage.null(newdat.ind = newdat, model = fatsim_glm, nsim = 500, powercoefid = length(coef(fatsim_glm)))
 ```
 
-### Coverage of impact coefficient
-
 ```{r}
-truebeta<--0.69
-impact.coverage(truebeta, powerout$betacis)
+summary(powerout, null.output, truebeta=-0.69)
+
 ```
 
 
 ### Proportion of significant differences:
-```{r sigdiff.ind}
+```{r sigdiff.ind,, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences in that cell under the null hypothesis of no-change.'}
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
 plotdata
 ```
 
-```{r sigdiff.fam}
+```{r sigdiff.famfat, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences across all grid cells under the null hypothesis of no-change.'}
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=TRUE)
 plotdata
 ```
 
-### Mean sightings probability before and after
+### Distance to event site plot
 
-```{r}
-powerout$Mean.Proportion
-```
-
-### Distance to impact site plot
-
-```{r}
+```{r disttoimpfat, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
 d2impPlot<-plot.d2imp(powerout)
 d2impPlot
-```
-
-```{r nulloutput, cache=T}
-null.output<-pval.coverage.null(newdat.ind = newdat, model = fatsim_glm, nsim = 500, powercoefid = length(coef(fatsim_glm)))
-
-summary(powerout, null.output, truebeta=-0.69)
-
 ```
 
 ```{r}

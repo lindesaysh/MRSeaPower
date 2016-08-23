@@ -6,7 +6,7 @@
 getCorrelationMat<-function (panel, data, dots=FALSE)
 {
   blocktab <- table(panel)
-  overallacf<-acf(data, lag.max = max(blocktab))$acf
+  overallacf<-acf(data, lag.max = max(blocktab), plot=F)$acf
   acfmat <- matrix(NA, length(unique(panel)), max(blocktab))
 
   for (i in 1:length(unique(panel))) {

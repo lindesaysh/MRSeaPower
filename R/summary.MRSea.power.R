@@ -45,7 +45,7 @@ print.summary.gamMRSea.power<-function (x, digits = max(3L, getOption("digits") 
   if(is.null(x$power$null)){
 
     cat("\nPower to select 'change' term:\n")
-    cat('\n    Under Change (truth = ', format(truebeta, digits) , ') = ', x$power$model, '%\n', sep='')
+    cat('\n    Under Change (truth = ', format(x$truebeta, digits) , ') = ', x$power$model, '%\n', sep='')
     cat('    Under no change = Null distribution not specified\n')
 
     cat("\nCoverage for 'change' coefficient:\n")
@@ -55,7 +55,7 @@ print.summary.gamMRSea.power<-function (x, digits = max(3L, getOption("digits") 
   }else{
 
     cat("\nPower to select 'change' term:\n")
-    cat('\n    Under Change (truth = ', format(truebeta, digits) , ') = ', x$power$model, '%\n', sep='')
+    cat('\n    Under Change (truth = ', format(x$truebeta, digits) , ') = ', x$power$model, '%\n', sep='')
     cat('    Under no change (truth = ', 0 ,') = ', x$power$null, '%\n', sep='')
 
     cat("\nCoverage for 'change' coefficient:\n")
