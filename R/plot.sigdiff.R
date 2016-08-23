@@ -28,9 +28,12 @@ require(ggplot2)
   if(is.null(nrow(coordinates))) stop("Error: coordinates does not contain two columns")
   if(dim(coordinates)[2]>2) warning('Warning: more than two coordinate columns, first two used')
 
+  height<-unique(coordinates[,2])[2]-unique(coordinates[,2])[1]
+  width<-unique(coordinates[,1])[2]-unique(coordinates[,1])[1]
+
   plotdata<-data.frame(coordinates, proportion=propsig)
   p<-ggplot(plotdata)
-  p<-p + geom_tile(aes(x=coordinates[,1], y=coordinates[,2], fill=proportion), height=500, width=500) + theme_bw() + coord_equal() + xlab(names(coordinates)[1]) + ylab(names(coordinates)[2]) + ggtitle(paste(t, ' ', error.rate*100,'% Error Rate', sep='')) + theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+ scale_fill_continuous(name='Proportion')
+  p<-p + geom_tile(aes(x=coordinates[,1], y=coordinates[,2], fill=proportion), height=height, width=width) + theme_bw() + coord_equal() + xlab(names(coordinates)[1]) + ylab(names(coordinates)[2]) + ggtitle(paste(t, ' ', error.rate*100,'% Error Rate', sep='')) + theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+ scale_fill_continuous(name='Proportion')
   p
 
   return(p)

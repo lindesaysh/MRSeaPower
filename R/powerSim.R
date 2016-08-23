@@ -1,4 +1,4 @@
-powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefid, predictionGrid=NULL, g2k=NULL, splineParams=NULL, bootstrapCI=TRUE, sigdif=TRUE, n.boot=1000){
+powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefid, predictionGrid=NULL, g2k=NULL, splineParams=NULL, bootstrapCI=TRUE, sigdif=TRUE, n.boot=1000, impact.loc=NULL){
 
   require(mvtnorm)
   data<-model$data
@@ -10,6 +10,19 @@ powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefi
   #cis<-array(NA, c(nrow(predictionGrid), 2, nsim))
   indpvals = familypvals = list(nsim)
   preds<-matrix(NA, nrow=nrow(predictionGrid), ncol=nsim)
+    bootdifferences<-array(NA, c((nrow(predictionGrid)/2), n.boot, nsim))
+
+  if(!is.null(impact.loc)){
+    # make difference dataset
+    preddiffs<-predictionGrid[predictionGrid$eventphase==0,]
+    # distances from wfarm to each grid loc.
+    preddiffs$impdist<-as.matrix(dist(x = rbind(impact.loc, preddiffs[,c('x.pos', 'y.pos')])))[1,-1]
+    # cut the distances into bins
+    br<-seq(0, max(preddiffs$impdist), length=10)
+    preddiffs$cuts<-cut(preddiffs$impdist, breaks=br)
+  }else{cat('No impact location given so distance to impact data not calculated.')}
+
+  preddifferences<-matrix(NA, nrow=(nrow(predictionGrid)/2), ncol=nsim)
 
   for(i in 1:nsim){
 
@@ -79,37 +92,114 @@ powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefi
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # if(bootstrapCI==T){
     #   bootPreds<-do.bootstrap.cress.robust(sim_glm,predictionGrid, splineParams=splineParams, g2k=g2k, B=n.boot, robust=robust, cat.message=FALSE)
-    #
     #     # # get upper and lower cis
     #     # quants<-c(0.025, 0.975)
     #     # cis[,,i]<-t(apply(bootPreds, 1,  quantile, probs= quants, na.rm=T ))
-    #
     #   } # end bootstrap
-    #
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~~~ Differences ~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     if(sigdif==T){
-      bootPreds<-do.bootstrap.cress.robust(sim_glm,predictionGrid[predictionGrid$eventphase==0,], splineParams=splineParams, g2k=g2k, B=n.boot, robust=robust, cat.message=FALSE)
+      bootPreds<-do.bootstrap.cress.robust(sim_glm,predictionGrid, splineParams=splineParams, g2k=g2k, B=n.boot, robust=robust, cat.message=FALSE)
 
-      nulldifferences<-bootPreds[,(1:(n.boot/2))] - bootPreds[,(((n.boot/2)+1):n.boot)]
-      preddifferences<-preds[predictionGrid$eventphase==1,i] - preds[predictionGrid$eventphase==0,i]
-      indpvals[[i]]<-pval.differences(nulldifferences, preddifferences, family=FALSE)
-      familypvals[[i]]<-pval.differences(nulldifferences, preddifferences, family=TRUE)
-    # # get upper and lower cis
-    # quants<-c(0.025, 0.975)
-    # cis[,,i]<-t(apply(bootPreds, 1,  quantile, probs= quants, na.rm=T ))
+      # extract distribution of null differences
+      nulldifferences<-bootPreds[predictionGrid$eventphase==0,(1:(n.boot/2))] - bootPreds[predictionGrid$eventphase==0,(((n.boot/2)+1):n.boot)]
 
+      # find the predicted differences from this simulation
+      preddifferences[,i]<-preds[predictionGrid$eventphase==1,i] - preds[predictionGrid$eventphase==0,i]
+
+      # calculate p-values for individual and family wide cells.
+      indpvals[[i]]<-pval.differences(nulldifferences, preddifferences[,i], family=FALSE)
+      familypvals[[i]]<-pval.differences(nulldifferences, preddifferences[,i], family=TRUE)
+
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # ~~~~ Abundance/mean proportion ~~~~~~~~~
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
+        if(i==1){bsum=asum=vector(length=nsim)}
+        bsum[i]<-sum(bootPreds[predictionGrid$eventphase==0,])
+        asum[i]<-sum(bootPreds[predictionGrid$eventphase==1,])
+      }
+      if(sim_glm$family[[1]]=='binomial' | sim_glm$family[[1]]=='quasibinomial'){
+        if(i==1){bmean=amean=vector(length=nsim)}
+        bmean[i]<-mean(bootPreds[predictionGrid$eventphase==0,])
+        amean[i]<-mean(bootPreds[predictionGrid$eventphase==1,])
+      }
+
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # ~~~~ Distance to Windfarm ~~~~~~~~~
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+      if(!is.null(impact.loc)){
+        #if(nrow(predictionGrid)>400){
+
+        d2imp.plotdata<-matrix(NA, nrow=length(unique(preddiffs$cuts)), ncol=5)
+        d2imp.plotdata[,1]<-tapply(preddiffs$impdist, preddiffs$cuts, mean)
+        d2imp.plotdata[,2]<-tapply(preddifferences[,i], preddiffs$cuts, mean)
+        colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI')
+
+        bootdifferences[,,i]<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
+      }
 
     } # end sigdif
 
   } # end nsim
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~~~~ Abundance/mean proportion ~~~~~~~~~
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
+      quants<-c(0.025, 0.975)
+      abund<-matrix(NA, 2, 3)
+      abund[,1]<-c(mean(bsum), mean(asum))
+      abund[1,2:3]<-quantile(bsum, probs=quants)
+      abund[2,2:3]<-quantile(asum, probs=quants)
+      rownames(abund)<-c('Before', 'After')
+      colnames(abund)<-c('Abundance', 'LowerCI', 'UpperCI')
+    }
+    if(sim_glm$family[[1]]=='binomial' | sim_glm$family[[1]]=='quasibinomial'){
+      quants<-c(0.025, 0.975)
+      meanp<-matrix(NA, 2, 3)
+      meanp[,1]<-c(mean(bmean), mean(amean))
+      meanp[1,2:3]<-quantile(bmean, probs=quants)
+      meanp[2,2:3]<-quantile(amean, probs=quants)
+      rownames(meanp)<-c('Before', 'After')
+      colnames(meanp)<-c('Mean', 'LowerCI', 'UpperCI')
+    }
+
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~~~~ Distance to Windfarm ~~~~~~~~~
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    if(!is.null(impact.loc)){
+
+      # get the upper and lower quantile for the differences in each cut point.
+      uniquecuts<-unique(preddiffs$cuts)
+      for(p in 1:length(uniquecuts)){
+        d2imp.plotdata[p,4:5]<-quantile(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]), probs=c(0.025, 0.975))
+        d2imp.plotdata[p,3]<-mean(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]))
+      }
+
+    } # end impact.loc
+
+
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
   # ~~ Return list object~~~~~
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-  return(list(rawrob=rawrob, imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, significant.differences=list(inividual=indpvals, family=familypvals)))
+  output<-list(rawrob=rawrob, imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, significant.differences=list(inividual=indpvals, family=familypvals), d2imp.plotdata=d2imp.plotdata)
+
+  if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
+    output$Abundance = abund
+  }
+  if(sim_glm$family[[1]]=='binomial' | sim_glm$family[[1]]=='quasibinomial'){
+    output$Mean.proportion = meanp
+  }
+
+  class(output)<-'gamMRSea.power'
+
+  return(output)
 }
 

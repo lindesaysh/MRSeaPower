@@ -1,6 +1,6 @@
 
-getRunsCritVals<-function(n.sim, simData, model, data, plot=FALSE, returnDist=FALSE,dots=TRUE){
-  runsstatH0<-vector(length=n.sim)
+getRunsCritVals<-function(n.sim, simData, model, data, plot=FALSE, returnDist=FALSE,dots=TRUE, imp.beta.coverage=FALSE){
+  runsstatH0=betas=vector(length=n.sim)
 for(i in 1:n.sim){
   if(dots==TRUE){if((i/500)%%1 == 0){cat(i, '\n')}else{cat('.')}}
 
@@ -9,6 +9,9 @@ for(i in 1:n.sim){
   sim_glm<- update(model, response ~ ., data=data)
   runs<-runs.test(residuals(sim_glm, type='pearson'))
   runsstatH0[i]<-runs$statistic
+  # if(imp.beta.coverage){
+  #   betas[i]<-coefficients(model)[length(coefficients(model))]
+  # }
 }
 
   critvals<-quantile(runsstatH0, probs = c(0.025, 0.975))
@@ -19,7 +22,17 @@ for(i in 1:n.sim){
     abline(v=c(qnorm(0.025), qnorm(0.975)), col='blue', lwd=2)
   }
 
-  if(returnDist){output<-runsstatH0}else{output<-as.vector(critvals)}
 
+
+  # if(returnDist){
+  #   output<-list=c(empirical.distribution.null=runsstatH0, beta.coverage.null = )
+  # }else{
+  #   output<-list=c(empirical.critical=as.vector(critvals), beta.coverage.null = )
+  #   }
+  if(returnDist){
+    output<-runsstatH0
+  }else{
+    output<-as.vector(critvals)
+  }
   return(output)
 }

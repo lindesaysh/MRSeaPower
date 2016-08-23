@@ -1,5 +1,6 @@
 update.gamMRSea<-function (object, formula., ..., evaluate = TRUE)
 {
+  splineParams=object$splineParams
   if (is.null(call <- getCall(object)))
     stop("need an object with call component")
   extras <- match.call(expand.dots = FALSE)$...

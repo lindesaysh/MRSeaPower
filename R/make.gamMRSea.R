@@ -14,9 +14,9 @@ make.gamMRSea<-function(model, panelid=NULL, splineParams=NULL, varshortnames=NU
   if(class(model)[1]!='gamMRSea'){
     class(newmodel)<-c('gamMRSea', class(model))
   }
-  model$panels<-if(is.null(panelid) & is.null(model$panels)) 1:nrow(model$data) else model$panels
+  newmodel$panels<-if(is.null(panelid) & is.null(model$panels)) 1:nrow(model$data) else model$panels
 
-  model$splineParams<-splineParams
-  model$varshortnames<-varshortnames
-  return(model)
+  newmodel$splineParams<-splineParams
+  newmodel$varshortnames<-varshortnames
+  return(newmodel)
 }

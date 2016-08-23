@@ -25,9 +25,7 @@ generateNoise<-function(n, response, family, ...){
       simData[,i]<-rbinom(n=length(response), prob=response, ...)
     }
     if(family=='zibinomial'){
-      require(VGAM)
       simData[,i]<-rzibinom(n=length(response), prob=response, ...)
-      detach(package:VGAM)
     }
   }
   return(simData)
