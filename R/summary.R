@@ -53,7 +53,19 @@ summary.gamMRSea<-function (object, dispersion = NULL, varshortnames=NULL, ...)
   vbeta<-sandcov(object, panelid)
 
   bob <- attr(object$coefficients, "names")
+
+  factorlist<-names(which(attr(terms(object), 'dataClasses')=='factor'))
+
   if(is.null(varshortnames)==FALSE){
+    bob2<-attr(terms(object), 'term.labels')
+    v<-NULL
+    for(i in 1:length(varshortnames)){
+      v<-c(v, ifelse(length(grep(varshortnames[i], bob2))>0, 1, 0))
+    }
+    varshortnames<-varshortnames[which(v==1)]
+  }
+
+  if(length(varshortnames)>0){
     for (i in 1:length(varshortnames)) {
       id <- grep(varshortnames[i], bob)
       if (length(id) > 1) {
@@ -72,11 +84,10 @@ summary.gamMRSea<-function (object, dispersion = NULL, varshortnames=NULL, ...)
         bob[smoothid][k] <- paste("s(x.pos, y.pos)b", k,
                                   sep = "")
       }
-      
-      int<-attr(terms(formula(test)), 'term.labels')[grep(":", attr(terms(formula(test)), 'term.labels'))]
-      factorlist<-names(which(attr(terms(test), 'dataClasses')=='factor'))
-      a<-which(!is.na(pmatch(names(facs), int)))
-      
+
+      int<-attr(terms(formula(object)), 'term.labels')[grep(":", attr(terms(formula(object)), 'term.labels'))]
+      a<-which(!is.na(pmatch(names(factorlist), int)))
+
       # for (i in 1:length(factorlist)) {
       #   a <- grep(factorlist[i], int)
       #   if (length(a) > 0) {
@@ -84,7 +95,7 @@ summary.gamMRSea<-function (object, dispersion = NULL, varshortnames=NULL, ...)
       #     break
       #   }
       # }
-      
+
       counter <- 1
       for (k in 1:length(smoothid)) {
         for (i in 1:(length(intid)/length(smoothid))) {
@@ -129,15 +140,18 @@ summary.gamMRSea<-function (object, dispersion = NULL, varshortnames=NULL, ...)
     s.err <- sqrt(var.cf)
     s.err.sand <- sqrt(diag(vbeta))
     tvalue <- coef.p/s.err.sand
+    traw <- coef.p/s.err
     dn <- c("Estimate", "Std. Error", "Robust S.E.")
     if (!est.disp) {
       pvalue <- 2 * pnorm(-abs(tvalue))
+      rawp <- 2 * pnorm(-abs(traw))
       coef.table <- cbind(coef.p, s.err, s.err.sand,tvalue, pvalue)
       dimnames(coef.table) <- list(names(coef.p), c(dn,
                                                     "z value", "Pr(>|z|)"))
     }
     else if (df.r > 0) {
       pvalue <- 2 * pt(-abs(tvalue), df.r)
+      rawp <- 2 * pt(-abs(traw), df.r)
       coef.table <- cbind(coef.p, s.err,  s.err.sand, tvalue, pvalue)
       dimnames(coef.table) <- list(names(coef.p), c(dn,
                                                     "t value", "Pr(>|t|)"))
@@ -163,7 +177,7 @@ summary.gamMRSea<-function (object, dispersion = NULL, varshortnames=NULL, ...)
   ans <- c(object[keep], list(deviance.resid = residuals(object,
                                                          type = "deviance"), coefficients = coef.table, aliased = aliased,
                               dispersion = dispersion, df = c(object$rank, df.r, df.f),
-                              cov.unscaled = covmat.unscaled, cov.scaled = covmat, cov.robust=vbeta, panelid=panelid))
+                              cov.unscaled = covmat.unscaled, cov.scaled = covmat, cov.robust=vbeta, panelid=panelid, rawpvals=rawp))
   class(ans) <- "summary.gamMRSea"
   return(ans)
 }

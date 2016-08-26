@@ -11,9 +11,9 @@
 
 pval.coverage.null<-function(newdat.ind, newdat.corr=NULL, model, nsim, powercoefid, splineParams=NULL, empdistnull=NULL){
 
-  if(!is.null(splineParams)){
-    dists<-splineParams[[1]]$dist
-  }
+  # if(!is.null(splineParams)){
+  #   dists<-splineParams[[1]]$dist
+  # }
   data<-model$data
   nc<-nsim/2
   nulldata.ind<-rbind(newdat.ind[data$eventphase==0, (1:nc)], newdat.ind[data$eventphase==0, ((nc+1):nsim)])
@@ -24,6 +24,8 @@ pval.coverage.null<-function(newdat.ind, newdat.corr=NULL, model, nsim, powercoe
   }
   nsim<-ncol(nulldata.ind)
 
+  splineParams<-model$splineParams
+  
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # ~ generate empirical distribution ~
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -62,7 +64,7 @@ pval.coverage.null<-function(newdat.ind, newdat.corr=NULL, model, nsim, powercoe
       robust<-TRUE
     }else{
       # not significant, use raw se
-      imppval<-summary(sim_glm)$coefficients[powercoefid,4]
+      imppval<-summary(sim_glm)$rawp[powercoefid]
       rawrob[i]<-0
       robust<-FALSE
     }

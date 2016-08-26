@@ -10,7 +10,7 @@ powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefi
   #cis<-array(NA, c(nrow(predictionGrid), 2, nsim))
   indpvals = familypvals = list(nsim)
   preds<-matrix(NA, nrow=nrow(predictionGrid), ncol=nsim)
-    bootdifferences<-array(NA, c((nrow(predictionGrid)/2), n.boot, nsim))
+    bootdifferences=bootdifferences.pct=array(NA, c((nrow(predictionGrid)/2), n.boot, nsim))
 
   if(!is.null(impact.loc)){
     # make difference dataset
@@ -29,6 +29,7 @@ powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefi
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~ fit model ~~~~~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #dists<<-splineParams[[1]]$dists
     data$response<-newdat[,i]
     sim_glm<-update(model, response ~ ., data=data)
 
@@ -48,7 +49,8 @@ powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefi
       robust<-TRUE
     }else{
       # not significant, use raw se
-      imppval<-summary(sim_glm)$coefficients[powercoefid,4]
+      class(sim_glm)<-c('gamMRSea', class(sim_glm))
+      imppval<-summary(sim_glm)$rawp[powercoefid]
       rawrob[i]<-0
       robust<-FALSE
     }
@@ -85,6 +87,7 @@ powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefi
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~ predictions to grid ~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #dists<<-g2k
     preds[,i]<-predict.gamMRSea(predictionGrid, splineParams = splineParams, g2k = g2k, model=sim_glm, type = 'response')
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -133,13 +136,16 @@ powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefi
 
       if(!is.null(impact.loc)){
         #if(nrow(predictionGrid)>400){
+        preddifferences.pct<-preddifferences/preds[predictionGrid$eventphase==1,i]
 
-        d2imp.plotdata<-matrix(NA, nrow=length(unique(preddiffs$cuts)), ncol=5)
+        d2imp.plotdata<-matrix(NA, nrow=length(unique(preddiffs$cuts)), ncol=9)
         d2imp.plotdata[,1]<-tapply(preddiffs$impdist, preddiffs$cuts, mean)
         d2imp.plotdata[,2]<-tapply(preddifferences[,i], preddiffs$cuts, mean)
-        colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI')
+        d2imp.plotdata[,6]<-tapply(preddifferences.pct[,i], preddiffs$cuts, mean)
+        colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI', '% MeanDiff', '% bootMeanDiff', '% LowerCI', '% Upper CI')
 
         bootdifferences[,,i]<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
+        bootdifferences.pct[,,i]<-(bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==1,]
       }
 
     } # end sigdif
@@ -180,6 +186,8 @@ powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefi
       for(p in 1:length(uniquecuts)){
         d2imp.plotdata[p,4:5]<-quantile(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]), probs=c(0.025, 0.975))
         d2imp.plotdata[p,3]<-mean(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]))
+        d2imp.plotdata[p,8:9]<-quantile(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]), probs=c(0.025, 0.975))
+        d2imp.plotdata[p,7]<-mean(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]))
       }
 
     } # end impact.loc
@@ -189,7 +197,7 @@ powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefi
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
   # ~~ Return list object~~~~~
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-  output<-list(rawrob=rawrob, imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, significant.differences=list(inividual=indpvals, family=familypvals), d2imp.plotdata=d2imp.plotdata)
+  output<-list(rawrob=rawrob, imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, significant.differences=list(individual=indpvals, family=familypvals), d2imp.plotdata=d2imp.plotdata)
 
   if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
     output$Abundance = abund

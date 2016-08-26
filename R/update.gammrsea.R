@@ -1,6 +1,7 @@
 update.gamMRSea<-function (object, formula., ..., evaluate = TRUE)
 {
-  splineParams=object$splineParams
+  splineParams<<-object$splineParams
+  
   if (is.null(call <- getCall(object)))
     stop("need an object with call component")
   extras <- match.call(expand.dots = FALSE)$...
@@ -15,12 +16,20 @@ update.gamMRSea<-function (object, formula., ..., evaluate = TRUE)
     }
   }
   if (evaluate) {
-    newmodel<-eval(call, parent.frame())
+    #if(is.null(splineParams)){
+      newmodel<-eval(call, parent.frame())  
+    #}else{
+    #  newmodel<-eval(call, environment())
+    #}
+    rm('splineParams', envir = globalenv())
     newmodel$panels<-object$panels
     newmodel$varshortnames<-object$varshortnames
     newmodel$splineParams<-object$splineParams
     class(newmodel)<-class(object)
     newmodel
   }
-  else call
+  else{
+    rm('splineParams', envir = globalenv())
+    call
+  }
 }

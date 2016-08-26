@@ -69,15 +69,21 @@
 #'
 predict.gamMRSea<- function (predict.data, splineParams=NULL, g2k=NULL, model, type = "response",coeff = NULL)
 {
-  attributes(model$formula)$.Environment <- environment()
-  radii <- splineParams[[1]]$radii
-  radiusIndices <- splineParams[[1]]$radiusIndices
-  dists <- g2k
+  # attributes(model$formula)$.Environment <- environment()
+  # radii <- splineParams[[1]]$radii
+  # radiusIndices <- splineParams[[1]]$radiusIndices
+  # dists <- g2k
+  require(splines)
   x2 <- data.frame(response = rpois(nrow(predict.data), lambda = 5),
                    predict.data)
   tt <- terms(model)
   Terms <- delete.response(tt)
-  m <- model.frame(Terms, predict.data, xlev = model$xlevels)
+  
+  if(!is.null(g2k)){
+    splineParams[[1]]$dist<-g2k
+  }
+  
+  m <- model.frame.gamMRSea(Terms, predict.data, xlev = model$xlevels, splineParams=splineParams)
   modmat <- model.matrix(Terms, m)
   if (is.null(coeff)) {
     modcoef <- as.vector(model$coefficients)

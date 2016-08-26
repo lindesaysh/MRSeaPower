@@ -11,24 +11,26 @@ summary.gamMRSea.power<-function(power.object, null.object=NULL, truebeta){
   model.power<-(length(which(power.object$imppvals<=0.05))/nsim.m)*100
   model.coverage<-impact.coverage(truebeta, power.object$betacis)*100
 
-  if(is.null(power.object$Mean.Proportion)){
+  if(is.null(power.object$Mean.proportion)){
     proptable<-power.object$Abundance
     modeltype='count'
   }else{
-    proptable<-power.object$Mean.Proportion
+    proptable<-power.object$Mean.proportion
     modeltype='proportion'
   }
 
   if(is.null(null.object)){
     null.power=NULL
     null.coverage=NULL
+    nsim.n=NULL
   }else{
     nsim.n<-length(null.object$imppvals)
     null.power<-(length(which(null.object$imppvals<=0.05))/nsim.n)*100
     null.coverage<-impact.coverage(0, null.object$betacis)*100
   }
 
-  ans<-list(power=list(model=model.power, null=null.power), coverage=list(model.coverage=model.coverage, null.coverage=null.coverage), summary=proptable, modeltype=modeltype, truebeta=truebeta)
+  nsims=c(nsim.m, nsim.n)
+  ans<-list(power=list(model=model.power, null=null.power), coverage=list(model.coverage=model.coverage, null.coverage=null.coverage), summary=proptable, modeltype=modeltype, truebeta=truebeta, nsims=nsims)
 
   class(ans) <- "summary.gamMRSea.power"
 
@@ -42,10 +44,13 @@ print.summary.gamMRSea.power<-function (x, digits = max(3L, getOption("digits") 
 
   cat('\n ++++ Summary of Power Analysis Output ++++\n')
 
+  cat("\nNumber of power simulations = ", x$nsims[1])
+  cat("\nNumber of no change simulations = ", x$nsims[2], "\n")
+
   if(is.null(x$power$null)){
 
     cat("\nPower to select 'change' term:\n")
-    cat('\n    Under Change (truth = ', format(x$truebeta, digits) , ') = ', x$power$model, '%\n', sep='')
+    cat('\n    Under Change (true parameter = ', format(x$truebeta, digits) , ') = ', x$power$model, '%\n', sep='')
     cat('    Under no change = Null distribution not specified\n')
 
     cat("\nCoverage for 'change' coefficient:\n")
@@ -55,8 +60,8 @@ print.summary.gamMRSea.power<-function (x, digits = max(3L, getOption("digits") 
   }else{
 
     cat("\nPower to select 'change' term:\n")
-    cat('\n    Under Change (truth = ', format(x$truebeta, digits) , ') = ', x$power$model, '%\n', sep='')
-    cat('    Under no change (truth = ', 0 ,') = ', x$power$null, '%\n', sep='')
+    cat('\n    Under Change (true parameter = ', format(x$truebeta, digits) , ') = ', x$power$model, '%\n', sep='')
+    cat('    Under no change (true parameter = ', 0 ,') = ', x$power$null, '%\n', sep='')
 
     cat("\nCoverage for 'change' coefficient:\n")
     cat('\n    Under model = ', x$coverage$model.coverage, '%\n', sep='')
@@ -66,13 +71,15 @@ print.summary.gamMRSea.power<-function (x, digits = max(3L, getOption("digits") 
   if(x$modeltype=='count'){
     cat('\nOverall Abundance Summary with 95% Confidence Intervals:\n\n')
     print(x$summary, digits=digits)
+
+    cat('\nNote: These calculations assume the correct area has been given for each prediction grid cell.\n')
+
   }
   if(x$modeltype=='proportion'){
     cat('\nOverall Mean Proportion Summary with 95% Confidence Intervals:\n\n')
     print(x$summary)
   }
 
-  cat('\nNote: These calculations assume the correct area has been given for each prediction grid cell.\n')
 
 }
 
