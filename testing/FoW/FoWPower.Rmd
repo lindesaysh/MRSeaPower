@@ -1,8 +1,8 @@
 ---
 title: "Fall of Warness"
 author: "Lindesay Scott-Hayward"
-date: "11 August 2016"
-output: html_document
+date: "26 August 2016"
+output: word_document
 ---
 
 ```{r setup, include=FALSE}
@@ -28,6 +28,8 @@ quilt.plot(dat$x.pos, dat$y.pos, dat$response, nrow=18, ncol=14, asp=1)
 ### Fit Initial Model
 ```{r fowinitglm}
 init_glm<-glm(response ~  as.factor(TideState) + WindStrength + SeaState + SimpPrecipitation + CloudCover + Depth + offset(log(areatime)), data=dat, family=quasipoisson)
+
+init_glm<-make.gamMRSea(init_glm, panelid="panels")
 ```
 
 
@@ -118,13 +120,13 @@ These plots show that the spatial distribution of the data is well represented b
 
 ### Power Analysis
 
-Now that we know we can generate data that represents the original fairly well, we now generate data for the power analysis with a change imposed of **10\%**; a 10\% decline in animal numbers post event.
+Now that we know we can generate data that represents the original fairly well, we now generate data for the power analysis with a change imposed of **50\%**; a 50\% decline in animal numbers post event.
 
 First the change is imposed on the data, then the noise is added (in-line with the dispersion seen in the initial model) and finally the correlation. 
 
 ```{r powerdatgen, cache=TRUE}
 nsim=500
-impdata<-genOverallchangeData(log(0.9), init_glm, data = dat, panels = 'newbidNum')
+impdata<-genOverallchangeData(log(0.5), init_glm, data = dat, panels = 'newbidNum')
 newdat<-generateNoise(nsim, impdata$truth, family='poisson', d=d)
 newdatcor<-generateIC(data = impdata, corrs = rbind(corrs, corrs), panels = 'panels', newdata = newdat, nsim = nsim, dots = FALSE)
 ```
@@ -132,7 +134,7 @@ newdatcor<-generateIC(data = impdata, corrs = rbind(corrs, corrs), panels = 'pan
 Update the initial model to include the eventphase term, indicating overall change. This model forms the foundation of the power analysis to follow.
 
 ```{r}
-fowsim_glm<-glm(newdatcor[,1] ~  as.factor(TideState) + WindStrength + SeaState + SimpPrecipitation + CloudCover + Depth  + as.factor(eventphase) + offset(log(areatime)), data=impdata, family=quasipoisson)
+fowsim_glm<-update(fowsim_glm, .~. + eventphase, data=impdata)
 ```
 
 The new values for the empirical distribution of the runs test are estimated using the noisy but un-correlated simulated data. This is differenct to the distribution generated earlier as we have another term in the model (eventphase).
@@ -157,7 +159,7 @@ apply(runspowsim_out$rawrob, 2, sum)/nsim
 
 If an offset is present in the model, the area of each gridcell should be provided when setting up the prediction grid so that an accurate estimate of the abundance pre and post event can be made at the outputs stage. 
 
-```{r predgridsetup}
+```{r predgridsetup, cache=TRUE}
 data("fowshco.grid")
 predictdata<-rbind(data.frame(fowshco.grid, TideState=1, WindStrength=0, SeaState=0, SimpPrecipitation='SHOWERS', CloudCover=0, areatime=fowshco.grid$Area, eventphase=0), data.frame(fowshco.grid, TideState=1, WindStrength=0, SeaState=0, SimpPrecipitation='SHOWERS', CloudCover=0,areatime=fowshco.grid$Area, eventphase=1))
 ```
@@ -174,7 +176,7 @@ To calculate the summary, the values for certain parameters are given under the 
 ### Summary output
 
 ```{r}
-summary(powerout, truebeta=log(0.9))
+summary(powerout, truebeta=log(0.5))
 ```
 
 In order to assess the summary calculations, we estimate the null parameters to provide the full summary. 
@@ -184,7 +186,7 @@ null.output<-pval.coverage.null(newdat.ind = newdat, newdat.corr = newdatcor, mo
 ```
 
 ```{r}
-summary(powerout, null.output, truebeta=log(0.9))
+summary(powerout, null.output, truebeta=log(0.5))
 ```
 
 We expect to see the null power to be 5\%, indicating a 5\% error rate for inclusion of the eventphase term when the data do not contain any change.  We also expect that the coverage for the null coefficient is 95\%.  This indicates that 5\% of the time, the confidence intervals for the eventphase coefficient did not include the truth (0; no change).
@@ -196,7 +198,7 @@ plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos'
 plotdata
 ```
 
-```{r sigdiff.fam, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences across all grid cells under the null hypothesis of no-change.'}
+```{r sigdiff.fam, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the family 5% level was determined by using the Sidak adjustment.'}
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=TRUE)
 plotdata
 ```
@@ -210,6 +212,6 @@ d2impPlot
 
 
 ```{r, echo=FALSE, eval=FALSE}
-lazyLoad(filebase = 'FoWPower_cache/html/poweroutfow_9f91ed9b2403db21866c9985fcb778fe')
+lazyLoad(filebase = 'FoWPower_cache/html/empdistpower_65466e1af9ddc03a7bcafc02c436b281')
 ```
 

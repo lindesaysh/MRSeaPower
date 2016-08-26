@@ -2,7 +2,7 @@
 title: "Forth and Tay"
 author: "Lindesay Scott-Hayward"
 date: "18 August 2016"
-output: html_document
+output: word_document
 ---
 
 ```{r setup, include=FALSE}
@@ -47,13 +47,14 @@ varlist<-c('depth', 'month', 'x.pos', 'y.pos')
 
 salsa1dlist<-list(fitnessMeasure='AIC', minKnots_1d = c(1,1,1,1), maxKnots_1d=c(5,5,5,5), startKnots_1d = c(1,1,1,1), degree=c(2,2,2,2), maxIterations=100, gaps=c(0,0,100,0))
 
-salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('month'), splineParams = NULL, datain=fat)
+salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('month'), splineParams = NULL, datain=fat, suppress.printout =TRUE)
+salsa1dout$bestModel$splineParams<-salsa1dout$splineParams
 
 ```
 
 ```{r}
-summary(salsa1dout$bestModel, varshortnames=varlist)
-anova(salsa1dout$bestModel, varshortnames=varlist)
+summary(salsa1dout$bestModel)
+anova(salsa1dout$bestModel)
 
 ```
 
@@ -65,18 +66,20 @@ varlist<-c('month', 'x.pos', 'y.pos')
 
 salsa1dlist<-list(fitnessMeasure='AIC', minKnots_1d = c(1,1,1), maxKnots_1d=c(5,5,5), startKnots_1d = c(1,1,1), degree=c(2,2,2), maxIterations=100, gaps=c(0,100,0))
 
-salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('month'), splineParams = NULL, datain=fat)
+salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('month'), splineParams = NULL, datain=fat, suppress.printout =TRUE)
+salsa1dout$bestModel$splineParams<-salsa1dout$splineParams
+
 ```
 
 ```{r}
-summary(salsa1dout$bestModel, varshortnames=varlist)
-anova(salsa1dout$bestModel, varshortnames=varlist)
+summary(salsa1dout$bestModel)
+anova(salsa1dout$bestModel)
 ```
 
 
 ```{r}
-bestModel<-make.gamMRSea(salsa1dout$bestModel, panelid = fat$panel, splineParams = salsa1dout$splineParams, varshortnames = varlist)
-splineParams<-bestModel$splineParams
+bestModel<-make.gamMRSea(salsa1dout$bestModel, panelid = fat$panel, splineParams = salsa1dout$splineParams, varshortnames = varlist, gamMRSea=TRUE)
+#splineParams<-bestModel$splineParams
 ```
 
 
@@ -227,7 +230,7 @@ predictdata<-rbind(data.frame(gridsub, month=9, year=2011, eventphase=0), data.f
 
 ```{r poweroutfat, cache=TRUE, dependson='gridsetup'}
 nsim=100
-
+require(splines)
 powerout<-powerSimOverallChange(newdat, fatsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fatsim_glm)), predictionGrid=predictdata, g2k=NULL, splineParams=bestModel$splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(570000, 6240000))
 ```
 
@@ -242,12 +245,12 @@ null.output<-pval.coverage.null(newdat.ind = newdat, model = fatsim_glm, nsim = 
 
 ```{r}
 summary(powerout, null.output, truebeta=-0.69)
-
 ```
 
 
 ### Proportion of significant differences:
 ```{r sigdiff.ind,, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences in that cell under the null hypothesis of no-change.'}
+names(powerout$significant.differences)[1]<-"individual"
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
 plotdata
 ```
@@ -264,6 +267,6 @@ d2impPlot<-plot.d2imp(powerout)
 d2impPlot
 ```
 
-```{r}
-#lazyLoad(filebase = 'FoWPower_cache/html/poweroutfow_e9cd6eba643105e8af4b9b2a338149a2')
+```{r echo=FALSE, eval=FALSE}
+lazyLoad(filebase = 'FaTPower_cache/html/poweroutfat_1755b15e504051ccedd3a72751fc7b52')
 ```

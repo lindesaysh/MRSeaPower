@@ -1,8 +1,8 @@
 ---
-title: "Fall of Warness Power: Spatial"
+title: 'Fall of Warness Power: Spatial'
 author: "Lindesay Scott-Hayward"
 date: "23 August 2016"
-output: html_document
+output: word_document
 ---
 
 ```{r setup, include=FALSE}
@@ -31,13 +31,13 @@ varlist<-c('Depth', 'MonthInt')
 
 salsa1dlist<-list(fitnessMeasure='QAIC', minKnots_1d = c(1,1), maxKnots_1d=c(5,5), startKnots_1d = c(1,1), degree=c(2,2), maxIterations=100, gaps=c(0,0))
 
-salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('MonthInt'), splineParams = NULL, datain=dat)
+salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('MonthInt'), splineParams = NULL, datain=dat, suppress.printout = TRUE)
 
 ```
 
 ```{r}
-summary(salsa1dout$bestModel, varshortnames=varlist)
-anova(salsa1dout$bestModel, varshortnames=varlist)
+summary(salsa1dout$bestModel)
+anova(salsa1dout$bestModel)
 
 ```
 
@@ -51,18 +51,18 @@ varlist<-c('Depth', 'MonthInt')
 
 salsa1dlist<-list(fitnessMeasure='QAIC', minKnots_1d = c(1,1), maxKnots_1d=c(5,5), startKnots_1d = c(1,1), degree=c(2,2), maxIterations=100, gaps=c(0,0))
 
-salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('MonthInt'), splineParams = NULL, datain=dat)
+salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('MonthInt'), splineParams = NULL, datain=dat,suppress.printout=TRUE)
 ```
 
 ```{r}
-summary(salsa1dout$bestModel, varshortnames=varlist)
-anova(salsa1dout$bestModel, varshortnames=varlist)
+summary(salsa1dout$bestModel)
+anova(salsa1dout$bestModel)
 ```
 
 
 ```{r}
-bestModel1D<-make.gamMRSea(salsa1dout$bestModel, panelid = dat$newbid, splineParams = salsa1dout$splineParams, varshortnames = varlist)
-splineParams<-bestModel1D$splineParams
+bestModel1D<-make.gamMRSea(salsa1dout$bestModel, panelid = dat$newbid, splineParams = salsa1dout$splineParams)
+#splineParams<-bestModel1D$splineParams
 ```
 
 
@@ -83,21 +83,18 @@ salsa2dlist<-list(fitnessMeasure = 'QAIC', knotgrid = knotgrid, knotdim = c(100,
 ```
 
 ```{r runsalsa2d, cache=TRUE}
-salsa2dOutput<-runSALSA2D(bestModel1D, salsa2dlist, d2k=distMats$dataDist, k2k=distMats$knotDist, splineParams=splineParams, tol=0, chooserad=F, panels=NULL)
+salsa2dOutput<-runSALSA2D(bestModel1D, salsa2dlist, d2k=distMats$dataDist, k2k=distMats$knotDist, splineParams=salsa1dout$splineParams, tol=0, chooserad=F, panels=NULL, suppress.printout=TRUE)
 ```
 
 ```{r}
-summary(salsa2dOutput$bestModel, varshortnames=varlist)
-anova(salsa2dOutput$bestModel, varshortnames=varlist)
+bestModel<-make.gamMRSea(salsa2dOutput$bestModel, panelid = dat$newbid, splineParams = salsa2dOutput$splineParams, varshortnames = varlist, gamMRSea=TRUE)
+
+rm(splineParams, dists)
 ```
 
 ```{r}
-bestModel<-salsa2dOutput$bestModel
-splineParams<-salsa2dOutput$splineParams
-aR<-splineParams[[1]]$invInd[splineParams[[1]]$knotPos]
-radiusIndices<-splineParams[[1]]$radiusIndices
-radii<-splineParams[[1]]$radii
-dists<-splineParams[[1]]$dist
+summary(bestModel)
+anova(bestModel)
 ```
 
 
@@ -179,11 +176,11 @@ quilt.plot(dat$x.pos, dat$y.pos, newdat[,10], main='Simulated Data B', nrow=18, 
 
 ### Power Analysis
 
-Generate data for power analysis with impact of 10\%
+Generate data for power analysis with impact of 50\%
 
 ```{r powerdatgen, cache=TRUE}
 nsim=500
-impdata<-genOverallchangeData(log(0.9), init_glm, data = dat, panels = 'newbidNum')
+impdata<-genOverallchangeData(log(0.5), bestModel, data = dat, panels = 'newbidNum')
 newdat<-generateNoise(nsim, impdata$truth, family='poisson', d=d)
 ```
 
@@ -195,7 +192,7 @@ sum(newdat[impdata$eventphase==1,1])
 Update the initial model to include the eventphase term, indicating overall change.
 
 ```{r}
-dists<-rbind(dists, dists)
+bestModel$splineParams[[1]]$dist<-rbind(bestModel$splineParams[[1]]$dist, bestModel$splineParams[[1]]$dist)
 fowsim_glm<-update(bestModel, newdat[,1]~. + eventphase, data=impdata)
 ```
 
@@ -214,62 +211,57 @@ If an offset is present in the model, when setting up the prediction grid the ar
 ```{r predgridsetup}
 data("fowshco.grid")
 predictdata<-rbind(data.frame(fowshco.grid, TideState=1, WindStrength=0, SeaState=1, SimpPrecipitation='NONE', CloudCover=7, MonthInt=6, areatime=fowshco.grid$Area, eventphase=0), data.frame(fowshco.grid, TideState=1, WindStrength=0, SeaState=1, SimpPrecipitation='NONE', CloudCover=7, MonthInt=6,areatime=fowshco.grid$Area, eventphase=1))
+
+g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit(knotgrid), knotmat = FALSE)$dataDist
 ```
 
 ```{r poweroutfow, cache=TRUE, dependson='predgridsetup'}
-nsim=100
-powerout<-powerSimOverallChange(newdatcor, fowsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=NULL, splineParams=NULL, sigdif=TRUE, n.boot=500, impact.loc=c(510700, 6555700))
+nsim=5
+powerout<-powerSimOverallChange(newdat, fowsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(510700, 6555700))
 ```
 
 # Power Outputs:
 
-### Power to detect Change
-```{r}
-(length(which(powerout$imppvals<=0.05))/nsim)*100
-```
+To calculate the summary, the values for certain parameters are given under the null hypothesis of 'no change'.  If these parameters are not provided, then the summary will not show the comparisons (see below)
 
-### Coverage of impact coefficient
+### Summary output
 
 ```{r}
-truebeta<--0.69
-impact.coverage(truebeta, powerout$betacis)
+summary(powerout, truebeta=log(0.5))
 ```
+
+In order to assess the summary calculations, we estimate the null parameters to provide the full summary. 
+
+```{r nulloutput, cache=TRUE}
+null.output<-pval.coverage.null(newdat.ind = newdat, newdat.corr = NULL, model = fowsim_glm, nsim = 500, powercoefid = length(coef(fowsim_glm)))
+```
+
+```{r}
+summary(powerout, null.output, truebeta=log(0.5))
+```
+
+We expect to see the null power to be 5\%, indicating a 5\% error rate for inclusion of the eventphase term when the data do not contain any change.  We also expect that the coverage for the null coefficient is 95\%.  This indicates that 5\% of the time, the confidence intervals for the eventphase coefficient did not include the truth (0; no change).
 
 
 ### Proportion of significant differences:
-```{r sigdiff.ind}
+```{r sigdiff.ind, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences in that cell under the null hypothesis of no-change.'}
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
 plotdata
 ```
 
-```{r sigdiff.fam}
+```{r sigdiff.fam, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the family 5% level was determined by using the Sidak adjustment.'}
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=TRUE)
 plotdata
 ```
 
-### Mean sightings probability before and after
+### Distance to event site plot
 
-```{r}
-powerout$Abundance
-```
-
-### Distance to impact site plot
-
-```{r}
+```{r disttoimp, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
 d2impPlot<-plot.d2imp(powerout)
 d2impPlot
 ```
 
-### Summary output
-```{r nulloutput, cache=T}
-null.output<-pval.coverage.null(newdat.ind = newdat, newdat.corr = newdatcor, model = fowsim_glm, nsim = 500, powercoefid = length(coef(fowsim_glm)))
 
-summary(powerout, null.output, truebeta=log(0.9))
-
+```{r, echo=FALSE, eval=FALSE}
+lazyLoad(filebase = 'FoWPower_cache/html/empdistpower_65466e1af9ddc03a7bcafc02c436b281')
 ```
-
-
-```{r}
-#lazyLoad(filebase = 'FoWPower_cache/html/poweroutfow_9f91ed9b2403db21866c9985fcb778fe')
-```
-

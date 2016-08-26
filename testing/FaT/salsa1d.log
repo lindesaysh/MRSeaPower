@@ -1,0 +1,181 @@
+[1] "initialDispersion -2993.54265288585"
+[1] "Initialising..."
+Initial fit =  3187.397 3 6 8 
+[1] "initialisation complete..."
+[1] "^^^^^^^^^^^Initial^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] 3187.397
+[1] 0
+[1]  1 12
+[1] "Exchanging..."
+[1] "Locating maximum residual......"
+[1] 5219
+[1] 7
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Locating maximum residual......"
+[1] 2969
+[1] 4
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Locating maximum residual......"
+[1] 8660
+[1] 1
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Locating maximum residual......"
+[1] 5219
+[1] 1
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Exchanging done..."
+[1] 5
+[1] 5
+[1] "^^^^^^^^^^^Exchange^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] "Improving..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Improving complete..."
+[1] "^^^^^^^^^^^Improve^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] 5
+[1] 5
+[1] "Dropping..."
+[1] "Dropped..."
+[1] 5
+[1] 5
+[1] "Exchanging..."
+[1] "Locating maximum residual......"
+[1] 5219
+[1] 1
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Locating maximum residual......"
+[1] 8660
+[1] 1
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Locating maximum residual......"
+[1] 300
+[1] 3
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Locating maximum residual......"
+[1] 11511
+[1] 5
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Locating maximum residual......"
+[1] 8660
+[1] 5
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Exchanging done..."
+[1] 5
+[1] 5
+[1] "^^^^^^^^^^^Exchange^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] "Improving..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Improving complete..."
+[1] "^^^^^^^^^^^Improve^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] 5
+[1] 5
+[1] "Dropping..."
+[1] "Dropped..."
+[1] "^^^^^^^^^^^Drop^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] 6
+[1] 6
+[1] "Exchanging..."
+[1] "Locating maximum residual......"
+[1] 8660
+[1] 5
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Exchanging done..."
+[1] 6
+[1] 6
+[1] "Improving..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Improving complete..."
+[1] 6
+[1] 6
+[1] "Dropping..."
+[1] "Dropped..."
+[1] 6
+[1] 6
+[1] "And we're done..."
+Fitting Linear Model...Choosing smooth vs linear model...[1] "initialDispersion -2984.7495190728"
