@@ -25,8 +25,8 @@ makeToyData<- function(n, changecoef.link=0, length.panels=1, binary=FALSE, b0=1
   b0<- b0
   b1<- 0.3
   obsorder<- 1:(n/2)
-
-  x<- seq(1,10, length=(n/2))
+  X<- seq(1,10, length=5000)
+  x<- sample(X, size = (n/2), replace = TRUE)
   evph<-c(0,1)
   dat<-expand.grid(x=x, evph=evph)
 
@@ -38,7 +38,7 @@ makeToyData<- function(n, changecoef.link=0, length.panels=1, binary=FALSE, b0=1
     #dat$mu.bin<-ifelse(dat$mu.bin>mean(dat$mu.bin), 1, 0)
   }
 
-  dat$panelid<-rep((1:ceiling(n/length.panels)), each=(length.panels))[1:n]
+  dat$panels<-rep((1:ceiling(n/length.panels)), each=(length.panels))[1:n]
   return(dat)
 }
 

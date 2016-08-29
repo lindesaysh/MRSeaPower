@@ -179,3 +179,261 @@ Initial fit =  3187.397 3 6 8
 [1] 6
 [1] "And we're done..."
 Fitting Linear Model...Choosing smooth vs linear model...[1] "initialDispersion -2984.7495190728"
+[1] "Initialising..."
+Initial fit =  3132.295 548477 
+[1] "initialisation complete..."
+[1] "^^^^^^^^^^^Initial^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] 3132.295
+[1] 100
+[1] 523588.3 612267.8
+[1] "Exchanging..."
+[1] "Locating maximum residual......"
+[1] 7386
+[1] 42
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Locating maximum residual......"
+[1] 7530
+[1] 164
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Locating maximum residual......"
+[1] 7530
+[1] 164
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Exchanging done..."
+[1] 197
+[1] 197
+[1] "^^^^^^^^^^^Exchange^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] "Improving..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Improving complete..."
+[1] "^^^^^^^^^^^Improve^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] 197
+[1] 197
+[1] "Dropping..."
+[1] "Dropped..."
+[1] 197
+[1] 197
+[1] "Exchanging..."
+[1] "Locating maximum residual......"
+[1] 7530
+[1] 163
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Exchanging done..."
+[1] 197
+[1] 197
+[1] "Improving..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Improving complete..."
+[1] 197
+[1] 197
+[1] "Dropping..."
+[1] "Dropped..."
+[1] 197
+[1] 197
+[1] "And we're done..."
+Fitting Linear Model...Choosing smooth vs linear model...[1] "initialDispersion -3620.0907858344"
+[1] "Initialising..."
+Initial fit =  3115.773 6243351 
+[1] "initialisation complete..."
+[1] "^^^^^^^^^^^Initial^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] 3115.773
+[1] 0
+[1] 6195841 6286543
+[1] "Exchanging..."
+[1] "Locating maximum residual......"
+[1] 7530
+[1] 192
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Locating maximum residual......"
+[1] 6746
+[1] 28
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Locating maximum residual......"
+[1] 6642
+[1] 6
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Exchanging done..."
+[1] 198
+[1] 198
+[1] "^^^^^^^^^^^Exchange^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] "Improving..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Improving complete..."
+[1] "^^^^^^^^^^^Improve^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] 198
+[1] 198
+[1] "Dropping..."
+[1] "Dropped..."
+[1] "^^^^^^^^^^^Drop^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] 199
+[1] 199
+[1] "Exchanging..."
+[1] "Locating maximum residual......"
+[1] 7530
+[1] 191
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Exchanging done..."
+[1] 199
+[1] 199
+[1] "Improving..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Improving complete..."
+[1] "^^^^^^^^^^^Improve^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] 199
+[1] 199
+[1] "Exchanging..."
+[1] "Locating maximum residual......"
+[1] 7530
+[1] 191
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Exchanging done..."
+[1] 199
+[1] 199
+[1] "Improving..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
+[1] "Improving complete..."
+[1] 199
+[1] 199
+[1] "And we're done..."
+Fitting Linear Model...Choosing smooth vs linear model...

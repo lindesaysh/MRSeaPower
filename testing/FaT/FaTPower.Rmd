@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE, dev='png', warning=FALSE, message=FALSE, fig=
 ```{r fat, echo=FALSE, warning=FALSE, message=FALSE}
 devtools::load_all(pkg = '../../../MRSea/MRSea')
 devtools::load_all(pkg = '../../../MRSeaPower')
+require(mgcv)
+require(splines)
 data(fat)
 ```
 
@@ -263,10 +265,16 @@ plotdata
 ### Distance to event site plot
 
 ```{r disttoimpfat, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
-d2impPlot<-plot.d2imp(powerout)
+d2impPlot<-plot.d2imp(powerout, pct.diff=FALSE)
 d2impPlot
 ```
 
+```{r disttoimpfat.pct, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
+d2impPlot<-plot.d2imp(powerout, pct.diff=T)
+d2impPlot
+```
+
+
 ```{r echo=FALSE, eval=FALSE}
-lazyLoad(filebase = 'FaTPower_cache/html/poweroutfat_1755b15e504051ccedd3a72751fc7b52')
+lazyLoad(filebase = 'FaTPower_cache/docx/poweroutfat_a896486c7266ee938530a429ee7ccd93')
 ```

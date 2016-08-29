@@ -29,7 +29,7 @@ quilt.plot(dat$x.pos, dat$y.pos, dat$response, nrow=18, ncol=14, asp=1)
 ```{r fowinitglm}
 init_glm<-glm(response ~  as.factor(TideState) + WindStrength + SeaState + SimpPrecipitation + CloudCover + Depth + offset(log(areatime)), data=dat, family=quasipoisson)
 
-init_glm<-make.gamMRSea(init_glm, panelid="panels")
+init_glm<-make.gamMRSea(init_glm, panelid=dat$panels)
 ```
 
 
@@ -64,7 +64,7 @@ The residuals are not considered independent so for the power analysis, the data
 Data are generated with no change but with the same dispersion and correlation as the original data so that the data generation process can be checked.
 
 ```{r cordatfow, cache=TRUE}
-corrs<-getCorrelationMat(dat$blockid, dat$response, dots=FALSE)
+corrs<-getCorrelationMat(dat$newbidNum, dat$response, dots=FALSE)
 newdatcor<-generateIC(data = dat, corrs = corrs, panels = 'blockid', newdata = newdat, nsim = nsim, dots = FALSE)
 ```
 
@@ -164,7 +164,7 @@ data("fowshco.grid")
 predictdata<-rbind(data.frame(fowshco.grid, TideState=1, WindStrength=0, SeaState=0, SimpPrecipitation='SHOWERS', CloudCover=0, areatime=fowshco.grid$Area, eventphase=0), data.frame(fowshco.grid, TideState=1, WindStrength=0, SeaState=0, SimpPrecipitation='SHOWERS', CloudCover=0,areatime=fowshco.grid$Area, eventphase=1))
 ```
 
-```{r poweroutfow, cache=TRUE, dependson='predgridsetup'}
+```{r poweroutfow, cache=TRUE, dependson=c('predgridsetup', 'powerdatagen')}
 nsim=100
 powerout<-powerSimOverallChange(newdatcor, fowsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=NULL, splineParams=NULL, sigdif=TRUE, n.boot=500, impact.loc=c(510700, 6555700))
 ```
@@ -206,12 +206,17 @@ plotdata
 ### Distance to event site plot
 
 ```{r disttoimp, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
-d2impPlot<-plot.d2imp(powerout)
+d2impPlot<-plot.d2imp(powerout, pct.diff=FALSE)
 d2impPlot
 ```
 
 
+```{r disttoimppct, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
+d2impPlot<-plot.d2imp(powerout, pct.diff = TRUE)
+d2impPlot
+```
+
 ```{r, echo=FALSE, eval=FALSE}
-lazyLoad(filebase = 'FoWPower_cache/html/empdistpower_65466e1af9ddc03a7bcafc02c436b281')
+lazyLoad(filebase = 'FoWPower_cache/docx/poweroutfow_9b61b0f606b3436a5ec4644d2949daec')
 ```
 

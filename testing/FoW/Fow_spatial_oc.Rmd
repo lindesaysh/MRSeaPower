@@ -14,6 +14,8 @@ knitr::opts_chunk$set(echo = TRUE, fig=TRUE, dev='png', warning=FALSE, message=F
 #devtools::load_all(pkg = '../../../../Packages/MRSea package/MRSea')
 devtools::load_all(pkg = '../../../MRSea/MRSea')
 devtools::load_all(pkg = '../../../MRSeaPower')
+require(mgcv)
+require(splines)
 data(fowshco)
 ```
 
@@ -25,7 +27,6 @@ init_glm<-glm(response ~  as.factor(TideState) + as.factor(WindStrength) + as.fa
 
 ### Run SALSA1D
 ```{r salsa1d, cache=TRUE}
-require(mgcv)
 factorlist<-c('TideState', 'WindStrength','SeaState',  'SimpPrecipitation', 'CloudCover')
 varlist<-c('Depth', 'MonthInt')
 
@@ -33,10 +34,18 @@ salsa1dlist<-list(fitnessMeasure='QAIC', minKnots_1d = c(1,1), maxKnots_1d=c(5,5
 
 salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('MonthInt'), splineParams = NULL, datain=dat, suppress.printout = TRUE)
 
+salsa1dout$bestModel$splineParams<-salsa1dout$splineParams
+
+```
+
+```{r inter1d, cache=TRUE}
+salsa1dout$bestModel<-make.gamMRSea(salsa1dout$bestModel, panelid = dat$newbid, splineParams = salsa1dout$splineParams)
+#splineParams<-bestModel1D$splineParams
 ```
 
 ```{r}
 summary(salsa1dout$bestModel)
+
 anova(salsa1dout$bestModel)
 
 ```
@@ -54,15 +63,14 @@ salsa1dlist<-list(fitnessMeasure='QAIC', minKnots_1d = c(1,1), maxKnots_1d=c(5,5
 salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('MonthInt'), splineParams = NULL, datain=dat,suppress.printout=TRUE)
 ```
 
+```{r best1d, cache=TRUE}
+bestModel1D<-make.gamMRSea(salsa1dout$bestModel, panelid = dat$newbid, splineParams = salsa1dout$splineParams)
+#splineParams<-bestModel1D$splineParams
+```
+
 ```{r}
 summary(salsa1dout$bestModel)
 anova(salsa1dout$bestModel)
-```
-
-
-```{r}
-bestModel1D<-make.gamMRSea(salsa1dout$bestModel, panelid = dat$newbid, splineParams = salsa1dout$splineParams)
-#splineParams<-bestModel1D$splineParams
 ```
 
 
@@ -216,8 +224,10 @@ g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit
 ```
 
 ```{r poweroutfow, cache=TRUE, dependson='predgridsetup'}
-nsim=5
+nsim=100
+system.time(
 powerout<-powerSimOverallChange(newdat, fowsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(510700, 6555700))
+)
 ```
 
 # Power Outputs:
@@ -263,5 +273,5 @@ d2impPlot
 
 
 ```{r, echo=FALSE, eval=FALSE}
-lazyLoad(filebase = 'FoWPower_cache/html/empdistpower_65466e1af9ddc03a7bcafc02c436b281')
+lazyLoad(filebase = 'Fow_spatial_oc_cache/docx/inter1d_c5da32629ab0fc740251f62d7199ce00')
 ```

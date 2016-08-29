@@ -136,16 +136,16 @@ powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefi
 
       if(!is.null(impact.loc)){
         #if(nrow(predictionGrid)>400){
-        preddifferences.pct<-preddifferences/preds[predictionGrid$eventphase==1,i]
+        preddifferences.pct<-(as.vector(preddifferences[,i])/as.vector(preds[predictionGrid$eventphase==0,i]))*100
 
         d2imp.plotdata<-matrix(NA, nrow=length(unique(preddiffs$cuts)), ncol=9)
         d2imp.plotdata[,1]<-tapply(preddiffs$impdist, preddiffs$cuts, mean)
         d2imp.plotdata[,2]<-tapply(preddifferences[,i], preddiffs$cuts, mean)
-        d2imp.plotdata[,6]<-tapply(preddifferences.pct[,i], preddiffs$cuts, mean)
-        colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI', '% MeanDiff', '% bootMeanDiff', '% LowerCI', '% Upper CI')
+        d2imp.plotdata[,6]<-tapply(preddifferences.pct, preddiffs$cuts, mean)
+        colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI', 'MeanDiff.pct', 'bootMeanDiff.pct', 'LowerCI.pct', 'UpperCI.pct')
 
         bootdifferences[,,i]<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
-        bootdifferences.pct[,,i]<-(bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==1,]
+        bootdifferences.pct[,,i]<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
       }
 
     } # end sigdif
@@ -186,8 +186,8 @@ powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefi
       for(p in 1:length(uniquecuts)){
         d2imp.plotdata[p,4:5]<-quantile(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]), probs=c(0.025, 0.975))
         d2imp.plotdata[p,3]<-mean(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]))
-        d2imp.plotdata[p,8:9]<-quantile(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]), probs=c(0.025, 0.975))
-        d2imp.plotdata[p,7]<-mean(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]))
+        d2imp.plotdata[p,8:9]<-quantile(na.omit(bootdifferences.pct[preddiffs$cuts==uniquecuts[p],,]), probs=c(0.025, 0.975))
+        d2imp.plotdata[p,7]<-mean(na.omit(bootdifferences.pct[preddiffs$cuts==uniquecuts[p],,]))
       }
 
     } # end impact.loc

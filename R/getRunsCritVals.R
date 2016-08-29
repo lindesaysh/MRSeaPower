@@ -1,6 +1,7 @@
 
-getRunsCritVals<-function(n.sim, simData, model, data, plot=FALSE, returnDist=FALSE,dots=TRUE, imp.beta.coverage=FALSE){
+getRunsCritVals<-function(n.sim, simData, model, data, plot=FALSE, returnDist=FALSE,dots=TRUE){
   runsstatH0=betas=vector(length=n.sim)
+  model$panels<-1:nrow(data) # make sure that independent panels specified for null distribution
 for(i in 1:n.sim){
   if(dots==TRUE){if((i/500)%%1 == 0){cat(i, '\n')}else{cat('.')}}
 
