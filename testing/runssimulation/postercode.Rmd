@@ -1,0 +1,391 @@
+---
+title: "Runs Test Paper"
+author: "Lindesay Scott-Hayward"
+date: '`r Sys.Date()`'
+output: pdf_document
+number_sections: yes
+toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment='', warning=FALSE, message = FALSE)
+```
+
+# Simulated Data
+
+```{r packages, echo=FALSE}
+devtools::load_all(pkg = 'C:/MarineScotlandPower/MRSeaPower')
+nsim=1000
+```
+
+Make some simulated toy data using the following equation:
+
+$$y=\beta_0\ +\ \beta_1X_1$$
+
+where $\beta_0 = 1$ and $\beta_1= 0.3$
+
+
+```{r simdata}
+dat<-makeToyData(200, length.panels=5)
+head(dat)
+```
+
+## Uncorrelated data 
+
+`r nsim` sets of noisy data are simulated from this truth using a Poisson distribution.
+
+```{r simnoise}
+newdat<-generateNoise(nsim, dat$mu, family='poisson', d=1)
+```
+
+To test, fit a glm to one of the sets of data.
+```{r initglm}
+init_glm<-glm(newdat[,1] ~ x, data=dat, family='quasipoisson')
+summary(init_glm)
+```
+
+Models were fitted to all datasets generated above and the runs test was evaluated for each one.  The distribution of the test statistics is returned.  A plot is also produced, which shows the lower 2.5\% and upper 97.5\% critical values of the empirical distribution (red) and from the Normal ($N(0,1)$) distribution.
+
+```{r critvals, cache=T}
+empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
+                                 model = init_glm, data = dat, plot=TRUE, 
+                                 returnDist = TRUE)
+```
+
+Use the data generated to assess the 5\% error rate for this test when using the Normal distribition or the empirical distribution generated above. 
+
+```{r simpvals, cache=TRUE}
+newdat<-generateNoise(nsim, dat$mu, family='poisson', d=1)
+ps<-matrix(NA, nrow=nsim, ncol=2)
+
+for(i in 1:nsim){
+  sim_glm<-glm(newdat[,i] ~ x , data=dat, family='quasipoisson')
+   d<-summary(sim_glm)$dispersion
+  resid<-residuals(sim_glm, type="response")/sqrt(fitted(sim_glm)*d)
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
+}
+```
+
+
+```{r}
+(length(which(ps[,1]<0.05))/nsim)*100
+(length(which(ps[,2]<0.05))/nsim)*100
+```
+
+How does this change if we vary the dispersion parameter for the data?
+
+```{r phisimRaw, cache=TRUE}
+nphi=seq(1,51, by=5)
+errrate<-matrix(NA, nrow=length(nphi), ncol=2)
+counter=1
+nsim=2000
+for(p in nphi){
+  newdat<-generateNoise(nsim, dat$mu, family='poisson', d=p)
+  # for each change in phi, update the empirical distribution
+  empdistribution<-getRunsCritVals.raw(n.sim = nsim, simData=newdat, 
+                                   model = init_glm, data = dat, plot=FALSE, 
+                                   returnDist = TRUE, dots=FALSE)
+  
+  ps<-matrix(NA, nrow=nsim, ncol=2)
+  for(i in 1:nsim){
+    sim_glm<-glm(newdat[,i] ~ x + as.factor(evph), data=dat, family='quasipoisson')
+    # find both the empirical and Normal p-values
+    resid<-residuals(sim_glm, type='response')
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
+  }
+  
+  errrate[counter,1]<-(length(which(ps[,1]<0.05))/nsim)*100
+  errrate[counter,2]<-(length(which(ps[,2]<0.05))/nsim)*100
+  counter=counter+1
+}
+
+```
+
+```{r plotphisimRaw}
+plot(nphi, errrate[,1], type='l', col='red', ylim=c(0, range(errrate)[2]), ylab='Error Rate', xlab='Dispersion Parameter', main='Raw Residuals')
+lines(nphi, errrate[,2], col='blue')
+legend(0, 20.1, legend = c('N(0,1)', 'Empirical'), col = c('blue', 'red'), lty = c(1,1), bty = 'n')
+```
+
+
+```{r phisimPearson, cache=TRUE}
+nphi=seq(1,51, by=5)
+errrate<-matrix(NA, nrow=length(nphi), ncol=2)
+counter=1
+nsim=2000
+for(p in nphi){
+  newdat<-generateNoise(nsim, dat$mu, family='poisson', d=p)
+  # for each change in phi, update the empirical distribution
+  empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+                                   model = init_glm, data = dat, plot=FALSE, 
+                                   returnDist = TRUE, dots=FALSE)
+  
+  ps<-matrix(NA, nrow=nsim, ncol=2)
+  for(i in 1:nsim){
+    sim_glm<-glm(newdat[,i] ~ x + as.factor(evph), data=dat, family='quasipoisson')
+    # find both the empirical and Normal p-values
+    resid<-residuals(sim_glm, type='pearson')
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
+  }
+  
+  errrate[counter,1]<-(length(which(ps[,1]<0.05))/nsim)*100
+  errrate[counter,2]<-(length(which(ps[,2]<0.05))/nsim)*100
+  counter=counter+1
+}
+
+```
+
+```{r plotphisimPears}
+plot(nphi, errrate[,1], type='l', col='red', ylim=c(0, range(errrate)[2]), ylab='Error Rate', xlab='Dispersion Parameter', main='Pearsons Residuals')
+lines(nphi, errrate[,2], col='blue')
+legend(0, 20.1, legend = c('N(0,1)', 'Empirical'), col = c('blue', 'red'), lty = c(1,1), bty = 'n')
+```
+
+```{r phisimScaledPearson, cache=TRUE}
+nphi=seq(1,51, by=5)
+errrate<-matrix(NA, nrow=length(nphi), ncol=2)
+counter=1
+nsim=2000
+for(p in nphi){
+  newdat<-generateNoise(nsim, dat$mu, family='poisson', d=p)
+  # for each change in phi, update the empirical distribution
+  empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
+                                   model = init_glm, data = dat, plot=FALSE, 
+                                   returnDist = TRUE, dots=FALSE)
+  
+  ps<-matrix(NA, nrow=nsim, ncol=2)
+  for(i in 1:nsim){
+    sim_glm<-glm(newdat[,i] ~ x + as.factor(evph), data=dat, family='quasipoisson')
+    # find both the empirical and Normal p-values
+    d<-summary(sim_glm)$dispersion
+  resid<-residuals(sim_glm, type="response")/sqrt(fitted(sim_glm)*d)
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
+  }
+  
+  errrate[counter,1]<-(length(which(ps[,1]<0.05))/nsim)*100
+  errrate[counter,2]<-(length(which(ps[,2]<0.05))/nsim)*100
+  counter=counter+1
+}
+
+```
+
+```{r plotphisimScPears}
+plot(nphi, errrate[,1], type='l', col='red', ylim=c(0, range(errrate)[2]), ylab='Error Rate', xlab='Dispersion Parameter', main='Scaled Pearsons Residuals')
+lines(nphi, errrate[,2], col='blue')
+legend(0, 20, legend = c('N(0,1)', 'Empirical'), col = c('blue', 'red'), lty = c(1,1), bty = 'n')
+```
+
+
+## Toy data with smaller mean
+
+The Falls of Warness data has a very small mean (1.01) compared with the toy data used so far.  Here we reduce the mean of the toy data inline with that seen in the Falls of Warness data to see if we can replicate results
+```{r}
+datlow<-makeToyData(200, length.panels=5, b0=-2)
+head(datlow)
+mean(datlow$mu)
+```
+
+
+```{r lowmeaninitglm}
+init_glm<-glm(newdat[,1] ~ x, data=datlow, family='quasipoisson')
+summary(init_glm)
+```
+
+```{r critvalslm, cache=T, eval=FALSE}
+newdat<-generateNoise(nsim, datlow$mu, family='poisson', d=20)
+empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
+                                 model = init_glm, data = datlow, plot=TRUE, 
+                                 returnDist = TRUE)
+```
+
+
+```{r lowmeanphisim, cache=TRUE}
+nphi=seq(1,51, by=5)
+errrate<-matrix(NA, nrow=length(nphi), ncol=2)
+counter=1
+nsim=2000
+for(p in nphi){
+  #print(p)
+  newdat<-generateNoise(nsim, datlow$mu, family='poisson', d=p)
+  # for each change in phi, update the empirical distribution
+  empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
+                                   model = init_glm, data = datlow, plot=FALSE, 
+                                   returnDist = TRUE, dots=FALSE)
+  
+  ps<-matrix(NA, nrow=nsim, ncol=2)
+  for(i in 1:nsim){
+    sim_glm<-glm(newdat[,i] ~ x + as.factor(evph), data=datlow,
+                 family='quasipoisson')
+    # find both the empirical and Normal p-values
+    d<-summary(sim_glm)$dispersion
+  resid<-residuals(sim_glm, type="response")/sqrt(fitted(sim_glm)*d)
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
+  
+  }
+  
+  errrate[counter,1]<-(length(which(ps[,1]<0.05))/nsim)*100
+  errrate[counter,2]<-(length(which(ps[,2]<0.05))/nsim)*100
+  counter=counter+1
+}
+```
+
+```{r lowmeanphiplot}
+plot(nphi, errrate[,1], type='l', col='red', ylim=c(0, range(errrate)[2]), ylab='Error Rate', xlab='Dispersion Parameter')
+lines(nphi, errrate[,2], col='blue')
+legend(35, 40, legend = c('N(0,1)', 'Empirical'), col = c('blue', 'red'), lty = c(1,1), bty = 'n')
+```
+
+## Correlated data low mean
+
+```{r}
+datlow<-makeToyData(200, length.panels=5, b0=-2)
+head(dat)
+```
+
+
+```{r corsimphid1lm, cache=TRUE}
+nsim=2000
+newdat<-generateNoise(nsim, datlow$mu, family='poisson', d=1)
+rho=seq(0.1, 0.9, by=0.1)
+errrate<-matrix(NA, nrow=length(rho), ncol=2)
+counter=1
+
+for(r in rho){
+  newdatcorr<-generateIC.toy(datlow, c(1, r, r^2, r^3, r^4), 'panels', newdat, ncol(newdat), dots=FALSE)
+  
+  # for each change in phi, update the empirical distribution
+  empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
+                                   model = init_glm, data = datlow, plot=FALSE, 
+                                   returnDist = TRUE, dots=FALSE)
+  
+  ps<-matrix(NA, nrow=nsim, ncol=2)
+  for(i in 1:nsim){
+    sim_glm<-glm(newdatcorr[,i] ~ x , data=datlow, family='quasipoisson')
+    # find both the empirical and Normal p-values
+    d<-summary(sim_glm)$dispersion
+  resid<-residuals(sim_glm, type="response")/sqrt(fitted(sim_glm)*d)
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
+  }
+  
+  errrate[counter,1]<-(length(which(ps[,1]<0.05))/nsim)*100
+  errrate[counter,2]<-(length(which(ps[,2]<0.05))/nsim)*100
+  counter=counter+1
+}
+
+```
+
+```{r plotcorsimphid1lm}
+plot(rho, errrate[,1], type='l', col='red', ylim=c(0, range(errrate)[2]), xlim=c(0.1,1), ylab='Error Rate', xlab='Correlation coefficient', main='Dispersion = 5')
+lines(rho, errrate[,2], col='blue')
+legend(0.7, 30, legend = c('N(0,1)', 'Empirical'), col = c('blue', 'red'), lty = c(1,1), bty = 'n')
+```
+
+As expected, when the dispersion in the data is high, there is a greater discrepancy between the N(0,1) and empirical distributions.
+
+
+
+
+# Real Data: Falls of Warness
+
+```{r fow, echo=FALSE}
+data(fowshco)
+```
+
+```{r fowinitglm}
+init_glm<-glm(response ~  TideState + WindStrength + SeaState + SimpPrecipitation + CloudCover, data=dat, family=quasipoisson)
+```
+
+```{r fownoise}
+nsim=500
+newdat<-generateNoise(nsim, fitted(init_glm), family='poisson', d=summary(init_glm)$dispersion)
+```
+`r nsim` sets of noisy data are simulated from this truth using a Poisson distribution.
+
+To test, fit a glm to one of the sets of data.
+```{r fowglm}
+fowsim_glm<-glm(newdat[,1] ~  TideState + WindStrength + SeaState + SimpPrecipitation + CloudCover, data=dat, family=quasipoisson)
+summary(fowsim_glm)
+```
+
+## Runs Test Check
+Models were fitted to all datasets generated above and the runs test was evaluated for each one.  The distribution of the test statistics is returned.  A plot is also produced, which shows the lower 2.5\% and upper 97.5\% critical values of the empirical distribution (red) and from the Normal ($N(0,1)$) distribution.
+
+```{r critvalsfow, cache=T, dependson='fownoise'}
+empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
+                                 model = fowsim_glm, data = dat, plot=TRUE, 
+                                 returnDist = TRUE)
+```
+
+Use the data generated to assess the 5\% error rate for this test when using the Normal distribition or the empirical distribution generated above. 
+
+```{r simpvalsfow, cache=TRUE}
+newdat<-generateNoise(nsim, fitted(init_glm), family='poisson', d=1)
+ps<-matrix(NA, nrow=nsim, ncol=2)
+
+for(i in 1:nsim){
+  sim_glm<-update(fowsim_glm, newdat[,i]~.)
+  # find both the empirical and Normal p-values
+   d<-1
+  resid<-residuals(sim_glm, type="response")/sqrt(fitted(sim_glm)*d)
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
+}
+```
+
+
+```{r}
+(length(which(ps[,1]<0.05))/nsim)*100
+(length(which(ps[,2]<0.05))/nsim)*100
+```
+
+How does this change if we vary the dispersion parameter for the data?
+
+```{r phisimfow, cache=TRUE}
+nphi=seq(1,51, by=5)
+errrate<-matrix(NA, nrow=length(nphi), ncol=2)
+counter=1
+nsim=500
+for(p in nphi){
+  print(p)
+  newdat<-generateNoise(nsim, fitted(init_glm), family='poisson', d=p)
+  # for each change in phi, update the empirical distribution
+  empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
+                                   model = init_glm, data = dat, plot=FALSE, 
+                                   returnDist = TRUE, dots=FALSE)
+  
+  ps<-matrix(NA, nrow=nsim, ncol=2)
+  for(i in 1:nsim){
+    sim_glm<-update(fowsim_glm, newdat[,i]~.)
+    # find both the empirical and Normal p-values
+     d<-summary(sim_glm)$dispersion
+  resid<-residuals(sim_glm, type="response")/sqrt(fitted(sim_glm)*d)
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
+  }
+  
+  errrate[counter,1]<-(length(which(ps[,1]<0.05))/nsim)*100
+  errrate[counter,2]<-(length(which(ps[,2]<0.05))/nsim)*100
+  counter=counter+1
+}
+
+```
+
+```{r plotphisimfow}
+plot(nphi, errrate[,1], type='l', col='red', ylim=c(0, range(errrate)[2]), ylab='Error Rate', xlab='Dispersion Parameter')
+lines(nphi, errrate[,2], col='blue')
+legend(0, 30, legend = c('N(0,1)', 'Empirical'), col = c('blue', 'red'), lty = c(1,1), bty = 'n')
+```

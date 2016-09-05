@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE, comment='', warning=FALSE, message = FALSE)
 # Simulated Data
 
 ```{r packages, echo=FALSE}
-require(MRSeaPower)
+devtools::load_all(pkg = 'C:/MarineScotlandPower/MRSeaPower')
 nsim=1000
 ```
 
@@ -47,7 +47,7 @@ summary(init_glm)
 Models were fitted to all datasets generated above and the runs test was evaluated for each one.  The distribution of the test statistics is returned.  A plot is also produced, which shows the lower 2.5\% and upper 97.5\% critical values of the empirical distribution (red) and from the Normal ($N(0,1)$) distribution.
 
 ```{r critvals, cache=T}
-empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
                                  model = init_glm, data = dat, plot=TRUE, 
                                  returnDist = TRUE)
 ```
@@ -60,9 +60,11 @@ ps<-matrix(NA, nrow=nsim, ncol=2)
 
 for(i in 1:nsim){
   sim_glm<-glm(newdat[,i] ~ x , data=dat, family='quasipoisson')
+   d<-summary(sim_glm)$dispersion
+  resid<-residuals(sim_glm)/sqrt(fitted(sim_glm)*d)
   # find both the empirical and Normal p-values
-  ps[i,1]<-runs.test(residuals(sim_glm, type='pearson'), critvals = empdistribution)$p.value
-  ps[i,2]<-runs.test(residuals(sim_glm, type='pearson'))$p.value
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
 }
 ```
 
@@ -82,7 +84,7 @@ nsim=2000
 for(p in nphi){
   newdat<-generateNoise(nsim, dat$mu, family='poisson', d=p)
   # for each change in phi, update the empirical distribution
-  empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+  empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
                                    model = init_glm, data = dat, plot=FALSE, 
                                    returnDist = TRUE, dots=FALSE)
   
@@ -90,8 +92,11 @@ for(p in nphi){
   for(i in 1:nsim){
     sim_glm<-glm(newdat[,i] ~ x + as.factor(evph), data=dat, family='quasipoisson')
     # find both the empirical and Normal p-values
-    ps[i,1]<-runs.test(residuals(sim_glm, type='pearson'), critvals = empdistribution)$p.value
-    ps[i,2]<-runs.test(residuals(sim_glm, type='pearson'))$p.value
+    d<-summary(sim_glm)$dispersion
+  resid<-residuals(sim_glm)/sqrt(fitted(sim_glm)*d)
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
   }
   
   errrate[counter,1]<-(length(which(ps[,1]<0.05))/nsim)*100
@@ -125,7 +130,7 @@ for(r in rho){
   newdatcorr<-generateIC.toy(dat, c(1, r, r^2, r^3, r^4), 'panelid', newdat, ncol(newdat), dots=FALSE)
   
   # for each change in phi, update the empirical distribution
-  empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+  empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
                                    model = init_glm, data = dat, plot=FALSE, 
                                    returnDist = TRUE, dots=FALSE)
   
@@ -133,8 +138,11 @@ for(r in rho){
   for(i in 1:nsim){
     sim_glm<-glm(newdatcorr[,i] ~ x , data=dat, family='quasipoisson')
     # find both the empirical and Normal p-values
-    ps[i,1]<-runs.test(residuals(sim_glm, type='pearson'), critvals = empdistribution)$p.value
-    ps[i,2]<-runs.test(residuals(sim_glm, type='pearson'))$p.value
+    d<-1
+  resid<-residuals(sim_glm)/sqrt(fitted(sim_glm)*d)
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
   }
   
   errrate[counter,1]<-(length(which(ps[,1]<0.05))/nsim)*100
@@ -170,8 +178,11 @@ for(r in rho){
   for(i in 1:nsim){
     sim_glm<-glm(newdatcorr[,i] ~ x , data=dat, family='quasipoisson')
     # find both the empirical and Normal p-values
-    ps[i,1]<-runs.test(residuals(sim_glm, type='pearson'), critvals = empdistribution)$p.value
-    ps[i,2]<-runs.test(residuals(sim_glm, type='pearson'))$p.value
+    d<-summary(sim_glm)$dispersion
+  resid<-residuals(sim_glm)/sqrt(fitted(sim_glm)*d)
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
   }
   
   errrate[counter,1]<-(length(which(ps[,1]<0.05))/nsim)*100
@@ -221,7 +232,7 @@ summary(init_impglm)
 
 Get the empirical distribution critical values:
 ```{r}
-empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
                                  model = init_impglm, data = datimp, plot=FALSE, 
                                  returnDist = TRUE, dots=FALSE)
 ```
@@ -292,7 +303,7 @@ power=runspower=matrix(NA, nrow=ssim, ncol=2)
 for(s in 1:ssim){
   newdat<-generateNoise(nsim, datimp$mu, family='poisson', d=50)
   
-  empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+  empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
                                    model = init_impglm, data = datimp, plot=FALSE, 
                                    returnDist = TRUE, dots=FALSE)
   
@@ -368,9 +379,10 @@ errrate<-matrix(NA, nrow=length(nphi), ncol=2)
 counter=1
 nsim=2000
 for(p in nphi){
+  #print(p)
   newdat<-generateNoise(nsim, datlow$mu, family='poisson', d=p)
   # for each change in phi, update the empirical distribution
-  empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+  empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
                                    model = init_glm, data = datlow, plot=FALSE, 
                                    returnDist = TRUE, dots=FALSE)
   
@@ -379,8 +391,12 @@ for(p in nphi){
     sim_glm<-glm(newdat[,i] ~ x + as.factor(evph), data=datlow,
                  family='quasipoisson')
     # find both the empirical and Normal p-values
-    ps[i,1]<-runs.test(residuals(sim_glm, type='pearson'), critvals = empdistribution)$p.value
-    ps[i,2]<-runs.test(residuals(sim_glm, type='pearson'))$p.value
+    d<-summary(sim_glm)$dispersion
+  resid<-residuals(sim_glm)/sqrt(fitted(sim_glm)*d)
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
+  
   }
   
   errrate[counter,1]<-(length(which(ps[,1]<0.05))/nsim)*100
@@ -480,7 +496,7 @@ summary(fowsim_glm)
 Models were fitted to all datasets generated above and the runs test was evaluated for each one.  The distribution of the test statistics is returned.  A plot is also produced, which shows the lower 2.5\% and upper 97.5\% critical values of the empirical distribution (red) and from the Normal ($N(0,1)$) distribution.
 
 ```{r critvalsfow, cache=T}
-empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
                                  model = fowsim_glm, data = dat, plot=TRUE, 
                                  returnDist = TRUE)
 ```
@@ -494,8 +510,11 @@ ps<-matrix(NA, nrow=nsim, ncol=2)
 for(i in 1:nsim){
   sim_glm<-update(fowsim_glm, newdat[,i]~.)
   # find both the empirical and Normal p-values
-  ps[i,1]<-runs.test(residuals(sim_glm, type='pearson'), critvals = empdistribution)$p.value
-  ps[i,2]<-runs.test(residuals(sim_glm, type='pearson'))$p.value
+   d<-1
+  resid<-residuals(sim_glm)/sqrt(fitted(sim_glm)*d)
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
 }
 ```
 
@@ -513,9 +532,10 @@ errrate<-matrix(NA, nrow=length(nphi), ncol=2)
 counter=1
 nsim=500
 for(p in nphi){
+  print(p)
   newdat<-generateNoise(nsim, fitted(init_glm), family='poisson', d=p)
   # for each change in phi, update the empirical distribution
-  empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+  empdistribution<-getRunsCritVals2(n.sim = nsim, simData=newdat, 
                                    model = init_glm, data = dat, plot=FALSE, 
                                    returnDist = TRUE, dots=FALSE)
   
@@ -523,8 +543,11 @@ for(p in nphi){
   for(i in 1:nsim){
     sim_glm<-update(fowsim_glm, newdat[,i]~.)
     # find both the empirical and Normal p-values
-    ps[i,1]<-runs.test(residuals(sim_glm, type='pearson'), critvals = empdistribution)$p.value
-    ps[i,2]<-runs.test(residuals(sim_glm, type='pearson'))$p.value
+     d<-summary(sim_glm)$dispersion
+  resid<-residuals(sim_glm)/sqrt(fitted(sim_glm)*d)
+  # find both the empirical and Normal p-values
+  ps[i,1]<-runs.test(resid, critvals = empdistribution)$p.value
+  ps[i,2]<-runs.test(resid)$p.value
   }
   
   errrate[counter,1]<-(length(which(ps[,1]<0.05))/nsim)*100

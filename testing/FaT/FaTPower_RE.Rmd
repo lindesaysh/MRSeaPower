@@ -1,7 +1,7 @@
----
-title: "Forth and Tay"
+------
+title: "Forth and Tay: Redistribution"
 author: "Lindesay Scott-Hayward"
-date: "18 August 2016"
+date: "3 September 2016"
 output: word_document
 ---
 
@@ -42,31 +42,13 @@ init_glm<-glm(response ~ as.factor(year), data=fat, family=binomial)
 
 
 ### Run SALSA1D
-```{r salsa1d, cache=TRUE}
-require(mgcv)
-factorlist<-'year'
-varlist<-c('depth', 'month', 'x.pos', 'y.pos')
 
-salsa1dlist<-list(fitnessMeasure='AIC', minKnots_1d = c(1,1,1,1), maxKnots_1d=c(5,5,5,5), startKnots_1d = c(1,1,1,1), degree=c(2,2,2,2), maxIterations=100, gaps=c(0,0,100,0))
-
-salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('month'), splineParams = NULL, datain=fat, suppress.printout =TRUE)
-salsa1dout$bestModel$splineParams<-salsa1dout$splineParams
-
-```
-
-```{r}
-summary(salsa1dout$bestModel)
-anova(salsa1dout$bestModel)
-
-```
-
-Depth is not significant so this is removed from the model and the process repeated:
   
 ```{r salsa1db, cache=TRUE}
 factorlist<-'year'
-varlist<-c('month', 'x.pos', 'y.pos')
+varlist<-c('month', 'depth')
 
-salsa1dlist<-list(fitnessMeasure='AIC', minKnots_1d = c(1,1,1), maxKnots_1d=c(5,5,5), startKnots_1d = c(1,1,1), degree=c(2,2,2), maxIterations=100, gaps=c(0,100,0))
+salsa1dlist<-list(fitnessMeasure='AIC', minKnots_1d = c(1,1), maxKnots_1d=c(5,5), startKnots_1d = c(1,1), degree=c(2,2), maxIterations=100, gaps=c(0,0))
 
 salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('month'), splineParams = NULL, datain=fat, suppress.printout =TRUE)
 salsa1dout$bestModel$splineParams<-salsa1dout$splineParams
@@ -80,16 +62,41 @@ anova(salsa1dout$bestModel)
 
 
 ```{r}
-bestModel<-make.gamMRSea(salsa1dout$bestModel, splineParams = salsa1dout$splineParams, varshortnames = varlist, gamMRSea=TRUE)
+bestModel1D<-make.gamMRSea(salsa1dout$bestModel, splineParams = salsa1dout$splineParams, varshortnames = salsa1dout$keptvarlist)
 #splineParams<-bestModel$splineParams
 ```
 
 
 ```{r}
 require(mgcv)
-runPartialPlots(bestModel, data = fat, factorlist.in = factorlist, varlist.in = varlist, showKnots = T)
+runPartialPlots(bestModel1D, data = fat, factorlist.in = factorlist, varlist.in = varlist, showKnots = T)
 ```
 
+### Run SALSA2D
+
+```{r salsa2dsetup, cache=TRUE}
+knotgrid<-getKnotgrid(cbind(fat$x.pos, fat$y.pos))
+distMats<-makeDists(cbind(fat$x.pos, fat$y.pos), na.omit(knotgrid))
+# choose sequence of radii
+r_seq<-getRadiiChoices(8, distMats$dataDist)
+ 
+salsa2dlist<-list(fitnessMeasure = 'BIC', knotgrid = knotgrid, knotdim = c(100, 100),  startKnots=6, minKnots=2, maxKnots=20, r_seq=r_seq, gap=0)
+```
+
+```{r runsalsa2d, cache=TRUE}
+salsa2dOutput<-runSALSA2D(bestModel1D, salsa2dlist, d2k=distMats$dataDist, k2k=distMats$knotDist, splineParams=salsa1dout$splineParams, tol=0, chooserad=F, panels=NULL, suppress.printout=TRUE)
+```
+
+```{r}
+bestModel<-make.gamMRSea(salsa2dOutput$bestModel, panelid = fat$panel, splineParams = salsa2dOutput$splineParams, varshortnames = varlist, gamMRSea=TRUE)
+
+#rm(splineParams, dists)
+```
+
+```{r}
+summary(bestModel)
+anova(bestModel)
+```
 
 ### Runs Test Check
 
@@ -98,13 +105,8 @@ Data generated under the null hypothesis of the runs test; independence and with
 ```{r fatnoise}
 nsim<-500
 newdat<-generateNoise(nsim, fitted(bestModel), family='zibinomial', size=1)
-```
-
-`r nsim` sets of noisy data are simulated from the model using an overdispersed Poisson distribution where $\hat{\phi} = $ `r round(summary(init_glm)$dispersion)`.
-
-```{r critvalsfat, cache=T, fig.cap='Figure showing the distribution of test statistics from a runs test. The red lines show the lower 2.5% and upper 97.5% critical values of the empirical distribution and the blue lines are from the Normal ($N(0,1)$) distribution.'}
 empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
-                                 model = bestModel, data = fat, plot=TRUE, 
+                                 model = bestModel, data = fat, plot=FALSE, 
                                  returnDist = TRUE, dots=FALSE)
 ```
 
@@ -116,39 +118,6 @@ acf(residuals(bestModel, type='pearson'))
 
 The residuals are considered independent so for the power analysis, the data will be generated as independent as already done. 
 
-# Data Generation
-
-Data are generated with no change but with the same correlation as the original data so that the data generation process can be checked.
-
-Even though the data are considered independent, the following generates data with the same correlation structure and shows that the IC method does not induce correlation in the simulated data. 
-
-```{r cordatfat, cache=TRUE}
-corrs<-getCorrelationMat(fat$panel, fat$response, dots=FALSE)
-newdatcor<-generateIC(data = fat, corrs = corrs, panels = 'panel', newdata = newdat, nsim = nsim, dots = FALSE)
-```
-
-```{r acfplot}
-par(mfrow=c(1,2))
-acf(fat$response, main='data')
-acf(newdatcor[,1], main='simulated data')
-```
-
-### Check simulated data consistency
-
-The generated data are consistent with the original data:
-  
-#### Mean
-```{r meanplotfat, fig.cap='Histogram of the mean of the simulated data, with the red line representing the mean of the original data.'}
-hist(apply(newdat, 2, mean), main='', xlab='mean(response)')
-abline(v=mean(fat$response), col='red', lwd=2, lty=3)
-```
-
-#### Variance
-```{r varplotfat, fig.cap='Histogram of the variance of the simulated data, with the red line representing the variance of the original data.'}
-hist(apply(newdat, 2, var), main='', xlab='var(response)')
-abline(v=var(fat$response), col='red', lwd=2, lty=3)
-var(fat$response)
-```
 
 #### Data distribution
 
@@ -156,8 +125,8 @@ var(fat$response)
 par(mfrow=c(2,2))
 quilt.plot(fat$x.pos, fat$y.pos, fat$response, main='Original Data', asp=1)
 quilt.plot(fat$x.pos, fat$y.pos, fitted(bestModel), main='Fitted Values', asp=1)
-quilt.plot(fat$x.pos, fat$y.pos, newdat[,1], main='Simulated Data A', asp=1)
-quilt.plot(fat$x.pos, fat$y.pos, newdat[,10], main='Simulated Data B', asp=1)
+quilt.plot(fat$x.pos, fat$y.pos, apply(newdat,1, mean), main='Simulated Mean', asp=1)
+quilt.plot(fat$x.pos, fat$y.pos, apply(newdat,1, median), main='Simulated Median', asp=1)
 ```
 
 
@@ -167,7 +136,9 @@ Generate data for power analysis with impact of 50\%
 
 ```{r powerdatgenfat, cache=TRUE}
 nsim=500
-impdata<-genOverallchangeData(-0.69, bestModel, data = fat, panels = 'panel')
+bnd.wf<-data.frame(x.pos=c(543289.6, 574317.5, 574892.1, 545588.0),y.pos=c(6253767, 6253097, 6237016, 6236681))
+impdata<-genRedistData(bestModel, data=fat, changecoef.link=log(0.75), panels='panel', imppoly=bnd.wf)
+#genOverallchangeData(log(0.9), bestModel, data = fat, panels = 'panel')
 newdat<-generateNoise(nsim, impdata$truth, family='zibinomial', size=1)
 ```
 
@@ -182,22 +153,31 @@ mean(fitted(bestModel))
 
 ```{r}
 # true surface
-mean(impdata$truth[impdata$eventphase==0,1])
-mean(impdata$truth[impdata$eventphase==1,1])
+mean(impdata$truth[impdata$eventphase==0])
+mean(impdata$truth[impdata$eventphase==1])
 ```
 
 ```{r}
 # example generated surface
-mean(newdat[impdata$eventphase==0,1])
-mean(newdat[impdata$eventphase==1,1])
+mean(newdat[impdata$eventphase==0,5])
+mean(newdat[impdata$eventphase==1,5])
 ```
+
+```{r}
+par(mfrow=c(1,2))
+quilt.plot(fat$x.pos, fat$y.pos, impdata$truth[impdata$eventphase==0])
+polymap(bnd, add=T, lwd=3)
+quilt.plot(fat$x.pos, fat$y.pos, impdata$truth[impdata$eventphase==1])
+```
+
+
 
 Update the initial model to include the eventphase term, indicating overall change.
 
 ```{r}
-require(mgcv)
-fatsim_glm<-update(bestModel, .~. + eventphase, data=impdata)
-fatsim_glm<-make.gamMRSea(fatsim_glm, panelid=1:nrow(impdata), splineParams=bestModel$splineParams)
+bestModel$splineParams[[1]]$dist<-rbind(bestModel$splineParams[[1]]$dist, bestModel$splineParams[[1]]$dist)
+fatsim_glm<-update(bestModel, .~. + eventphase +  eventphase:LocalRadialFunction(radiusIndices, dists, radii, aR), data=impdata)
+fatsim_glm<-make.gamMRSea(fatsim_glm, panelid=1:nrow(impdata), splineParams=bestModel$splineParams, varshortnames=bestModel$varshortnames)
 ```
 
 Using the simulated data with noise but no correlation, estimate the new values for the empirical distribution for the runs test.
@@ -210,16 +190,6 @@ empdistpower<-getRunsCritVals(n.sim = nsim, simData=newdat,
 ```
 
 
-```{r, powerouta, cache=TRUE, echo=FALSE, eval=FALSE}
-runspowsim_out<-runsPowerSim(newdat, fatsim_glm, empdistpower, nsim, powercoefid = length(coef(fatsim_glm)))
-
-apply(runspowsim_out$rawrob, 2, sum)/nsim
-
-(length(which(runspowsim_out$imppvals[,1]<=0.05))/nsim)*100
-(length(which(runspowsim_out$imppvals[,2]<=0.05))/nsim)*100
-
-```
-
 ```{r gridsetup, cache=TRUE}
 grid<-expand.grid(seq(min(fat$x.pos), max(fat$x.pos), by=1000), seq(min(fat$y.pos), max(fat$y.pos), by=1000))
 names(grid)<-c('x.pos', 'y.pos')
@@ -229,11 +199,14 @@ require(splancs)
 gridsub<-grid[inout(grid, bnd),]
 
 predictdata<-rbind(data.frame(gridsub, month=9, year=2011, eventphase=0), data.frame(gridsub, month=9, year=2011, eventphase=1))
+
+g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit(knotgrid), knotmat = FALSE)$dataDist
 ```
+
 
 ```{r poweroutfat, cache=TRUE, dependson='gridsetup'}
 nsim=100
-powerout<-powerSimOverallChange(newdat, fatsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fatsim_glm)), predictionGrid=predictdata, g2k=NULL, splineParams=fatsim_glm$splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(570000, 6240000))
+powerout<-powerSimOverallChange(newdat, fatsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fatsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fatsim_glm$splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(558385.2, 6245497))
 ```
 
 # Power Outputs:
@@ -246,19 +219,18 @@ null.output<-pval.coverage.null(newdat.ind = newdat, model = fatsim_glm, nsim = 
 ```
 
 ```{r}
-summary(powerout, null.output, truebeta=-0.69)
+summary(powerout, null.output, truebeta=log(0.75))
 ```
 
 ### How does power change with the error rate?
 
-```{r powerplotfat, fig.cap='Figure showing how the power changes if the error rate is changed.  The dotted lines represent error rates of 0.01 and 0.05.', dependson='poweroutfow'}
+```{r powerplotfatre, fig.cap='Figure showing how the power changes if the error rate is changed.  The dotted lines represent error rates of 0.01 and 0.05.', dependson='poweroutfow'}
 powerPlot(powerout)
 ```
 
 
 ### Proportion of significant differences:
 ```{r sigdiff.ind,, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences in that cell under the null hypothesis of no-change.'}
-names(powerout$significant.differences)[1]<-"individual"
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
 plotdata
 ```

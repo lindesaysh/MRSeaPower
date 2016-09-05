@@ -89,7 +89,8 @@ init_glm<-make.gamMRSea(init_glm, panelid=dat$newbidNum)
 
 model.power.raw3=model.power.rob3 = model.coverage3=vector(length=100)
 
-for(i in 1:100){
+for(i in 26:100){
+  print(i)
   # induce change
   impdat<-genOverallchangeData(truebeta, model = init_glm, data = dat, panels = 'newbidNum')
   # generate noisy independent data
@@ -116,4 +117,8 @@ for(i in 1:100){
 model.power.raw3
 model.power.rob3
 model.coverage3
+
+
+wilcox.test(model.power.raw3, model.power.rob3, paired = T)
+mean(model.power.raw3- model.power.rob3)
 

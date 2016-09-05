@@ -29,7 +29,7 @@ quilt.plot(dat$x.pos, dat$y.pos, dat$response, nrow=18, ncol=14, asp=1)
 ```{r fowinitglm}
 init_glm<-glm(response ~  as.factor(TideState) + WindStrength + SeaState + SimpPrecipitation + CloudCover + Depth + offset(log(areatime)), data=dat, family=quasipoisson)
 
-init_glm<-make.gamMRSea(init_glm, panelid=dat$panels)
+init_glm<-make.gamMRSea(init_glm, panelid=dat$newbidNum)
 ```
 
 
@@ -43,7 +43,7 @@ d<-as.numeric(summary(init_glm)$dispersion)
 newdat<-generateNoise(nsim, fitted(init_glm), family='poisson', d=d)
 ```
 
-`r nsim` sets of noisy data are simulated from the model using an overdispersed Poisson distribution where $$\hat{\phi} = $$ `r round(summary(init_glm)$dispersion)`.
+`r nsim` sets of noisy data are simulated from the model using an overdispersed Poisson distribution where $\hat{\phi} = $ `r round(summary(init_glm)$dispersion)`.
 
 ```{r critvalsfow, cache=T, fig.cap='Figure showing the distribution of test statistics from a runs test. The red lines show the lower 2.5% and upper 97.5% critical values of the empirical distribution and the blue lines are from the Normal ($N(0,1)$) distribution.'}
 empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
@@ -85,7 +85,7 @@ abline(v=var(dat$response), col='red', lwd=2, lty=3)
 var(dat$response)
 ```
 
-Unfortunately the variance of the simulated data is lower than that of the original data ($$\sigma^2 = $$ ```r round(var(dat$response), 3)```).  This could be due to the overly simplistic model being unable to return the variability seen in the data.  This model is then used to simulate from.
+Unfortunately the variance of the simulated data is lower than that of the original data ($\sigma^2 = $ ```r round(var(dat$response), 3)```).  This could be due to the overly simplistic model being unable to return the variability seen in the data.  This model is then used to simulate from.
 
 #### Correlation
 
@@ -120,13 +120,14 @@ These plots show that the spatial distribution of the data is well represented b
 
 ### Power Analysis
 
-Now that we know we can generate data that represents the original fairly well, we now generate data for the power analysis with a change imposed of **50\%**; a 50\% decline in animal numbers post event.
+Now that we know we can generate data that represents the original fairly well, we now generate data for the power analysis with a change imposed of **25%**; a 25% decline in animal numbers post event.
 
 First the change is imposed on the data, then the noise is added (in-line with the dispersion seen in the initial model) and finally the correlation. 
 
 ```{r powerdatgen, cache=TRUE}
+truebeta<-log(0.9)
 nsim=500
-impdata<-genOverallchangeData(log(0.5), init_glm, data = dat, panels = 'newbidNum')
+impdata<-genOverallchangeData(truebeta, init_glm, data = dat, panels = 'newbidNum')
 newdat<-generateNoise(nsim, impdata$truth, family='poisson', d=d)
 newdatcor<-generateIC(data = impdata, corrs = rbind(corrs, corrs), panels = 'panels', newdata = newdat, nsim = nsim, dots = FALSE)
 ```
@@ -135,6 +136,7 @@ Update the initial model to include the eventphase term, indicating overall chan
 
 ```{r}
 fowsim_glm<-update(fowsim_glm, .~. + eventphase, data=impdata)
+fowsim_glm<-make.gamMRSea(fowsim_glm, panelid=impdata$panels)
 ```
 
 The new values for the empirical distribution of the runs test are estimated using the noisy but un-correlated simulated data. This is differenct to the distribution generated earlier as we have another term in the model (eventphase).
@@ -176,7 +178,7 @@ To calculate the summary, the values for certain parameters are given under the 
 ### Summary output
 
 ```{r}
-summary(powerout, truebeta=log(0.5))
+summary(powerout, truebeta=truebeta)
 ```
 
 In order to assess the summary calculations, we estimate the null parameters to provide the full summary. 
@@ -186,37 +188,43 @@ null.output<-pval.coverage.null(newdat.ind = newdat, newdat.corr = newdatcor, mo
 ```
 
 ```{r}
-summary(powerout, null.output, truebeta=log(0.5))
+summary(powerout, null.output, truebeta=truebeta)
 ```
 
 We expect to see the null power to be 5\%, indicating a 5\% error rate for inclusion of the eventphase term when the data do not contain any change.  We also expect that the coverage for the null coefficient is 95\%.  This indicates that 5\% of the time, the confidence intervals for the eventphase coefficient did not include the truth (0; no change).
 
+### How does power change with the error rate?
+
+```{r powerplotfow, fig.cap='Figure showing how the power changes if the error rate is changed.  The dotted lines represent error rates of 0.01 and 0.05.', dependson='poweroutfow'}
+powerPlot(powerout)
+```
+
 
 ### Proportion of significant differences:
-```{r sigdiff.ind, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences in that cell under the null hypothesis of no-change.'}
+```{r sigdiff.ind, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences in that cell under the null hypothesis of no-change.', dependson='poweroutfow'}
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
 plotdata
 ```
 
-```{r sigdiff.fam, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the family 5% level was determined by using the Sidak adjustment.'}
+```{r sigdiff.fam, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the family 5% level was determined by using the Sidak adjustment.', dependson='poweroutfow'}
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=TRUE)
 plotdata
 ```
 
 ### Distance to event site plot
 
-```{r disttoimp, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
+```{r disttoimp, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.', dependson='poweroutfow'}
 d2impPlot<-plot.d2imp(powerout, pct.diff=FALSE)
 d2impPlot
 ```
 
 
-```{r disttoimppct, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
+```{r disttoimppct, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.', dependson='poweroutfow'}
 d2impPlot<-plot.d2imp(powerout, pct.diff = TRUE)
 d2impPlot
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
-lazyLoad(filebase = 'FoWPower_cache/docx/poweroutfow_9b61b0f606b3436a5ec4644d2949daec')
+lazyLoad(filebase = 'FoWPower_cache/docx/powerdatgen_1a799cfd66767e0f3cdd228f530a2c5e')
 ```
 

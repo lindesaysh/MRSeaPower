@@ -39,21 +39,43 @@ powerSimOverallChange<-function(newdat, model, empdistribution, nsim, powercoefi
     # get runs test result using empirical distribution
     runspvalemp<-runs.test(residuals(sim_glm, type='pearson'),
                            critvals = empdistribution)$p.value
-    if(runspvalemp<=0.05){
-      # significant, therefore correlated, use robust se
-      class(sim_glm)<-c('gamMRSea', class(sim_glm))
-      sim_glm$panels<-data$panelid
-      imppval<-summary(sim_glm)$coefficients[powercoefid,5]
-      #class(sim_glm)<-class(sim_glm)[-1]
-      rawrob[i]<-1
-      robust<-TRUE
+
+    sim.anv<-anova.gamMRSea(sim_glm)
+    if(length(pmatch("LocalRadialFunction(radiusIndices, dists, radii, aR):eventphase", rownames(sim.anv)))>0){
+      if(runspvalemp<=0.05){
+        # significant, therefore correlated, use robust se
+        class(sim_glm)<-c('gamMRSea', class(sim_glm))
+        sim_glm$panels<-model$panels
+        imppval<-sim.anv$P[nrow(sim.anv)]
+        rawrob[i]<-1
+        robust<-TRUE
+      }else{
+        # not significant, use raw se
+        class(sim_glm)<-c('gamMRSea', class(sim_glm))
+        sim_glm$panels<-1:nrow(data)
+        imppval<-sim.anv$P[nrow(sim.anv)]
+        rawrob[i]<-0
+        robust<-FALSE
+      }
     }else{
-      # not significant, use raw se
-      class(sim_glm)<-c('gamMRSea', class(sim_glm))
-      imppval<-summary(sim_glm)$rawp[powercoefid]
-      rawrob[i]<-0
-      robust<-FALSE
+      if(runspvalemp<=0.05){
+        # significant, therefore correlated, use robust se
+        class(sim_glm)<-c('gamMRSea', class(sim_glm))
+        sim_glm$panels<-data$panelid
+        imppval<-summary(sim_glm)$coefficients[powercoefid,5]
+        #class(sim_glm)<-class(sim_glm)[-1]
+        rawrob[i]<-1
+        robust<-TRUE
+      }else{
+        # not significant, use raw se
+        class(sim_glm)<-c('gamMRSea', class(sim_glm))
+        imppval<-summary(sim_glm)$rawp[powercoefid]
+        rawrob[i]<-0
+        robust<-FALSE
+      }
+
     }
+
     imppvals[i]<-imppval
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -28,6 +28,7 @@ makeToyData<- function(n, changecoef.link=0, length.panels=1, binary=FALSE, b0=1
   X<- seq(1,10, length=5000)
   x<- sample(X, size = (n/2), replace = TRUE)
   evph<-c(0,1)
+  x<-sort(x)
   dat<-expand.grid(x=x, evph=evph)
 
   eta<-b0+b1*dat$x + changecoef.link*dat$evph

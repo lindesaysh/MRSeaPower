@@ -202,6 +202,7 @@ Update the initial model to include the eventphase term, indicating overall chan
 ```{r}
 bestModel$splineParams[[1]]$dist<-rbind(bestModel$splineParams[[1]]$dist, bestModel$splineParams[[1]]$dist)
 fowsim_glm<-update(bestModel, newdat[,1]~. + eventphase, data=impdata)
+fowsim_glm$panels<-impdata$panels
 ```
 
 Using the simulated data with noise but no correlation, estimate the new values for the empirical distribution for the runs test.
@@ -226,7 +227,7 @@ g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit
 ```{r poweroutfow, cache=TRUE, dependson='predgridsetup'}
 nsim=100
 system.time(
-powerout<-powerSimOverallChange(newdat, fowsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(510700, 6555700))
+powerout<-powerSimOverallChange(newdat, fowsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fowsim_glm$splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(510700, 6555700))
 )
 ```
 
@@ -253,6 +254,14 @@ summary(powerout, null.output, truebeta=log(0.5))
 We expect to see the null power to be 5\%, indicating a 5\% error rate for inclusion of the eventphase term when the data do not contain any change.  We also expect that the coverage for the null coefficient is 95\%.  This indicates that 5\% of the time, the confidence intervals for the eventphase coefficient did not include the truth (0; no change).
 
 
+
+### How does power change with the error rate?
+
+```{r powerplotfow, fig.cap='Figure showing how the power changes if the error rate is changed.  The dotted lines represent error rates of 0.01 and 0.05.', dependson='poweroutfow'}
+powerPlot(powerout)
+```
+
+
 ### Proportion of significant differences:
 ```{r sigdiff.ind, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences in that cell under the null hypothesis of no-change.'}
 plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
@@ -268,6 +277,12 @@ plotdata
 
 ```{r disttoimp, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
 d2impPlot<-plot.d2imp(powerout)
+d2impPlot
+```
+
+```{r disttoimppct, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
+d2impPlot<-plot.d2imp(powerout, pct.diff = TRUE)
+
 d2impPlot
 ```
 
