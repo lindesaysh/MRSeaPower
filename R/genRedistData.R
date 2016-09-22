@@ -58,11 +58,11 @@ genRedistData<-function(model, data, changecoef.link, panels=NULL, imppoly){
   if(overallchange){
     xx2<- cbind(modmat, dat2$impcells, dat2$eventphase)
     b1<- c(b1, changecoef.link.overall)
-    dat2$truth<-as.numeric(exp((xx2%*%b1)))
+    dat2$truth<-as.numeric(model$family$linkinv(xx2%*%b1))
   }else{
     # new model matrix with inout column added
     xx2<- cbind(modmat, dat2$impcells)
-    dat2$truth<-as.numeric(exp((xx2%*%b1)))
+    dat2$truth<-as.numeric(model$family$linkinv(xx2%*%b1))
   }
   return(dat2)
 }

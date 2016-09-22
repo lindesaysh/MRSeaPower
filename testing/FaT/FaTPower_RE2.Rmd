@@ -1,0 +1,281 @@
+----
+title: "Forth and Tay: Redistribution"
+author: "Lindesay Scott-Hayward"
+date: "3 September 2016"
+output: word_document
+----
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, dev='png', warning=FALSE, message=FALSE, fig=TRUE)
+```
+
+```{r fat, echo=FALSE, warning=FALSE, message=FALSE}
+devtools::load_all(pkg = '../MRSea/MRSea')
+devtools::load_all(pkg = '../MRSeaPower')
+require(mgcv)
+require(splines)
+require(splancs)
+data(fat)
+```
+
+# Initial Model Fitting
+
+### Fit Initial Model
+
+Owing to the very low mean, the data are converted to presence/absence data and fitted using the binomial family. The panel column is created to identify each individual transect. 
+
+```{r fatsetup}
+# convert data to presence/absence
+fat$response<-ifelse(fat$response>0, 1, 0)
+fat$panel<-as.numeric(as.factor(paste(fat$survey, fat$trip.code, sep='')))
+fat$foldid<-getCVids(fat, 5, 'panel')
+```
+
+```{r rawplot, fig.cap='Plot of the data with mean probability of sighting per grid cell.'}
+require(fields)
+quilt.plot(fat$x.pos, fat$y.pos, fat$response, asp=1)
+```
+
+
+```{r fatinitglm}
+init_glm<-glm(response ~ as.factor(year), data=fat, family=binomial)
+```
+
+
+### Run SALSA1D
+
+  
+```{r salsa1db, cache=TRUE}
+factorlist<-'year'
+varlist<-c('month', 'depth')
+
+salsa1dlist<-list(fitnessMeasure='AIC', minKnots_1d = c(1,1), maxKnots_1d=c(5,5), startKnots_1d = c(1,1), degree=c(2,2), maxIterations=100, gaps=c(0,0))
+
+salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('month'), splineParams = NULL, datain=fat, suppress.printout =TRUE)
+salsa1dout$bestModel$splineParams<-salsa1dout$splineParams
+
+```
+
+```{r}
+summary(salsa1dout$bestModel)
+anova(salsa1dout$bestModel)
+```
+
+
+```{r}
+bestModel1D<-make.gamMRSea(salsa1dout$bestModel, splineParams = salsa1dout$splineParams, varshortnames = salsa1dout$keptvarlist)
+#splineParams<-bestModel$splineParams
+```
+
+
+```{r}
+require(mgcv)
+runPartialPlots(bestModel1D, data = fat, factorlist.in = factorlist, varlist.in = varlist, showKnots = T)
+```
+
+### Run SALSA2D
+
+```{r salsa2dsetup, cache=TRUE}
+knotgrid<-getKnotgrid(cbind(fat$x.pos, fat$y.pos))
+distMats<-makeDists(cbind(fat$x.pos, fat$y.pos), na.omit(knotgrid))
+# choose sequence of radii
+r_seq<-getRadiiChoices(8, distMats$dataDist)
+ 
+salsa2dlist<-list(fitnessMeasure = 'BIC', knotgrid = knotgrid, knotdim = c(100, 100),  startKnots=6, minKnots=2, maxKnots=20, r_seq=r_seq, gap=0)
+```
+
+```{r runsalsa2d, cache=TRUE}
+salsa2dOutput<-runSALSA2D(bestModel1D, salsa2dlist, d2k=distMats$dataDist, k2k=distMats$knotDist, splineParams=salsa1dout$splineParams, tol=0, chooserad=F, panels=NULL, suppress.printout=TRUE)
+```
+
+```{r}
+bestModel<-make.gamMRSea(salsa2dOutput$bestModel, panelid = fat$panel, splineParams = salsa2dOutput$splineParams, varshortnames = varlist, gamMRSea=TRUE)
+
+#rm(splineParams, dists)
+```
+
+```{r}
+summary(bestModel)
+anova(bestModel)
+```
+
+### Runs Test Check
+
+Data generated under the null hypothesis of the runs test; independence and with no change induced at this stage.
+
+```{r fatnoise}
+nsim<-500
+newdat<-generateNoise(nsim, fitted(bestModel), family='zibinomial', size=1)
+empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+                                 model = bestModel, data = fat, plot=FALSE, 
+                                 returnDist = TRUE, dots=FALSE)
+```
+
+Evaluate the runs test using the empirical distribution to determine if the data are independent
+```{r runsacffat}
+runs.test(residuals(bestModel, type='pearson'), critvals = empdistribution)
+acf(residuals(bestModel, type='pearson'))
+```
+
+The residuals are considered independent so for the power analysis, the data will be generated as independent as already done. 
+
+
+#### Data distribution
+
+```{r datadistributionfat, fig.cap='Figure showing the spatial distribution of the original data, the fitted values from the model and two examples of the simulated data.'}
+par(mfrow=c(2,2))
+quilt.plot(fat$x.pos, fat$y.pos, fat$response, main='Original Data', asp=1)
+quilt.plot(fat$x.pos, fat$y.pos, fitted(bestModel), main='Fitted Values', asp=1)
+quilt.plot(fat$x.pos, fat$y.pos, apply(newdat,1, mean), main='Simulated Mean', asp=1)
+quilt.plot(fat$x.pos, fat$y.pos, apply(newdat,1, median), main='Simulated Median', asp=1)
+```
+
+
+# Power Analysis
+
+Generate data for power analysis with impact of 50\%
+
+```{r powerdatgenfat, cache=TRUE}
+nsim=500
+bnd.wf<-data.frame(x.pos=c(573582.6, 588287.9, 588888.2, 577484.0),y.pos=c(6245875, 6245278, 6221998, 6221998))
+impdata<-genRedistData(bestModel, data=fat, changecoef.link=log(0.3), panels='panel', imppoly=bnd.wf)
+#genOverallchangeData(log(0.9), bestModel, data = fat, panels = 'panel')
+newdat<-generateNoise(nsim, impdata$truth, family='zibinomial', size=1)
+```
+
+Check the generated data has reduced the mean probability of sighting post impact by half:
+  
+```{r}
+# original data
+mean(fat$response)
+# fitted value mean
+mean(fitted(bestModel))
+```
+
+```{r}
+# true surface
+mean(impdata$truth[impdata$eventphase==0])
+mean(impdata$truth[impdata$eventphase==1])
+```
+
+require(dplyr)
+group_by(impdata, impcells, eventphase)%>%
+summarise(resp=mean(truth), num=n())
+
+```{r}
+# example generated surface
+mean(newdat[impdata$eventphase==0,5])
+mean(newdat[impdata$eventphase==1,5])
+```
+
+```{r}
+par(mfrow=c(1,2))
+quilt.plot(fat$x.pos, fat$y.pos, impdata$truth[impdata$eventphase==0])
+polymap(bnd.wf, add=T, lwd=3)
+quilt.plot(fat$x.pos, fat$y.pos, impdata$truth[impdata$eventphase==1])
+polymap(bnd.wf, add=T, lwd=3)
+```
+
+
+
+Update the initial model to include the eventphase term and remove the spatial term.  The spatial term will be re-added as an interaction term via SALSA2D.
+
+```{r}
+fatsim_glm<-update(bestModel1D, .~. + as.factor(eventphase), data=impdata)
+```
+
+```{r}
+salsa2dlist<-list(fitnessMeasure = 'BIC', knotgrid = knotgrid, knotdim = c(100, 100),  startKnots=6, minKnots=2, maxKnots=20, r_seq=r_seq, gap=0, interactionTerm='as.factor(eventphase)')
+
+salsa2dOutputint<-runSALSA2D(fatsim_glm, salsa2dlist, d2k=rbind(bestModel$splineParams[[1]]$dist,bestModel$splineParams[[1]]$dist), k2k=distMats$knotDist, splineParams=salsa1dout$splineParams, tol=0, chooserad=F, panels=NULL, suppress.printout=FALSE)
+
+
+bestModel_int<-make.gamMRSea(salsa2dOutputint$bestModel, panelid = 1:nrow(impdata), splineParams = salsa2dOutputint$splineParams, varshortnames = varlist, gamMRSea=TRUE)
+
+summary(bestModel_int)
+anova(bestModel_int)
+
+summary(update(bestModel_int))
+```
+
+
+```{r}
+fatsim_glm<-make.gamMRSea(fatsim_glm, panelid=1:nrow(impdata), splineParams=bestModel$splineParams, varshortnames=bestModel$varshortnames)
+```
+
+Using the simulated data with noise but no correlation, estimate the new values for the empirical distribution for the runs test.
+
+```{r empdistpower, cache=TRUE}
+# make sure that the independent data is used to get the null distribution
+empdistpower<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+                              model = fatsim_glm, data = impdata, plot=TRUE, 
+                              returnDist = TRUE, dots=FALSE)
+```
+
+
+```{r gridsetup, cache=TRUE}
+grid<-expand.grid(seq(min(fat$x.pos), max(fat$x.pos), by=1000), seq(min(fat$y.pos), max(fat$y.pos), by=1000))
+names(grid)<-c('x.pos', 'y.pos')
+
+bnd<-cbind(fat$x.pos, fat$y.pos)[chull(x = fat$x.pos, fat$y.pos),]
+require(splancs)
+gridsub<-grid[inout(grid, bnd),]
+
+predictdata<-rbind(data.frame(gridsub, month=9, year=2011, eventphase=0), data.frame(gridsub, month=9, year=2011, eventphase=1))
+
+g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit(knotgrid), knotmat = FALSE)$dataDist
+```
+
+
+```{r poweroutfat, cache=TRUE, dependson='gridsetup'}
+nsim=100
+powerout<-powerSimOverallChange(newdat, fatsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fatsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fatsim_glm$splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(558385.2, 6245497))
+```
+
+# Power Outputs:
+
+
+## Summary output
+
+```{r nulloutput, cache=TRUE}
+null.output<-pval.coverage.null(newdat.ind = newdat, model = fatsim_glm, nsim = 500, powercoefid = length(coef(fatsim_glm)))
+```
+
+```{r}
+summary(powerout, null.output, truebeta=log(0.75))
+```
+
+### How does power change with the error rate?
+
+```{r powerplotfatre, fig.cap='Figure showing how the power changes if the error rate is changed.  The dotted lines represent error rates of 0.01 and 0.05.', dependson='poweroutfow'}
+powerPlot(powerout)
+```
+
+
+### Proportion of significant differences:
+```{r sigdiff.ind,, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences in that cell under the null hypothesis of no-change.'}
+plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
+plotdata
+```
+
+```{r sigdiff.famfat, fig.cap='Figure showing the proportion of simulations which showed a significant difference (post event - pre event) in a given grid cell. Significance at the 5% level was determined by comparing the estimated difference in a given cell to the distribution of differences across all grid cells under the null hypothesis of no-change.'}
+plotdata<-plot.sigdiff(powerout, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=TRUE)
+plotdata
+```
+
+### Distance to event site plot
+
+```{r disttoimpfat, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
+d2impPlot<-plot.d2imp(powerout, pct.diff=FALSE)
+d2impPlot
+```
+
+```{r disttoimpfat.pct, fig.cap='Figure showing the effect of the event on animal numbers with distance from the event site; post event - pre event.  The confidence intervals are 95% bootstrap intervals.'}
+d2impPlot<-plot.d2imp(powerout, pct.diff=T)
+d2impPlot
+```
+
+
+```{r echo=FALSE, eval=FALSE}
+lazyLoad(filebase = 'FaTPower_cache/docx/poweroutfat_a896486c7266ee938530a429ee7ccd93')
+```
