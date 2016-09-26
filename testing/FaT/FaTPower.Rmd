@@ -1,7 +1,7 @@
 ---
-title: "Forth and Tay"
+title: "Forth and Tay; Overall Change"
 author: "Lindesay Scott-Hayward"
-date: "18 August 2016"
+date: "22 September 2016"
 output: word_document
 ---
 
@@ -42,31 +42,13 @@ init_glm<-glm(response ~ as.factor(year), data=fat, family=binomial)
 
 
 ### Run SALSA1D
-```{r salsa1d, cache=TRUE}
-require(mgcv)
-factorlist<-'year'
-varlist<-c('depth', 'month', 'x.pos', 'y.pos')
 
-salsa1dlist<-list(fitnessMeasure='AIC', minKnots_1d = c(1,1,1,1), maxKnots_1d=c(5,5,5,5), startKnots_1d = c(1,1,1,1), degree=c(2,2,2,2), maxIterations=100, gaps=c(0,0,100,0))
 
-salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('month'), splineParams = NULL, datain=fat, suppress.printout =TRUE)
-salsa1dout$bestModel$splineParams<-salsa1dout$splineParams
-
-```
-
-```{r}
-summary(salsa1dout$bestModel)
-anova(salsa1dout$bestModel)
-
-```
-
-Depth is not significant so this is removed from the model and the process repeated:
-  
 ```{r salsa1db, cache=TRUE}
 factorlist<-'year'
-varlist<-c('month', 'x.pos', 'y.pos')
+varlist<-c('month', 'depth')
 
-salsa1dlist<-list(fitnessMeasure='AIC', minKnots_1d = c(1,1,1), maxKnots_1d=c(5,5,5), startKnots_1d = c(1,1,1), degree=c(2,2,2), maxIterations=100, gaps=c(0,100,0))
+salsa1dlist<-list(fitnessMeasure='AIC', minKnots_1d = c(1,1), maxKnots_1d=c(5,5), startKnots_1d = c(1,1), degree=c(2,2), maxIterations=100, gaps=c(0,0))
 
 salsa1dout<-runSALSA1D_withremoval(init_glm, salsa1dlist, varlist, factorlist, varlist_cyclicSplines = c('month'), splineParams = NULL, datain=fat, suppress.printout =TRUE)
 salsa1dout$bestModel$splineParams<-salsa1dout$splineParams
@@ -80,16 +62,40 @@ anova(salsa1dout$bestModel)
 
 
 ```{r}
-bestModel<-make.gamMRSea(salsa1dout$bestModel, splineParams = salsa1dout$splineParams, varshortnames = varlist, gamMRSea=TRUE)
+bestModel1D<-make.gamMRSea(salsa1dout$bestModel, splineParams = salsa1dout$splineParams, varshortnames = salsa1dout$keptvarlist)
 #splineParams<-bestModel$splineParams
 ```
 
 
 ```{r}
-require(mgcv)
-runPartialPlots(bestModel, data = fat, factorlist.in = factorlist, varlist.in = varlist, showKnots = T)
+runPartialPlots(bestModel1D, data = fat, factorlist.in = factorlist, varlist.in = salsa1dout$keptvarlist, showKnots = T)
 ```
 
+### Run SALSA2D
+
+```{r salsa2dsetup, cache=TRUE}
+knotgrid<-getKnotgrid(cbind(fat$x.pos, fat$y.pos))
+distMats<-makeDists(cbind(fat$x.pos, fat$y.pos), na.omit(knotgrid))
+# choose sequence of radii
+r_seq<-getRadiiChoices(8, distMats$dataDist)
+ 
+salsa2dlist<-list(fitnessMeasure = 'BIC', knotgrid = knotgrid, knotdim = c(100, 100),  startKnots=6, minKnots=2, maxKnots=20, r_seq=r_seq, gap=0)
+```
+
+```{r runsalsa2d, cache=TRUE}
+salsa2dOutput<-runSALSA2D(bestModel1D, salsa2dlist, d2k=distMats$dataDist, k2k=distMats$knotDist, splineParams=salsa1dout$splineParams, tol=0, chooserad=F, panels=NULL, suppress.printout=TRUE)
+```
+
+```{r}
+bestModel<-make.gamMRSea(salsa2dOutput$bestModel, splineParams = salsa2dOutput$splineParams, varshortnames = varlist, gamMRSea=TRUE)
+
+#rm(splineParams, dists)
+```
+
+```{r}
+summary(bestModel)
+anova(bestModel)
+```
 
 ### Runs Test Check
 

@@ -158,23 +158,34 @@ Initial fit =  3228.255 3 6 8
 [1] "And we're done..."
 Fitting Linear Model...Choosing smooth vs linear model...[1] "initialDispersion -2316.09751350049"
 [1] "Initialising..."
-Initial fit =  3145.758 -52.59761 
+Initial fit =  3145.914 -51.98864 
 [1] "initialisation complete..."
 [1] "^^^^^^^^^^^Initial^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
-[1] 3145.758
+[1] 3145.914
 [1] 0
 [1] -88.330635  -5.314269
 [1] "Exchanging..."
 [1] "Locating maximum residual......"
 [1] 7530
-[1] 5
+[1] 7
+[1] "Maximum residual found..."
+[1] "Moving knot..."
+[1] "Knot moved..."
+[1] "Locating maximum residual......"
+[1] 7530
+[1] 6
 [1] "Maximum residual found..."
 [1] "Moving knot..."
 [1] "Knot moved..."
 [1] "Exchanging done..."
-[1] 199
-[1] 199
+[1] 198
+[1] 198
+[1] "^^^^^^^^^^^Exchange^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 [1] "Improving..."
+[1] "Shifting up..."
+[1] "Up done..."
+[1] "Shifting down..."
+[1] "Down done..."
 [1] "Shifting up..."
 [1] "Up done..."
 [1] "Shifting down..."
@@ -185,12 +196,17 @@ Initial fit =  3145.758 -52.59761
 [1] "Down done..."
 [1] "Improving complete..."
 [1] "^^^^^^^^^^^Improve^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+[1] 198
+[1] 198
+[1] "Dropping..."
+[1] "Dropped..."
+[1] "^^^^^^^^^^^Drop^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 [1] 199
 [1] 199
 [1] "Exchanging..."
 [1] "Locating maximum residual......"
 [1] 7530
-[1] 5
+[1] 6
 [1] "Maximum residual found..."
 [1] "Moving knot..."
 [1] "Knot moved..."

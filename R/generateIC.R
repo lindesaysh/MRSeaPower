@@ -1,4 +1,4 @@
-generateIC<-function(data, corrs, panels, newdata, nsim, dots=TRUE){
+generateIC<-function(data, corrs, panels, newdata, nsim, dots=FALSE){
 
   require(Hmisc)
   require(Matrix)

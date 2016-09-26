@@ -116,7 +116,7 @@ newdat<-generateNoise(nsim, impdata$truth, family='zibinomial', size=1)
 
 Check the generated data has reduced the mean probability of sighting post impact by half:
   
-  ```{r}
+```{r}
 # original data
 mean(fat$response)
 # fitted value mean

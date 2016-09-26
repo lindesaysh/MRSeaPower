@@ -105,6 +105,10 @@ summary(bestModel)
 anova(bestModel)
 ```
 
+```{r}
+save(bestModel, file='FoW_model.RData')
+```
+
 
 ### Runs Test Check
 

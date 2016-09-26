@@ -99,6 +99,12 @@ summary(bestModel)
 anova(bestModel)
 ```
 
+
+```{r}
+save(bestModel, file='FaT_model.RData')
+```
+
+
 ### Runs Test Check
 
 Data generated under the null hypothesis of the runs test; independence and with no change induced at this stage.
@@ -137,8 +143,9 @@ Generate data for power analysis with impact of 50\%
 
 ```{r powerdatgenfat, cache=TRUE}
 nsim=500
-bnd.wf<-data.frame(x.pos=c(573582.6, 588287.9, 588888.2, 577484.0),y.pos=c(6245875, 6245278, 6221998, 6221998))
-impdata<-genRedistData(bestModel, data=fat, changecoef.link=log(0.3), panels='panel', imppoly=bnd.wf)
+bnd.wf<-data.frame(x.pos=c(543289.6, 574317.5, 574892.1, 545588.0),y.pos=c(6253767, 6253097, 6237016, 6236681))
+truebeta<-log(0.3)
+impdata<-genRedistData(bestModel, data=fat, changecoef.link=truebeta, panels='panel', imppoly=bnd.wf)
 #genOverallchangeData(log(0.9), bestModel, data = fat, panels = 'panel')
 newdat<-generateNoise(nsim, impdata$truth, family='zibinomial', size=1)
 ```
@@ -158,9 +165,12 @@ mean(impdata$truth[impdata$eventphase==0])
 mean(impdata$truth[impdata$eventphase==1])
 ```
 
+```{r}
 require(dplyr)
+impdata$sim1<-newdat[,1]
 group_by(impdata, impcells, eventphase)%>%
-summarise(resp=mean(truth), num=n())
+  summarise(tr=mean(truth),sim=mean(sim1) , num=n())
+```
 
 ```{r}
 # example generated surface
@@ -177,30 +187,40 @@ polymap(bnd.wf, add=T, lwd=3)
 ```
 
 
+```{r}
+par(mfrow=c(1,2))
+quilt.plot(fat$x.pos, fat$y.pos, impdata$sim1[impdata$eventphase==0])
+polymap(bnd.wf, add=T, lwd=3)
+quilt.plot(fat$x.pos, fat$y.pos, impdata$sim1[impdata$eventphase==1])
+polymap(bnd.wf, add=T, lwd=3)
+```
+
 
 Update the initial model to include the eventphase term and remove the spatial term.  The spatial term will be re-added as an interaction term via SALSA2D.
 
 ```{r}
-fatsim_glm<-update(bestModel1D, .~. + as.factor(eventphase), data=impdata)
+fatsim_glm<-update(bestModel1D, sim1~. + as.factor(eventphase), data=impdata)
+fatsim_glm<-make.gamMRSea(fatsim_glm, panelid=1:nrow(impdata), splineParams=bestModel1D$splineParams, varshortnames=bestModel1D$varshortnames,gamMRSea=TRUE)
 ```
 
 ```{r}
-salsa2dlist<-list(fitnessMeasure = 'BIC', knotgrid = knotgrid, knotdim = c(100, 100),  startKnots=6, minKnots=2, maxKnots=20, r_seq=r_seq, gap=0, interactionTerm='as.factor(eventphase)')
+salsa2dlist<-list(fitnessMeasure = 'BIC', knotgrid = knotgrid, knotdim = c(100, 100),  startKnots=10, minKnots=2, maxKnots=20, r_seq=r_seq, gap=0, interactionTerm='as.factor(eventphase)')
 
-salsa2dOutputint<-runSALSA2D(fatsim_glm, salsa2dlist, d2k=rbind(bestModel$splineParams[[1]]$dist,bestModel$splineParams[[1]]$dist), k2k=distMats$knotDist, splineParams=salsa1dout$splineParams, tol=0, chooserad=F, panels=NULL, suppress.printout=FALSE)
+salsa2dOutputint<-runSALSA2D(fatsim_glm, salsa2dlist, d2k=rbind(distMats$dataDist,distMats$dataDist), k2k=distMats$knotDist, splineParams=NULL, tol=0, chooserad=F, panels=NULL, suppress.printout=FALSE)
 
 
-bestModel_int<-make.gamMRSea(salsa2dOutputint$bestModel, panelid = 1:nrow(impdata), splineParams = salsa2dOutputint$splineParams, varshortnames = varlist, gamMRSea=TRUE)
+bestModel_int<-make.gamMRSea(salsa2dOutputint$bestModel, panelid = 1:nrow(impdata), splineParams = salsa2dOutputint$splineParams, varshortnames = NULL, gamMRSea=TRUE)
 
 summary(bestModel_int)
 anova(bestModel_int)
-
-summary(update(bestModel_int))
 ```
 
-
 ```{r}
-fatsim_glm<-make.gamMRSea(fatsim_glm, panelid=1:nrow(impdata), splineParams=bestModel$splineParams, varshortnames=bestModel$varshortnames)
+par(mfrow=c(1,2))
+quilt.plot(fat$x.pos, fat$y.pos, fitted(bestModel_int)[impdata$eventphase==0])
+polymap(bnd.wf, add=T, lwd=3)
+quilt.plot(fat$x.pos, fat$y.pos, fitted(bestModel_int)[impdata$eventphase==1])
+polymap(bnd.wf, add=T, lwd=3)
 ```
 
 Using the simulated data with noise but no correlation, estimate the new values for the empirical distribution for the runs test.
@@ -208,7 +228,7 @@ Using the simulated data with noise but no correlation, estimate the new values 
 ```{r empdistpower, cache=TRUE}
 # make sure that the independent data is used to get the null distribution
 empdistpower<-getRunsCritVals(n.sim = nsim, simData=newdat, 
-                              model = fatsim_glm, data = impdata, plot=TRUE, 
+                              model = bestModel_int, data = impdata, plot=TRUE, 
                               returnDist = TRUE, dots=FALSE)
 ```
 
@@ -228,8 +248,8 @@ g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit
 
 
 ```{r poweroutfat, cache=TRUE, dependson='gridsetup'}
-nsim=100
-powerout<-powerSimOverallChange(newdat, fatsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fatsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fatsim_glm$splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(558385.2, 6245497))
+nsim=10
+powerout<-powerSimOverallChange(newdat, bestModel_int, empdistpower, nsim=nsim, powercoefid=length(coef(bestModel_int)), predictionGrid=predictdata, g2k=g2k, splineParams=bestModel_int$splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(581877.4, 6234143))
 ```
 
 # Power Outputs:
@@ -238,11 +258,11 @@ powerout<-powerSimOverallChange(newdat, fatsim_glm, empdistpower, nsim=nsim, pow
 ## Summary output
 
 ```{r nulloutput, cache=TRUE}
-null.output<-pval.coverage.null(newdat.ind = newdat, model = fatsim_glm, nsim = 500, powercoefid = length(coef(fatsim_glm)))
+null.output<-pval.coverage.null(newdat.ind = newdat, model = bestModel_int, nsim = 500, powercoefid = length(coef(bestModel_int)))
 ```
 
 ```{r}
-summary(powerout, null.output, truebeta=log(0.75))
+summary(powerout, null.output, truebeta=truebeta)
 ```
 
 ### How does power change with the error rate?
