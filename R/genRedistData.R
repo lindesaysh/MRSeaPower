@@ -21,7 +21,9 @@
 # $y.pos
 # [1] 6556624 6556997 6555979 6554563 6556177
 
-genRedistData<-function(model, data, changecoef.link, panels=NULL, imppoly){
+genRedistData<-function(model, data, changecoef.link, panels=NULL, imppoly=NULL, impactcells=NULL){
+
+  if(is.null(imppoly) & is.null(impcells)){stop('One of impcells or imppoly must be specified')}
 
   if(is.null(panels)){
     panels<-1:nrow(data)
@@ -35,7 +37,9 @@ genRedistData<-function(model, data, changecoef.link, panels=NULL, imppoly){
     changecoef.link=changecoef.link[1]
   }else(overallchange=FALSE)
 
-  impactcells<-ifelse(inout(data[,names(imppoly)], imppoly,quiet = T), 0, 1)
+  if(is.null(impactcells)){
+    impactcells<-ifelse(inout(data[,names(imppoly)], imppoly,quiet = T), 0, 1)
+  }
 
   dat2<-rbind(data.frame(data, eventphase=0, panels=panels, impcells=0), data.frame(data,eventphase=1, panels=max(panels)+panels, impcells=impactcells))
 
