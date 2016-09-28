@@ -39,8 +39,6 @@ genRedistData<-function(model, data, changecoef.link, panels=NULL, imppoly=NULL,
 
   if(is.null(impactcells)){
     impactcells<-ifelse(inout(data[,names(imppoly)], imppoly,quiet = T), 0, 1)
-  }else{
-    impactcells<-c(rep(0, length(impactcells)), impactcells)
   }
 
   dat2<-rbind(data.frame(data, eventphase=0, panels=panels, impcells=0), data.frame(data,eventphase=1, panels=max(panels)+panels, impcells=impactcells))
