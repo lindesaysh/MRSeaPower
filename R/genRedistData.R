@@ -38,6 +38,7 @@ genRedistData<-function(model, data, changecoef.link, panels=NULL, imppoly=NULL,
   }else(overallchange=FALSE)
 
   if(is.null(impactcells)){
+    require(splancs)
     impactcells<-ifelse(inout(data[,names(imppoly)], imppoly,quiet = T), 0, 1)
   }
 
