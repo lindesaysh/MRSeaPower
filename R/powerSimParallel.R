@@ -1,4 +1,4 @@
-powerSim<-function(newdat, model, empdistribution, nsim, powercoefid, predictionGrid=NULL, g2k=NULL, splineParams=NULL, bootstrapCI=TRUE, sigdif=TRUE, n.boot=1000, impact.loc=NULL){
+powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predictionGrid=NULL, g2k=NULL, splineParams=NULL, bootstrapCI=TRUE, sigdif=TRUE, n.boot=1000, impact.loc=NULL, nCores=1){
 
   require(mvtnorm)
   data<-model$data
@@ -24,7 +24,198 @@ powerSim<-function(newdat, model, empdistribution, nsim, powercoefid, prediction
 
   preddifferences<-matrix(NA, nrow=(nrow(predictionGrid)/2), ncol=nsim)
 
-  for(i in 1:nsim){
+
+
+  if(nCores>1){
+    require(parallel)
+    cat('Code in parallel')
+
+    computerCores <- getOption("cl.cores", detectCores())
+    if(nCores>(computerCores-2)){nCores<-(computerCores-2)}
+    myCluster <- makeCluster(nCores) ; myCluster # initialise the cluster
+    clusterExport(myCluster, ls(), envir=environment()) # export all objects to each cluster
+    # export directory and functions to each cluster
+    clusterEvalQ(myCluster, {
+      require(splines)
+      require(mgcv)
+      require(MRSea)
+      require(dplyr)
+      require(Matrix)
+      require(mvtnorm)
+      devtools::load_all(pkg='C://MarineScotlandPower/MRSeaPower')
+      devtools::load_all(pkg='C://MarineScotlandPower/MRSea/MRSea')
+    })
+
+    # only do parametric boostrap if no data re-sampling and no nhats provided
+    Routputs<-parLapply(myCluster, 1:nsim, function(i){
+
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # ~~ fit model ~~~~~~~~~~~~~
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      #dists<<-splineParams[[1]]$dists
+      data$response<-newdat[,i]
+      sim_glm<-update(model, response ~ ., data=data)
+
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # ~~ power p-value ~~~~~~~~~
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # get runs test result using empirical distribution
+      runspvalemp<-runs.test(residuals(sim_glm, type='pearson'),
+                             critvals = empdistribution)$p.value
+
+      sim.anv<-anova.gamMRSea(sim_glm)
+      if(length(pmatch("LocalRadialFunction(radiusIndices, dists, radii, aR):eventphase", rownames(sim.anv)))>0){
+        if(runspvalemp<=0.05){
+          # significant, therefore correlated, use robust se
+          class(sim_glm)<-c('gamMRSea', class(sim_glm))
+          sim_glm$panels<-model$panels
+          imppval<-sim.anv$P[nrow(sim.anv)]
+          rawrob[i]<-1
+          robust<-TRUE
+        }else{
+          # not significant, use raw se
+          class(sim_glm)<-c('gamMRSea', class(sim_glm))
+          sim_glm$panels<-1:nrow(data)
+          imppval<-sim.anv$P[nrow(sim.anv)]
+          rawrob[i]<-0
+          robust<-FALSE
+        }
+      }else{
+        if(runspvalemp<=0.05){
+          # significant, therefore correlated, use robust se
+          class(sim_glm)<-c('gamMRSea', class(sim_glm))
+          sim_glm$panels<-data$panelid
+          imppval<-summary(sim_glm)$coefficients[powercoefid,5]
+          #class(sim_glm)<-class(sim_glm)[-1]
+          rawrob[i]<-1
+          robust<-TRUE
+        }else{
+          # not significant, use raw se
+          class(sim_glm)<-c('gamMRSea', class(sim_glm))
+          imppval<-summary(sim_glm)$rawp[powercoefid]
+          rawrob[i]<-0
+          robust<-FALSE
+        }
+
+      }
+
+      imppvals<-imppval
+
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # ~~~~~~ beta CI's ~~~~~~~~~
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      est<- coefficients(sim_glm)
+      if(robust==T){
+        vbeta<-summary(sim_glm)$cov.robust
+        samplecoeff<-NULL
+        try(samplecoeff<- rmvnorm(500,est,vbeta, method='svd'))
+        if(is.null(samplecoeff)){
+          vbeta<-as.matrix(nearPD(as.matrix(summary(sim_glm)$cov.robust))$mat)
+          samplecoeff<- rmvnorm(500,est,vbeta, method='svd')
+        }
+      }
+      else{
+        vbeta<-summary(sim_glm)$cov.scaled
+        samplecoeff<-NULL
+        try(samplecoeff<- rmvnorm(500,est,vbeta, method='svd'))
+        if(is.null(samplecoeff)){
+          vbeta<-as.matrix(nearPD(as.matrix(summary(sim_glm)$cov.scaled))$mat)
+          samplecoeff<- rmvnorm(500,est,vbeta, method='svd')
+        }
+      }
+      betacis<- as.numeric(quantile(samplecoeff[,powercoefid],probs = c(0.025, 0.975)))
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # ~~ fitted values ~~~~~~~~~
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      powsimfits<-fitted(sim_glm)
+
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # ~~ predictions to grid ~~~
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      #dists<<-g2k
+      preds<-predict.gamMRSea(predictionGrid, splineParams = splineParams, g2k = g2k, model=sim_glm, type = 'response')
+
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # ~~~~ Differences ~~~~~~~~~
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      if(sigdif==T){
+        bootPreds<-do.bootstrap.cress.robust(sim_glm,predictionGrid, splineParams=splineParams, g2k=g2k, B=n.boot, robust=robust, cat.message=FALSE)
+
+        # extract distribution of null differences
+        nulldifferences<-bootPreds[predictionGrid$eventphase==0,(1:(n.boot/2))] - bootPreds[predictionGrid$eventphase==0,(((n.boot/2)+1):n.boot)]
+
+        # find the predicted differences from this simulation
+        preddifferences<-preds[predictionGrid$eventphase==1] - preds[predictionGrid$eventphase==0]
+
+        # calculate p-values for individual and family wide cells.
+        indpvals<-pval.differences(nulldifferences, preddifferences, family=FALSE)
+        familypvals<-pval.differences(nulldifferences, preddifferences, family=TRUE)
+
+        indpvals<-as.matrix(data.frame(indpvals))
+        familypvals<-as.matrix(data.frame(familypvals))
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # ~~~~ Abundance/mean proportion ~~~~~~~~~
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
+          #if(i==1){bsum=asum=vector(length=nsim)}
+          bsum<-sum(bootPreds[predictionGrid$eventphase==0,])
+          asum<-sum(bootPreds[predictionGrid$eventphase==1,])
+        }
+        if(sim_glm$family[[1]]=='binomial' | sim_glm$family[[1]]=='quasibinomial'){
+          #if(i==1){bmean=amean=vector(length=nsim)}
+          bsum<-mean(bootPreds[predictionGrid$eventphase==0,])
+          asum<-mean(bootPreds[predictionGrid$eventphase==1,])
+        }
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # ~~~~ Distance to Windfarm ~~~~~~~~~
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        if(!is.null(impact.loc)){
+          #if(nrow(predictionGrid)>400){
+          preddifferences.pct<-(as.vector(preddifferences)/as.vector(preds[predictionGrid$eventphase==0]))*100
+
+          d2imp.plotdata<-matrix(NA, nrow=length(unique(preddiffs$cuts)), ncol=9)
+          d2imp.plotdata[,1]<-tapply(preddiffs$impdist, preddiffs$cuts, mean)
+          d2imp.plotdata[,2]<-tapply(preddifferences, preddiffs$cuts, mean)
+          d2imp.plotdata[,6]<-tapply(preddifferences.pct, preddiffs$cuts, mean)
+          colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI', 'MeanDiff.pct', 'bootMeanDiff.pct', 'LowerCI.pct', 'UpperCI.pct')
+
+          bootdifferences<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
+          bootdifferences.pct<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
+        }
+
+      } # end sigdif
+
+
+      return(list(imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, preds=preds, indpvals=indpvals, familypvals=familypvals, bootdifferences.pct=bootdifferences.pct, bootdifferences=bootdifferences, d2imp.plotdata=d2imp.plotdata, bsum=bsum, asum=asum))
+    })
+
+    stopCluster(myCluster)
+
+    imppvals= sapply(Routputs, '[[','imppvals')
+    bsum= sapply(Routputs, '[[','bsum')
+    asum= sapply(Routputs, '[[','asum')
+    powsimfits=sapply(Routputs, '[[','powsimfits')
+    betacis=t(sapply(Routputs, '[[','betacis'))
+    indpvals = sapply(Routputs, '[[','indpvals', simplify='array')
+    familypvals = sapply(Routputs, '[[','familypvals', simplify='array')
+    preds<-sapply(Routputs, '[[','preds')
+    bootdifferences=sapply(Routputs, '[[','bootdifferences', simplify='array')
+    bootdifferences.pct=sapply(Routputs, '[[','bootdifferences.pct', simplify  ='array')
+    d2imp.plotdata=Routputs[[nsim]]$d2imp.plotdata
+   #~~~
+    # try alply
+    require(plyr)
+    indpvals<-alply(indpvals,3)
+    familypvals<-alply(familypvals,3)
+    detach(package:plyr)
+    #~~~
+
+    }else{
+
+    for(i in 1:nsim){
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~ fit model ~~~~~~~~~~~~~
@@ -112,17 +303,7 @@ powerSim<-function(newdat, model, empdistribution, nsim, powercoefid, prediction
     #dists<<-g2k
     preds[,i]<-predict.gamMRSea(predictionGrid, splineParams = splineParams, g2k = g2k, model=sim_glm, type = 'response')
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # ~~ bootstrap CIs ~~~~~~~~~
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # if(bootstrapCI==T){
-    #   bootPreds<-do.bootstrap.cress.robust(sim_glm,predictionGrid, splineParams=splineParams, g2k=g2k, B=n.boot, robust=robust, cat.message=FALSE)
-    #     # # get upper and lower cis
-    #     # quants<-c(0.025, 0.975)
-    #     # cis[,,i]<-t(apply(bootPreds, 1,  quantile, probs= quants, na.rm=T ))
-    #   } # end bootstrap
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~~~ Differences ~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     if(sigdif==T){
@@ -173,11 +354,12 @@ powerSim<-function(newdat, model, empdistribution, nsim, powercoefid, prediction
     } # end sigdif
 
   } # end nsim
+} # end cores else statement
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~~~ Abundance/mean proportion ~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
+    if(model$family[[1]]=='poisson' | model$family[[1]]=='quasipoisson'){
       quants<-c(0.025, 0.975)
       abund<-matrix(NA, 2, 3)
       abund[,1]<-c(mean(bsum), mean(asum))
@@ -186,7 +368,7 @@ powerSim<-function(newdat, model, empdistribution, nsim, powercoefid, prediction
       rownames(abund)<-c('Before', 'After')
       colnames(abund)<-c('Abundance', 'LowerCI', 'UpperCI')
     }
-    if(sim_glm$family[[1]]=='binomial' | sim_glm$family[[1]]=='quasibinomial'){
+    if(model$family[[1]]=='binomial' | model$family[[1]]=='quasibinomial'){
       quants<-c(0.025, 0.975)
       meanp<-matrix(NA, 2, 3)
       meanp[,1]<-c(mean(bmean), mean(amean))
@@ -221,10 +403,10 @@ powerSim<-function(newdat, model, empdistribution, nsim, powercoefid, prediction
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
   output<-list(rawrob=rawrob, imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, significant.differences=list(individual=indpvals, family=familypvals), d2imp.plotdata=d2imp.plotdata)
 
-  if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
+  if(model$family[[1]]=='poisson' | model$family[[1]]=='quasipoisson'){
     output$Abundance = abund
   }
-  if(sim_glm$family[[1]]=='binomial' | sim_glm$family[[1]]=='quasibinomial'){
+  if(model$family[[1]]=='binomial' | model$family[[1]]=='quasibinomial'){
     output$Mean.proportion = meanp
   }
 

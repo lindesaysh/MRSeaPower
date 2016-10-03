@@ -23,7 +23,7 @@
 
 genRedistData<-function(model, data, changecoef.link, panels=NULL, imppoly=NULL, impactcells=NULL){
 
-  if(is.null(imppoly) & is.null(impcells)){stop('One of impcells or imppoly must be specified')}
+  if(is.null(imppoly) & is.null(impactcells)){stop('One of impcells or imppoly must be specified')}
 
   if(is.null(panels)){
     panels<-1:nrow(data)
