@@ -328,9 +328,9 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
         asum[i]<-sum(bootPreds[predictionGrid$eventphase==1,])
       }
       if(sim_glm$family[[1]]=='binomial' | sim_glm$family[[1]]=='quasibinomial'){
-        if(i==1){bmean=amean=vector(length=nsim)}
-        bmean[i]<-mean(bootPreds[predictionGrid$eventphase==0,])
-        amean[i]<-mean(bootPreds[predictionGrid$eventphase==1,])
+        if(i==1){bsum=asum=vector(length=nsim)}
+        bsum[i]<-mean(bootPreds[predictionGrid$eventphase==0,])
+        asum[i]<-mean(bootPreds[predictionGrid$eventphase==1,])
       }
 
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -371,9 +371,9 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     if(model$family[[1]]=='binomial' | model$family[[1]]=='quasibinomial'){
       quants<-c(0.025, 0.975)
       meanp<-matrix(NA, 2, 3)
-      meanp[,1]<-c(mean(bmean), mean(amean))
-      meanp[1,2:3]<-quantile(bmean, probs=quants)
-      meanp[2,2:3]<-quantile(amean, probs=quants)
+      meanp[,1]<-c(mean(bsum), mean(asum))
+      meanp[1,2:3]<-quantile(bsum, probs=quants)
+      meanp[2,2:3]<-quantile(asum, probs=quants)
       rownames(meanp)<-c('Before', 'After')
       colnames(meanp)<-c('Mean', 'LowerCI', 'UpperCI')
     }
