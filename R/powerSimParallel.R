@@ -311,7 +311,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
 
       # extract distribution of null differences
       nulldifferences<-bootPreds[predictionGrid$eventphase==0,(1:(n.boot/2))] - bootPreds[predictionGrid$eventphase==0,(((n.boot/2)+1):n.boot)]
-
+      
       # find the predicted differences from this simulation
       preddifferences[,i]<-preds[predictionGrid$eventphase==1,i] - preds[predictionGrid$eventphase==0,i]
 
@@ -397,7 +397,9 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     } # end impact.loc
 
 
-
+bootdiffmean<-apply(bootdifferences, 1, mean)
+  
+  
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
   # ~~ Return list object~~~~~
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
