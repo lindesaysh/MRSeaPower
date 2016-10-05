@@ -1,6 +1,10 @@
 devtools::load_all(pkg='C://MarineScotlandPower/MRSeaPower')
 devtools::load_all(pkg='C://MarineScotlandPower/MRSea/MRSea')
 
+
+setwd("C:/MarineScotlandPower/MRSeaPower")
+
+
 require(fields)
 require(splines)
 require(mgcv)
@@ -52,7 +56,7 @@ predictdata<-rbind(data.frame(fowshco.grid, TideState=1, WindStrength=0, SeaStat
 g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit(fowsim_glm$splineParams[[1]]$knotgrid), knotmat = FALSE)$dataDist
 
 # POWER ANALYSIS
-nsim=500
+nsim=100
 system.time(
   powerout.fow.oc<-powerSimPll(newdata.fow.cor, fowsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fowsim_glm$splineParams, n.boot=500, impact.loc=c(510750, 6555700), nCores=8)
 
@@ -79,6 +83,15 @@ plotdata
 plot.d2imp(powerout.fow.oc)
 
 plot.d2imp(powerout.fow.oc, pct.diff = FALSE)
+
+
+pdata<-plot.preds(powerout.fow.oc, returndata=TRUE)
+ggplot(pdata) + geom_tile(aes( x.pos , y.pos , fill = mean, width=500, height=500 ) ) + scale_fill_gradientn(colours=mypalette, values = breaks, space = "Lab", na.value = "grey50", guide = "colourbar", name='Mean Prediction') + theme_bw() + facet_wrap(~type+eventphase, nrow=3) + coord_equal()
+
+
+ddata<-plot.diffs(powerout.fow.oc, returndata=TRUE)
+
+ggplot(ddata) + geom_tile(aes( x.pos , y.pos , fill = mean, width=500, height=500 ) ) + scale_fill_gradientn(colours=mypalette, values = breaks, space = "Lab", na.value = "grey50", guide = "colourbar", name='Mean Prediction') + theme_bw() + facet_wrap(~type, nrow=1) + coord_equal()
 
 
 

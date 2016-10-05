@@ -41,7 +41,7 @@ impdata.fow.re<-genRedistData(bestModel.fow, data=fow.data, changecoef.link=true
 ##
 newdata.fow.imp.re<-generateNoise(nsim, impdata.fow.re$truth, family='poisson', d=summary(bestModel.fow)$dispersion)
 corrmat.fow.imp<-rbind(corrmat.fow, corrmat.fow)
-newdata.fow.cor.re<-generateIC(data = impdata.fow, corrs = corrmat.fow.imp, panels = 'panels', newdata=newdata.fow.imp.re, nsim=nsim)
+newdata.fow.cor.re<-generateIC(data = impdata.fow.re, corrs = corrmat.fow.imp, panels = 'panels', newdata=newdata.fow.imp.re, nsim=nsim)
 
 ##
 fowsim_glm<-update(bestModel.fow, newdata.fow.cor.re[,1] ~. + as.factor(eventphase) -
@@ -49,7 +49,7 @@ fowsim_glm<-update(bestModel.fow, newdata.fow.cor.re[,1] ~. + as.factor(eventpha
 fowsim_glm<-make.gamMRSea(fowsim_glm, panelid=1:nrow(impdata.fow.re),
                           splineParams=fowsim_glm$splineParams,
                           varshortnames=fowsim_glm$varshortnames,gamMRSea=TRUE)
-
+require(MuMIn)
 salsa2dlist<-list(fitnessMeasure = 'QAIC', knotgrid = fowsim_glm$splineParams[[1]]$knotgrid,
                   knotdim = c(100, 100),  startKnots=10, minKnots=2,
                   maxKnots=20, r_seq=fowsim_glm$splineParams[[1]]$radii, gap=0, interactionTerm='as.factor(eventphase)')
@@ -65,6 +65,9 @@ salsa2dOutputint<-runSALSA2D(fowsim_glm, salsa2dlist,
 bestModel_int<-make.gamMRSea(salsa2dOutputint$bestModel, panelid = 1:nrow(impdata.fow.re),
                              splineParams = salsa2dOutputint$splineParams,
                              varshortnames = NULL, gamMRSea=TRUE)
+
+summary(bestModel_int)
+anova(bestModel_int)
 
 
 # make sure that the independent data is used to get the null distribution

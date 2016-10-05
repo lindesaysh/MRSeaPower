@@ -1,4 +1,4 @@
-plot.diffs<-function(power.object){
+plot.diffs<-function(power.object, returndata=FALSE){
 
 data<-power.object$bootdifferences
 
@@ -18,6 +18,10 @@ c<-rename(c, mean=X97.5.)
 
 plotdata<-data.frame(rbind(a, b, c))
 
+if(returndata==TRUE){
+  return(plotdata)
+}
+
 require(RColorBrewer)
 breaks<-ticks<-c(0, 0.2, 0.4, 0.6, 0.8, 1, 10, 25)
 mypalette<-rev(brewer.pal(length (ticks)-1,"Spectral"))
@@ -27,7 +31,7 @@ ggplot(plotdata) + geom_raster(aes( x.pos , y.pos , fill = mean ) ) + scale_fill
 }
 
 
-plot.preds<-function(power.object){
+plot.preds<-function(power.object, returndata=FALSE){
   
   data<-power.object$bootpreds
   
@@ -46,6 +50,10 @@ plot.preds<-function(power.object){
   c<-rename(c, mean=X97.5.)
   
   plotdata<-data.frame(rbind(a, b, c))
+  
+  if(returndata==TRUE){
+    return(plotdata)
+  }
   
   require(RColorBrewer)
   breaks<-ticks<-c(0, 0.2, 0.4, 0.6, 0.8, 1, 10, 25)

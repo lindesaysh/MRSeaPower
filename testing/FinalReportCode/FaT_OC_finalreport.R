@@ -1,6 +1,8 @@
 devtools::load_all(pkg='C://MarineScotlandPower/MRSeaPower')
 devtools::load_all(pkg='C://MarineScotlandPower/MRSea/MRSea')
 
+setwd("C:/MarineScotlandPower/MRSeaPower")
+
 require(fields)
 require(splines)
 require(mgcv)
@@ -12,6 +14,7 @@ breaks<-ticks<-c(0, 0.2, 0.4, 0.6, 0.8, 1, 10, 25)
 mypalette<-rev(brewer.pal(length (ticks)-1,"Spectral"))
 require(sp)
 require(raster)
+require(splancs)
 
 
 data(fat)
@@ -24,7 +27,7 @@ fat.data<-bestModel.fat$data
 newdata.fat<-generateNoise(n=100, response=fitted(bestModel.fat), family='binomial', size=1)
 
 nsim=500
-impdata.fat<-genOverallchangeData(log(0.3), bestModel.fat, data = fat.data)
+impdata.fat<-genOverallchangeData(log(0.5), bestModel.fat, data = fat.data)
 
 t<-group_by(impdata.fat, eventphase)%>%
   summarise(sum=sum(truth), mean=mean(truth), n=n())
@@ -58,9 +61,8 @@ ggplot( NULL ) + geom_raster( data = rdf1 , aes( x , y , fill = pct.change ) ) +
 # ~~~ OC Change ~~~~
 # ~~~~~~~~~~~~~~~~~~~
 nsim=500
-bnd.wf<-data.frame(x.pos=c(543289.6, 574317.5, 574892.1, 545588.0),y.pos=c(6253767, 6253097, 6237016, 6236681))
 truebeta<-log(0.5)
-impdata.fat<-genRedistData(bestModel.fat, data=fat.data, changecoef.link=truebeta, panels='panel', imppoly=bnd.wf)
+impdata.fat<-genOverallchangeData(bestModel.fat, data=fat.data, changecoef.link=truebeta, panels='panel')
 newdata.fat.imp<-generateNoise(nsim, impdata.fat$truth, family='binomial', size=1)
 
 bestModel.fat$splineParams[[1]]$dist<-rbind(bestModel.fat$splineParams[[1]]$dist, bestModel.fat$splineParams[[1]]$dist)
@@ -86,10 +88,9 @@ g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit
 
 
 nsim=100
-system.time(powerout.fat.oc<-powerSimPll(newdata.fat.imp, fatsim_glm, empdistpower.fat, nsim=nsim, powercoefid=length(coef(fatsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fatsim_glm$splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(581877.4, 6234143), nCores = 8))
+system.time(powerout.fat.oc<-powerSimPll(newdata.fat.imp, fatsim_glm, empdistpower.fat, nsim=nsim, powercoefid=length(coef(fatsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fatsim_glm$splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(559347.4, 6244923), nCores = 8))
 
 save(powerout.fat.oc, file='testing/FinalReportCode/powerout.fat.oc.RData', compress = 'bzip2')
-
 
 null.output.fat.oc<-pval.coverage.null(newdat.ind = newdata.fat.imp, newdat.corr = NULL, model = fatsim_glm, nsim = nsim, powercoefid = length(coef(fatsim_glm)))
 
@@ -111,10 +112,6 @@ plotdata
 plot.d2imp(powerout.fat.oc)
 
 plot.d2imp(powerout.fat.oc, pct.diff = FALSE)
-# ~~~~~~~~~~~~~~~~~~~
-# ~~~ RE Change ~~~~
-# ~~~~~~~~~~~~~~~~~~~
-nsim=500
-bnd.wf<-data.frame(x.pos=c(543289.6, 574317.5, 574892.1, 545588.0,543289.6),y.pos=c(6253767, 6253097, 6237016, 6236681,6253767))
-truebeta<-log(0.5)
-impdata.fat.re<-genRedistData(bestModel.fat, data=fat.data, changecoef.link=truebeta, panels='panel', imppoly=bnd.wf, impactcells = NULL)
+
+plot.diffs(powerout.fat.oc)
+plot.preds(powerout.fat.oc)
