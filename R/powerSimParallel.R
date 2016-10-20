@@ -10,17 +10,17 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
   #cis<-array(NA, c(nrow(predictionGrid), 2, nsim))
   indpvals = familypvals = list(nsim)
   preds<-matrix(NA, nrow=nrow(predictionGrid), ncol=nsim)
-    bootdifferences=bootdifferences.pct=array(NA, c((nrow(predictionGrid)/2), n.boot, nsim))
+  bootdifferences=bootdifferences.pct=array(NA, c((nrow(predictionGrid)/2), n.boot, nsim))
 
-  if(!is.null(impact.loc)){
-    # make difference dataset
-    preddiffs<-predictionGrid[predictionGrid$eventphase==0,]
-    # distances from wfarm to each grid loc.
-    preddiffs$impdist<-as.matrix(dist(x = rbind(impact.loc, preddiffs[,c('x.pos', 'y.pos')])))[1,-1]
-    # cut the distances into bins
-    br<-seq(0, max(preddiffs$impdist), length=10)
-    preddiffs$cuts<-cut(preddiffs$impdist, breaks=br)
-  }else{cat('No impact location given so distance to impact data not calculated.')}
+  # if(!is.null(impact.loc)){
+  #   # make difference dataset
+  #   preddiffs<-predictionGrid[predictionGrid$eventphase==0,]
+  #   # distances from wfarm to each grid loc.
+  #   preddiffs$impdist<-as.matrix(dist(x = rbind(impact.loc, preddiffs[,c('x.pos', 'y.pos')])))[1,-1]
+  #   # cut the distances into bins
+  #   br<-seq(0, max(preddiffs$impdist), length=10)
+  #   preddiffs$cuts<-cut(preddiffs$impdist, breaks=br)
+  # }else{cat('No impact location given so distance to impact data not calculated.')}
 
   preddifferences<-matrix(NA, nrow=(nrow(predictionGrid)/2), ncol=nsim)
 
@@ -172,24 +172,24 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
         # ~~~~ Distance to Windfarm ~~~~~~~~~
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        if(!is.null(impact.loc)){
-          #if(nrow(predictionGrid)>400){
-          preddifferences.pct<-(as.vector(preddifferences)/as.vector(preds[predictionGrid$eventphase==0]))*100
-
-          d2imp.plotdata<-matrix(NA, nrow=length(unique(preddiffs$cuts)), ncol=9)
-          d2imp.plotdata[,1]<-tapply(preddiffs$impdist, preddiffs$cuts, mean)
-          d2imp.plotdata[,2]<-tapply(preddifferences, preddiffs$cuts, mean)
-          d2imp.plotdata[,6]<-tapply(preddifferences.pct, preddiffs$cuts, mean)
-          colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI', 'MeanDiff.pct', 'bootMeanDiff.pct', 'LowerCI.pct', 'UpperCI.pct')
-
-          bootdifferences<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
-          bootdifferences.pct<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
-        }
+        # if(!is.null(impact.loc)){
+        #   #if(nrow(predictionGrid)>400){
+        #   preddifferences.pct<-(as.vector(preddifferences)/as.vector(preds[predictionGrid$eventphase==0]))*100
+        #
+        #   d2imp.plotdata<-matrix(NA, nrow=length(unique(preddiffs$cuts)), ncol=9)
+        #   d2imp.plotdata[,1]<-tapply(preddiffs$impdist, preddiffs$cuts, mean)
+        #   d2imp.plotdata[,2]<-tapply(preddifferences, preddiffs$cuts, mean)
+        #   d2imp.plotdata[,6]<-tapply(preddifferences.pct, preddiffs$cuts, mean)
+        #   colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI', 'MeanDiff.pct', 'bootMeanDiff.pct', 'LowerCI.pct', 'UpperCI.pct')
+        #
+        #   bootdifferences<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
+        #   bootdifferences.pct<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
+        # }
 
       } # end sigdif
 
 
-      return(list(imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, preds=preds, indpvals=indpvals, familypvals=familypvals, bootdifferences.pct=bootdifferences.pct, bootdifferences=bootdifferences, d2imp.plotdata=d2imp.plotdata, bsum=bsum, asum=asum, bootPreds=bootPreds))
+      return(list(imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, preds=preds, indpvals=indpvals, familypvals=familypvals, bsum=bsum, asum=asum, bootPreds=bootPreds))
     })
 
     stopCluster(myCluster)
@@ -202,11 +202,11 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     indpvals = sapply(Routputs, '[[','indpvals', simplify='array')
     familypvals = sapply(Routputs, '[[','familypvals', simplify='array')
     preds<-sapply(Routputs, '[[','preds')
-    bootdifferences=sapply(Routputs, '[[','bootdifferences', simplify='array')
-    bootdifferences.pct=sapply(Routputs, '[[','bootdifferences.pct', simplify  ='array')
-    d2imp.plotdata=Routputs[[nsim]]$d2imp.plotdata
+    #bootdifferences=sapply(Routputs, '[[','bootdifferences', simplify='array')
+    #bootdifferences.pct=sapply(Routputs, '[[','bootdifferences.pct', simplify  ='array')
+    #d2imp.plotdata=Routputs[[nsim]]$d2imp.plotdata
     bootPreds.all=sapply(Routputs, '[[','bootPreds', simplify='array')
-    
+
    #~~~
     # try alply
     require(plyr)
@@ -314,7 +314,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
 
       # extract distribution of null differences
       nulldifferences<-bootPreds[predictionGrid$eventphase==0,(1:(n.boot/2))] - bootPreds[predictionGrid$eventphase==0,(((n.boot/2)+1):n.boot)]
-      
+
       # find the predicted differences from this simulation
       preddifferences[,i]<-preds[predictionGrid$eventphase==1,i] - preds[predictionGrid$eventphase==0,i]
 
@@ -340,20 +340,20 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       # ~~~~ Distance to Windfarm ~~~~~~~~~
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      if(!is.null(impact.loc)){
-        #if(nrow(predictionGrid)>400){
-        preddifferences.pct<-(as.vector(preddifferences[,i])/as.vector(preds[predictionGrid$eventphase==0,i]))*100
-
-        d2imp.plotdata<-matrix(NA, nrow=length(unique(preddiffs$cuts)), ncol=9)
-        d2imp.plotdata[,1]<-tapply(preddiffs$impdist, preddiffs$cuts, mean)
-        d2imp.plotdata[,2]<-tapply(preddifferences[,i], preddiffs$cuts, mean)
-        d2imp.plotdata[,6]<-tapply(preddifferences.pct, preddiffs$cuts, mean)
-        colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI', 'MeanDiff.pct', 'bootMeanDiff.pct', 'LowerCI.pct', 'UpperCI.pct')
-
-        bootdifferences[,,i]<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
-        bootdifferences.pct[,,i]<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
-        bootPreds.all[,,i]<-bootPreds
-      }
+      # if(!is.null(impact.loc)){
+      #   #if(nrow(predictionGrid)>400){
+      #   preddifferences.pct<-(as.vector(preddifferences[,i])/as.vector(preds[predictionGrid$eventphase==0,i]))*100
+      #
+      #   d2imp.plotdata<-matrix(NA, nrow=length(unique(preddiffs$cuts)), ncol=9)
+      #   d2imp.plotdata[,1]<-tapply(preddiffs$impdist, preddiffs$cuts, mean)
+      #   d2imp.plotdata[,2]<-tapply(preddifferences[,i], preddiffs$cuts, mean)
+      #   d2imp.plotdata[,6]<-tapply(preddifferences.pct, preddiffs$cuts, mean)
+      #   colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI', 'MeanDiff.pct', 'bootMeanDiff.pct', 'LowerCI.pct', 'UpperCI.pct')
+      #
+      #   bootdifferences[,,i]<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
+      #   bootdifferences.pct[,,i]<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
+      #   bootPreds.all[,,i]<-bootPreds
+      # }
 
     } # end sigdif
 
@@ -387,16 +387,16 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     # ~~~~ Distance to Windfarm ~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if(!is.null(impact.loc)){
-
-      # get the upper and lower quantile for the differences in each cut point.
-      uniquecuts<-unique(preddiffs$cuts)
-      for(p in 1:length(uniquecuts)){
-        d2imp.plotdata[p,4:5]<-quantile(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]), probs=c(0.025, 0.975))
-        d2imp.plotdata[p,3]<-mean(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]))
-        d2imp.plotdata[p,8:9]<-quantile(na.omit(bootdifferences.pct[preddiffs$cuts==uniquecuts[p],,]), probs=c(0.025, 0.975))
-        d2imp.plotdata[p,7]<-mean(na.omit(bootdifferences.pct[preddiffs$cuts==uniquecuts[p],,]))
-      }
+    # if(!is.null(impact.loc)){
+    #
+    #   # get the upper and lower quantile for the differences in each cut point.
+    #   uniquecuts<-unique(preddiffs$cuts)
+    #   for(p in 1:length(uniquecuts)){
+    #     d2imp.plotdata[p,4:5]<-quantile(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]), probs=c(0.025, 0.975))
+    #     d2imp.plotdata[p,3]<-mean(na.omit(bootdifferences[preddiffs$cuts==uniquecuts[p],,]))
+    #     d2imp.plotdata[p,8:9]<-quantile(na.omit(bootdifferences.pct[preddiffs$cuts==uniquecuts[p],,]), probs=c(0.025, 0.975))
+    #     d2imp.plotdata[p,7]<-mean(na.omit(bootdifferences.pct[preddiffs$cuts==uniquecuts[p],,]))
+    #   }
 
     } # end impact.loc
 
@@ -409,7 +409,7 @@ bootpredsmean<-apply(bootPreds.all, 1, mean)
 bootpredscis<-t(apply(bootPreds.all, 1, quantile, probs=c(0.025, 0.975)))
 estpreds<-data.frame(mean=bootpredsmean, bootpredscis,predictionGrid[,c('x.pos', 'y.pos', 'eventphase')])
 
-  
+
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
   # ~~ Return list object~~~~~
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~

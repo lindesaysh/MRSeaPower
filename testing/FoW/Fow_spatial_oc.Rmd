@@ -123,7 +123,7 @@ newdat<-generateNoise(nsim, fitted(bestModel), family='poisson', d=d)
 `r nsim` sets of noisy data are simulated from the model using an overdispersed Poisson distribution where $\hat{\phi} = $ `r round(summary(init_glm)$dispersion)`.
 
 ```{r critvalsfow, cache=T, fig.cap='Figure showing the distribution of test statistics from a runs test. The red lines show the lower 2.5% and upper 97.5% critical values of the empirical distribution and the blue lines are from the Normal ($N(0,1)$) distribution.'}
-empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat, 
+empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdata.fow, 
                                  model = bestModel, data = dat, plot=TRUE, 
                                  returnDist = TRUE, dots=FALSE)
 ```
