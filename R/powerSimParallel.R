@@ -1,4 +1,4 @@
-powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predictionGrid=NULL, g2k=NULL, splineParams=NULL, bootstrapCI=TRUE, sigdif=TRUE, n.boot=1000, impact.loc=NULL, nCores=1){
+powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predictionGrid=NULL, g2k=NULL, splineParams=NULL, bootstrapCI=TRUE, sigdif=TRUE, n.boot=1000, nCores=1){
 
   require(mvtnorm)
   data<-model$data
@@ -133,7 +133,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       # ~~ predictions to grid ~~~
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~
       #dists<<-g2k
-      preds<-predict.gamMRSea(predictionGrid, splineParams = splineParams, g2k = g2k, model=sim_glm, type = 'response')
+      preds<-predict.gamMRSea(predictionGrid, g2k = g2k, model=sim_glm, type = 'response')
 
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~
       # ~~~~ Differences ~~~~~~~~~
@@ -182,14 +182,14 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
         #   d2imp.plotdata[,6]<-tapply(preddifferences.pct, preddiffs$cuts, mean)
         #   colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI', 'MeanDiff.pct', 'bootMeanDiff.pct', 'LowerCI.pct', 'UpperCI.pct')
         #
-        #   bootdifferences<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
-        #   bootdifferences.pct<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
+           bootdifferences<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
+           bootdifferences.pct<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
         # }
 
       } # end sigdif
 
 
-      return(list(imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, preds=preds, indpvals=indpvals, familypvals=familypvals, bsum=bsum, asum=asum, bootPreds=bootPreds))
+      return(list(imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, preds=preds, indpvals=indpvals, familypvals=familypvals, bsum=bsum, asum=asum, bootPreds=bootPreds, bootdifferences=bootdifferences, bootdifferences.pct=bootdifferences.pct))
     })
 
     stopCluster(myCluster)
@@ -202,8 +202,8 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     indpvals = sapply(Routputs, '[[','indpvals', simplify='array')
     familypvals = sapply(Routputs, '[[','familypvals', simplify='array')
     preds<-sapply(Routputs, '[[','preds')
-    #bootdifferences=sapply(Routputs, '[[','bootdifferences', simplify='array')
-    #bootdifferences.pct=sapply(Routputs, '[[','bootdifferences.pct', simplify  ='array')
+    bootdifferences=sapply(Routputs, '[[','bootdifferences', simplify='array')
+    bootdifferences.pct=sapply(Routputs, '[[','bootdifferences.pct', simplify  ='array')
     #d2imp.plotdata=Routputs[[nsim]]$d2imp.plotdata
     bootPreds.all=sapply(Routputs, '[[','bootPreds', simplify='array')
 
@@ -304,7 +304,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     # ~~ predictions to grid ~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     #dists<<-g2k
-    preds[,i]<-predict.gamMRSea(predictionGrid, splineParams = splineParams, g2k = g2k, model=sim_glm, type = 'response')
+    preds[,i]<-predict.gamMRSea(predictionGrid, g2k = g2k, model=sim_glm, type = 'response')
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~~~ Differences ~~~~~~~~~
@@ -350,9 +350,9 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       #   d2imp.plotdata[,6]<-tapply(preddifferences.pct, preddiffs$cuts, mean)
       #   colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI', 'MeanDiff.pct', 'bootMeanDiff.pct', 'LowerCI.pct', 'UpperCI.pct')
       #
-      #   bootdifferences[,,i]<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
-      #   bootdifferences.pct[,,i]<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
-      #   bootPreds.all[,,i]<-bootPreds
+         bootdifferences[,,i]<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
+         bootdifferences.pct[,,i]<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
+         bootPreds.all[,,i]<-bootPreds
       # }
 
     } # end sigdif
@@ -398,7 +398,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     #     d2imp.plotdata[p,7]<-mean(na.omit(bootdifferences.pct[preddiffs$cuts==uniquecuts[p],,]))
     #   }
 
-    } # end impact.loc
+    #} # end impact.loc
 
 
 bootdiffmean<-apply(bootdifferences, 1, mean)
@@ -413,7 +413,7 @@ estpreds<-data.frame(mean=bootpredsmean, bootpredscis,predictionGrid[,c('x.pos',
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
   # ~~ Return list object~~~~~
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-  output<-list(rawrob=rawrob, imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, significant.differences=list(individual=indpvals, family=familypvals), d2imp.plotdata=d2imp.plotdata, bootdifferences=estdiffs, bootpreds=estpreds)
+  output<-list(rawrob=rawrob, imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, significant.differences=list(individual=indpvals, family=familypvals), bootdifferences=estdiffs, bootpreds=estpreds)
 
   if(model$family[[1]]=='poisson' | model$family[[1]]=='quasipoisson'){
     output$Abundance = abund

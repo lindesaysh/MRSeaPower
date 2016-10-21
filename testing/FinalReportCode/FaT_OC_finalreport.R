@@ -87,8 +87,8 @@ g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit
 
 
 
-nsim=100
-system.time(powerout.fat.oc<-powerSimPll(newdata.fat.imp, fatsim_glm, empdistpower.fat, nsim=nsim, powercoefid=length(coef(fatsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fatsim_glm$splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(559347.4, 6244923), nCores = 8))
+nsim=2
+system.time(powerout.fat.oc<-powerSimPll(newdata.fat.imp, fatsim_glm, empdistpower.fat, nsim=nsim, powercoefid=length(coef(fatsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fatsim_glm$splineParams, sigdif=TRUE, n.boot=500, nCores = 1))
 
 save(powerout.fat.oc, file='testing/FinalReportCode/powerout.fat.oc.RData', compress = 'bzip2')
 
