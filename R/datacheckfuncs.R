@@ -3,7 +3,7 @@ plotVariance<-function(model, simdat){
   ow<-options("warn")
   options(warn=1)
   
-  #dat<-model$data
+  dat<-model$data
   fits<-fitted(model)
   cut.fit<-cut(fits, breaks=quantile(fits, probs=seq(0,1,length=20)))
   means.mod<-tapply(fits, cut.fit, mean)
@@ -36,9 +36,14 @@ plotVariance<-function(model, simdat){
     theme(panel.grid.major=element_blank(), panel.grid.minor=
             element_blank()) + xlab('Mean Fitted Values') + ylab("Residual Variance") + guides(colour=FALSE) + geom_rug(data=test, sides='b', alpha=1/5)
   
-  p2<-ggplot(data.frame(disp), aes(disp)) + geom_histogram(colour='black', fill='lightgrey', bins=15) + theme_bw() + xlab("Estimated Dispersion") + ylab("Frequency") + ggtitle("") + geom_vline(xintercept = summary(model)$dispersion, colour='blue', size=2 , linetype=2)
+  if(summary(model)$dispersion!=1){
+    p2<-ggplot(data.frame(disp), aes(disp)) + geom_histogram(colour='black', fill='lightgrey', bins=15) + theme_bw() + xlab("Estimated Dispersion") + ylab("Frequency") + ggtitle("") + geom_vline(xintercept = summary(model)$dispersion, colour='blue', size=2 , linetype=2)
+    
+    grid.arrange(p, p2)  
+  }else{
+    print(p)
+  }
   
-  grid.arrange(p, p2)
   options(ow)
 }
 

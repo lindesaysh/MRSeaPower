@@ -32,9 +32,9 @@ genOverallchangeData<-function(changecoef.link, model, data, panels=NULL){
   initcoeff<-as.vector(c(initcoeff, changecoef.link))
   impcoefID<-length(initcoeff)
   if(!is.null(model$offset)){
-    dat2$truth<-model$family$linkinv(modmat%*%initcoeff) * model$family$linkinv(model$offset)
+    dat2$truth<-as.vector(model$family$linkinv(modmat%*%initcoeff) * model$family$linkinv(model$offset))
   }else{
-    dat2$truth<-model$family$linkinv(modmat%*%initcoeff)
+    dat2$truth<-as.vector(model$family$linkinv(modmat%*%initcoeff))
   }
 
   return(dat2)
