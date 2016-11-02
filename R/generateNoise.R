@@ -2,8 +2,8 @@
 #'
 #' The function generates a random sample from poisson, overdispersed poisson, binomial and zero inflated binomial samples.
 #'
-#' @param n
-#' @param response
+#' @param n thing
+#' @param response thing
 #' @param family one of \code{poisson}, \code{binomial} or \code{zibinomial}
 #' @param ... Other parameters required for the family specified
 #'
@@ -12,7 +12,7 @@
 #' The additional parameters for the Binomial distribution can be found in \link{rbinom}
 #' The zibinomial family requires the \code{VGAM} library to generate zero inflated binomial data. Additional parameters can be found in the help for \link{rzibinom}.
 #'
-#' @example
+#' @export
 #'
 
 generateNoise<-function(n, response, family, ...){

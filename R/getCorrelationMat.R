@@ -2,6 +2,8 @@
 #'
 #' @param panel vector identifying the panel to which each row of data belongs.  Data are considered correlated within a panel and independent between panels.
 #' @param data vector of response data.
+#'
+#' @export
 
 getCorrelationMat<-function (panel, data, dots=FALSE)
 {

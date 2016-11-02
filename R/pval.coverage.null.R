@@ -1,13 +1,14 @@
 #' Function to estimate the coverage of the overall change impact coefficient.
 #'
-#' @param newdat
-#' @param model
-#' @param nsim
-#' @param powercoefid
-#' @param g2k
+#' @param newdat thing
+#' @param model thing
+#' @param nsim thing
+#' @param powercoefid thing
+#' @param g2k thing
 #'
 #' @author Lindesay Scott-Hayward
 #'
+#' @export
 
 pval.coverage.null<-function(newdat.ind, newdat.corr=NULL, model, nsim, powercoefid, splineParams=NULL, empdistnull=NULL){
 
@@ -25,7 +26,7 @@ pval.coverage.null<-function(newdat.ind, newdat.corr=NULL, model, nsim, powercoe
   nsim<-ncol(nulldata.ind)
 
   splineParams<-model$splineParams
-  
+
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # ~ generate empirical distribution ~
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

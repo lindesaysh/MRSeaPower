@@ -1,10 +1,12 @@
 #' Function to get p-values for individual cell differences
 #'
 #'
-#' @param null
-#' @param estimate
+#' @param null thing
+#' @param estimate thing
 #'
 #' @example
+#'
+#' @export
 #'
 
 pval.differences<-function(null, estimate, family=FALSE){

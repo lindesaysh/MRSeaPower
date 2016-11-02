@@ -4,7 +4,8 @@
 \alias{genRedistData}
 \title{Function to impose a re-distribution impact effect}
 \usage{
-genRedistData(model, data, changecoef.link, panels = NULL, imppoly)
+genRedistData(model, data, changecoef.link, panels = NULL,
+  eventsite.bnd = NULL, noneventcells = NULL)
 }
 \arguments{
 \item{model}{A glm or gamMRSea model object.}
@@ -15,7 +16,9 @@ genRedistData(model, data, changecoef.link, panels = NULL, imppoly)
 
 \item{panels}{Character vector denoting the column of \code{data} containing the panel structure.}
 
-\item{imppoly}{A data frame containing the coordinates of a polygon defining the region of impact. The variable names must match the coordinate system in the data.}
+\item{eventsite.bnd}{A data frame containing the coordinates of a polygon defining the region of the defined event The variable names must match the coordinate system in the data.}
+
+\item{noneventcells}{}
 }
 \value{
 Returns a data frame twice the size of the original input with additional columns for panel id, eventphase and truth.  The truth column represents the input data for the first half (pre-event; eventphase==0) and the second half has the change imposed (post-event; eventphase==1).

@@ -4,7 +4,8 @@
 \alias{makeToyData}
 \title{Function to create a toy dataset for package testing}
 \usage{
-makeToyData(n, changecoef.link = 0, length.panels = 1, binary = FALSE)
+makeToyData(n, changecoef.link = 0, length.panels = 1, binary = FALSE,
+  b0 = 1)
 }
 \arguments{
 \item{n}{number denoting the amount of data to generate.}
@@ -16,7 +17,7 @@ makeToyData(n, changecoef.link = 0, length.panels = 1, binary = FALSE)
 \item{binary}{logical (default = FALSE) denoting whether to generate binary data.  If FALSE, poisson data is generated.}
 }
 \value{
-Returns a data frame of columns 
+Returns a data frame of columns
    \code{x} x covariate
    \code{evph} covariate denoting pre(0)/post(1) event
    \code{mu} poisson response

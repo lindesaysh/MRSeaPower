@@ -1,6 +1,8 @@
-#'
+#' function from VGAM package
 #'
 #' @author VGAM package
+#'
+#' @export
 
 qzibinom<-function (p, size, prob, pstr0 = 0)
 {
