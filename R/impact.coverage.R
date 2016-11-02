@@ -1,10 +1,9 @@
 #'
 #'  Get the coverage for the impact coefficient
 #'
-#'  @param truebeta
-#'  @param betacis
+#'  @param truebeta thing
+#'  @param betacis thing
 #'
-#'  @example
 #'
 #'  @export
 #'

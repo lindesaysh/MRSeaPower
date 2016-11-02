@@ -1,9 +1,9 @@
-
 #' Summary function for objects of class gamMRSea.power
 #'
 #' @param power.object  An object of class gamMRSea.power
-#' @param
+#' @param thing
 #'
+#' @export
 #'
 summary.gamMRSea.power<-function(power.object, null.object=NULL, truebeta){
 

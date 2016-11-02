@@ -8,6 +8,7 @@
 #'
 #' @author Lindesay Scott-Hayward
 #'
+#' @export
 
 pval.coverage.null<-function(newdat.ind, newdat.corr=NULL, model, nsim, powercoefid, empdistnull=NULL){
 

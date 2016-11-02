@@ -14,6 +14,8 @@
 #'
 #' @example
 #'
+#' @export
+#'
 
 generateNoise<-function(n, response, family, ...){
   simData<-matrix(NA, nrow=length(response), ncol=n)

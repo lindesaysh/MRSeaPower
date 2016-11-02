@@ -1,8 +1,6 @@
 #' Function to plot the output from powerSim
 #'
-#' @param
-#'
-#' @example
+#' @export
 #'
 
 plot.sigdiff<-function(powerout, coordinates, tailed='two', error.rate=0.05, adjustment='none'){
@@ -17,7 +15,7 @@ plot.sigdiff<-function(powerout, coordinates, tailed='two', error.rate=0.05, adj
     adjustment='none'
     maintitle<-paste(t, ' ', error.rate*100,'% Error Rate, Adj = "',adjustment, '"', sep='')
   }else{
-    
+
     t<-'Family'
     er.orig<-error.rate
     if(adjustment=='sidak' | adjustment=='bonferroni'){
@@ -29,7 +27,7 @@ plot.sigdiff<-function(powerout, coordinates, tailed='two', error.rate=0.05, adj
       )
       maintitle<-paste(t, ' ER = ', er.orig*100,'%; Invididual ER = ', error.rate*100,'% , Adj = "',adjustment, '"', sep='')
     }
-   
+
   }
 
   # one or two tailed test

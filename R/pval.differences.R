@@ -6,6 +6,8 @@
 #'
 #' @example
 #'
+#' @export
+#'
 
 pval.differences<-function(null, estimate, family=FALSE){
 
