@@ -2,8 +2,8 @@
 #'
 #' The function generates a random sample from poisson, overdispersed poisson, binomial and zero inflated binomial samples.
 #'
-#' @param n
-#' @param response
+#' @param n number of simulations to generate
+#' @param response vector of 'true' means to genereate from
 #' @param family one of \code{poisson}, \code{binomial} or \code{zibinomial}
 #' @param ... Other parameters required for the family specified
 #'

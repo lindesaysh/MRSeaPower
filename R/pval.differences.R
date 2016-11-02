@@ -1,8 +1,8 @@
 #' Function to get p-values for individual cell differences
 #'
 #'
-#' @param null
-#' @param estimate
+#' @param null cell differences under the null hypothesis of no change
+#' @param estimate vector or estimates for a given cell
 #'
 #' @example
 #'

@@ -1,15 +1,15 @@
 #' Function to estimate the coverage of the overall change impact coefficient.
 #'
-#' @param newdat
-#' @param model
-#' @param nsim
-#' @param powercoefid
-#' @param g2k
+#' @param newdat.ind simulated independent response data
+#' @param model glm or gamMRSea model object
+#' @param nsim number of simulations in newdat.ind
+#' @param powercoefid coefficient id that relates to the eventchange term
+#' @param empdistnull if known, provide the empirical distribution for the runs test.
 #'
 #' @author Lindesay Scott-Hayward
 #'
 
-pval.coverage.null<-function(newdat.ind, newdat.corr=NULL, model, nsim, powercoefid, splineParams=NULL, empdistnull=NULL){
+pval.coverage.null<-function(newdat.ind, newdat.corr=NULL, model, nsim, powercoefid, empdistnull=NULL){
 
   # if(!is.null(splineParams)){
   #   dists<-splineParams[[1]]$dist
@@ -25,7 +25,7 @@ pval.coverage.null<-function(newdat.ind, newdat.corr=NULL, model, nsim, powercoe
   nsim<-ncol(nulldata.ind)
 
   splineParams<-model$splineParams
-  
+
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # ~ generate empirical distribution ~
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
