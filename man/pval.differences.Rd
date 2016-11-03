@@ -7,9 +7,9 @@
 pval.differences(null, estimate, family = FALSE)
 }
 \arguments{
-\item{null}{thing}
+\item{null}{cell differences under the null hypothesis of no change}
 
-\item{estimate}{thing}
+\item{estimate}{vector or estimates for a given cell}
 }
 \description{
 Function to get p-values for individual cell differences

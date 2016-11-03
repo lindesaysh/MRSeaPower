@@ -5,18 +5,18 @@
 \title{Function to estimate the coverage of the overall change impact coefficient.}
 \usage{
 pval.coverage.null(newdat.ind, newdat.corr = NULL, model, nsim, powercoefid,
-  splineParams = NULL, empdistnull = NULL)
+  empdistnull = NULL)
 }
 \arguments{
-\item{model}{thing}
+\item{newdat.ind}{simulated independent response data}
 
-\item{nsim}{thing}
+\item{model}{glm or gamMRSea model object}
 
-\item{powercoefid}{thing}
+\item{nsim}{number of simulations in newdat.ind}
 
-\item{newdat}{thing}
+\item{powercoefid}{coefficient id that relates to the eventchange term}
 
-\item{g2k}{thing}
+\item{empdistnull}{if known, provide the empirical distribution for the runs test.}
 }
 \description{
 Function to estimate the coverage of the overall change impact coefficient.

@@ -2,12 +2,12 @@
 % Please edit documentation in R/rzibinom.R
 \name{qzibinom}
 \alias{qzibinom}
-\title{function from VGAM package}
+\title{qzibinom function from the VGAM package}
 \usage{
 qzibinom(p, size, prob, pstr0 = 0)
 }
 \description{
-function from VGAM package
+qzibinom function from the VGAM package
 }
 \author{
 VGAM package

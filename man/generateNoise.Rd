@@ -7,9 +7,9 @@
 generateNoise(n, response, family, ...)
 }
 \arguments{
-\item{n}{thing}
+\item{n}{number of simulations to generate}
 
-\item{response}{thing}
+\item{response}{vector of 'true' means to genereate from}
 
 \item{family}{one of \code{poisson}, \code{binomial} or \code{zibinomial}}
 
@@ -22,5 +22,8 @@ The function generates a random sample from poisson, overdispersed poisson, bino
 An additional parameter for the Poisson distribution is the dispersion parameter, specified by d=
 The additional parameters for the Binomial distribution can be found in \link{rbinom}
 The zibinomial family requires the \code{VGAM} library to generate zero inflated binomial data. Additional parameters can be found in the help for \link{rzibinom}.
+}
+\examples{
+
 }
 

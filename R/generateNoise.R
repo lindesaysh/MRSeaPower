@@ -12,7 +12,7 @@
 #' The additional parameters for the Binomial distribution can be found in \link{rbinom}
 #' The zibinomial family requires the \code{VGAM} library to generate zero inflated binomial data. Additional parameters can be found in the help for \link{rzibinom}.
 #'
-#' @example
+#' @examples
 #'
 #' @export
 #'

@@ -4,7 +4,7 @@
 #' @param null cell differences under the null hypothesis of no change
 #' @param estimate vector or estimates for a given cell
 #'
-#' @example
+#' @examples
 #'
 #' @export
 #'
