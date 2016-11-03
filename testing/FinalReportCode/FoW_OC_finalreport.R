@@ -56,9 +56,9 @@ predictdata<-rbind(data.frame(fowshco.grid, TideState=1, WindStrength=0, SeaStat
 g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit(fowsim_glm$splineParams[[1]]$knotgrid), knotmat = FALSE)$dataDist
 
 # POWER ANALYSIS
-nsim=100
+nsim=500
 system.time(
-  powerout.fow.oc<-powerSimPll(newdata.fow.cor, fowsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fowsim_glm$splineParams, n.boot=500, impact.loc=c(510750, 6555700), nCores=8)
+  powerout.fow.oc<-powerSimPll(newdata.fow.cor, fowsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fowsim_glm$splineParams, n.boot=500, nCores=8)
 
 )
 save(powerout.fow.oc, file='testing/FinalReportCode/powerout.fow.oc.RData', compress = 'bzip2')
@@ -68,21 +68,18 @@ null.output.fow.oc<-pval.coverage.null(newdat.ind = newdata.fow.imp, newdat.corr
 
 save(null.output.fow.oc, file='testing/FinalReportCode/null.output.fow.oc.RData', compress = 'bzip2')
 
-summary(powerout.fow.oc, null.output, truebeta=log(0.5))
+summary(powerout.fow.oc, null.output.fow.oc, truebeta=log(0.5))
 
 powerPlot(powerout.fow.oc)
 
-plotdata<-plot.sigdiff(powerout.fow.oc, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
+plotdata<-plot.sigdiff(powerout.fow.oc, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05)
 plotdata
 
-plotdata<-plot.sigdiff(powerout.fow.oc, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=TRUE)
+plotdata<-plot.sigdiff(powerout.fow.oc, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment = 'bonferroni')
 plotdata
 
-### Distance to event site plot
-
-plot.d2imp(powerout.fow.oc)
-
-plot.d2imp(powerout.fow.oc, pct.diff = FALSE)
+plotdata<-plot.sigdiff(powerout.fow.oc, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment = 'sidak')
+plotdata
 
 
 pdata<-plot.preds(powerout.fow.oc, returndata=TRUE)

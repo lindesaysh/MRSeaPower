@@ -87,8 +87,8 @@ g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit
 
 
 
-nsim=2
-system.time(powerout.fat.oc<-powerSimPll(newdata.fat.imp, fatsim_glm, empdistpower.fat, nsim=nsim, powercoefid=length(coef(fatsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fatsim_glm$splineParams, sigdif=TRUE, n.boot=500, nCores = 1))
+nsim=500
+system.time(powerout.fat.oc<-powerSimPll(newdata.fat.imp, fatsim_glm, empdistpower.fat, nsim=nsim, powercoefid=length(coef(fatsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fatsim_glm$splineParams, sigdif=TRUE, n.boot=500, nCores = 8))
 
 save(powerout.fat.oc, file='testing/FinalReportCode/powerout.fat.oc.RData', compress = 'bzip2')
 
@@ -101,17 +101,12 @@ summary(powerout.fat.oc, null.output.fat.oc, truebeta=log(0.5))
 
 powerPlot(powerout.fat.oc)
 
-plotdata<-plot.sigdiff(powerout.fat.oc, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
+plotdata<-plot.sigdiff(powerout.fat.oc, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05)
 plotdata
 
-plotdata<-plot.sigdiff(powerout.fat.oc, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=TRUE)
+plotdata<-plot.sigdiff(powerout.fat.oc, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment = 'sidak')
 plotdata
 
-### Distance to event site plot
-
-plot.d2imp(powerout.fat.oc)
-
-plot.d2imp(powerout.fat.oc, pct.diff = FALSE)
 
 plot.diffs(powerout.fat.oc)
 plot.preds(powerout.fat.oc)
