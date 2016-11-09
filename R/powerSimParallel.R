@@ -47,7 +47,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     })
 
     # only do parametric boostrap if no data re-sampling and no nhats provided
-    Routputs<-parLapply(myCluster, 1:nsim, function(i){
+    Routputs<-pbapply::pblapply(cl=myCluster, X=1:nsim, FUN=function(i){
 
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~
       # ~~ fit model ~~~~~~~~~~~~~
