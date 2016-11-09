@@ -1,3 +1,12 @@
+#' Function to plot the output from powerSim
+#' 
+#' 
+#' @author Lindesay Scott-Hayward (University of St Andrews)
+#' 
+#' @export
+#'
+
+
 plot.diffs<-function(power.object, returndata=FALSE){
 
 data<-power.object$bootdifferences
@@ -31,7 +40,13 @@ ggplot(plotdata) + geom_raster(aes( x.pos , y.pos , fill = mean ) ) + scale_fill
 
 }
 
-
+#' Function to plot the output from powerSim
+#' 
+#' 
+#' @author Lindesay Scott-Hayward (University of St Andrews)
+#' 
+#' @export
+#'
 plot.preds<-function(power.object, returndata=FALSE){
 
   data<-power.object$bootpreds
