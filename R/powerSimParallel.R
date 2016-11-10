@@ -220,6 +220,9 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       bootPreds.all<-array(NA, c(nrow(predictionGrid), n.boot,  nsim))
     for(i in 1:nsim){
 
+        cat("\r", i, " \r")
+        flush.console()
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~ fit model ~~~~~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~

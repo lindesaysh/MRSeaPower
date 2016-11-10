@@ -7,7 +7,12 @@ generateIC<-function(data, corrs, panels, newdata, nsim, dots=FALSE){
   numRep=nsim # number of draws to be taken
 
   for(iter in 1:length(bids)){
-    if(dots){if((iter/100)%%1 == 0){cat(iter, '\n')}else{cat('.')}}
+    #if(dots){if((iter/100)%%1 == 0){cat(iter, '\n')}else{cat('.')}}
+
+    if(dots){
+      cat("\r", iter, " \r")
+      flush.console()
+    }
 
     if(iter==1){
       totalrepVars<-NULL
