@@ -3,11 +3,8 @@ getRunsCritVals<-function(n.sim, simData, model, data, plot=FALSE, returnDist=FA
   runsstatH0=betas=vector(length=n.sim)
   model$panels<-1:nrow(data) # make sure that independent panels specified for null distribution
 for(i in 1:n.sim){
-  #if(dots==TRUE){if((i/500)%%1 == 0){cat(i, '\n')}else{cat('.')}}
-  if(dots){
-    cat("\r", i, " \r")
-    flush.console()
-  }
+  if(dots==TRUE){if((i/500)%%1 == 0){cat(i, '\n')}else{cat('.')}}
+
   splineParams = model$splineParams
   data$response=simData[,i]
   sim_glm<- update(model, response ~ ., data=data)

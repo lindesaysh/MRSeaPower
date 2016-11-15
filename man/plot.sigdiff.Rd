@@ -7,21 +7,7 @@
 \method{plot}{sigdiff}(powerout, coordinates, tailed = "two",
   error.rate = 0.05, adjustment = "none")
 }
-\arguments{
-\item{powerout}{power analysis object of class 'gamMRSea.power'}
-
-\item{coordinates}{nx2 dataframe or matrix of data coordinates}
-
-\item{tailed}{takes on the value 'one' or 'two' depending on the type of test required}
-
-\item{error.rate}{number stating the error rate required, default is 0.05 (5\% error rate)}
-
-\item{adjustment}{character stating the adjustment, if any, for multiple testing.  The default value is 'none'.  Alternatives are 'sidak' and 'bonferroni'.}
-}
 \description{
 Function to plot the output from powerSim
-}
-\author{
-Lindesay Scott-Hayward (University of St Andrews)
 }
 

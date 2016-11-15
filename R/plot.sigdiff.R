@@ -1,15 +1,16 @@
 #' Function to plot the output from powerSim
-#'
+#' 
 #' @param powerout power analysis object of class 'gamMRSea.power'
 #' @param coordinates nx2 dataframe or matrix of data coordinates
 #' @param tailed takes on the value 'one' or 'two' depending on the type of test required
-#' @param error.rate number stating the error rate required, default is 0.05 (5\% error rate)
+#' @param error.rate number stating the error rate required, default is 0.05 (5% error rate)
 #' @param adjustment character stating the adjustment, if any, for multiple testing.  The default value is 'none'.  Alternatives are 'sidak' and 'bonferroni'.
-#'
+#' 
 #' @author Lindesay Scott-Hayward (University of St Andrews)
-#'
+#' 
 #' @export
 #'
+
 plot.sigdiff<-function(powerout, coordinates, tailed='two', error.rate=0.05, adjustment='none'){
 
   require(ggplot2)
