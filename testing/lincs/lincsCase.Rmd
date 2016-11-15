@@ -1,7 +1,7 @@
 ---
 title: 'Lincs Power Analysis: Auks'
 author: "Lindesay Scott-Hayward"
-date: "`r Sys.Data()`"
+date: "`r Sys.Date()`"
 output: pdf_document
 ---
 
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, fig=TRUE, dev='png', warning=FALSE, message=F
 ```{r}
 devtools::load_all(pkg='C://MarineScotlandPower/MRSeaPower')
 devtools::load_all(pkg='C://MarineScotlandPower/MRSea/MRSea')
-setwd("C:/MarineScotlandPower/MRSeaPower")
+#setwd("C:/MarineScotlandPower/MRSeaPower")
 
 require(fields)
 require(splines)
@@ -36,8 +36,13 @@ lincs$response<-lincs$AUK
 lincs$foldid<-getCVids(lincs, 10, 'line_id')
 ```
 
-
+remove data points > 170 animals
 ```{r}
+lincs<-lincs[-which(lincs$response>170),]
+lincs<-arrange(lincs, date, segment)
+```
+
+```{r salsa1d, cache=TRUE}
 initialModel<-glm(response ~ 1 + offset(log(area)), data=lincs, family=quasipoisson)
 
 factorlist<-NULL
@@ -51,6 +56,11 @@ salsa1dout$bestModel$splineParams<-salsa1dout$splineParams
 
 bestModel1D<-make.gamMRSea(salsa1dout$bestModel, panelid = 1:nrow(lincs), splineParams = salsa1dout$splineParams)
 
+```
+
+```{r}
+sink()
+sink()
 ```
 
 
@@ -69,8 +79,7 @@ runPartialPlots(bestModel1D, data = lincs, factorlist.in = factorlist, varlist.i
 ```
 
 
-```{r}
-
+```{r salsa2d, cache=TRUE}
 knotgrid<-getKnotgrid(cbind(lincs$x.pos, lincs$y.pos))
 distMats<-makeDists(cbind(lincs$x.pos, lincs$y.pos), na.omit(knotgrid))
 # choose sequence of radii
@@ -79,7 +88,7 @@ r_seq<-getRadiiChoices(8, distMats$dataDist)
 salsa2dlist<-list(fitnessMeasure = 'QAIC', knotgrid = knotgrid, knotdim = c(100, 100),  startKnots=6, minKnots=2, maxKnots=20, r_seq=r_seq, gap=0)
 
 
-salsa2dOutput<-runSALSA2D(bestModel1D, salsa2dlist, d2k=distMats$dataDist, k2k=distMats$knotDist, splineParams=NULL, tol=0, chooserad=F, panels=NULL, suppress.printout=FALSE)
+salsa2dOutput<-runSALSA2D(bestModel1D, salsa2dlist, d2k=distMats$dataDist, k2k=distMats$knotDist, splineParams=NULL, tol=0, chooserad=F, panels=NULL, suppress.printout=TRUE)
 
 bestModel<-make.gamMRSea(salsa2dOutput$bestModel, panelid = 1:nrow(lincs), splineParams = salsa2dOutput$splineParams, varshortnames = varlist, gamMRSea=TRUE)
 
@@ -100,12 +109,12 @@ save(bestModel, file='D:/lindesay/MarScoPower/finalreportdata/lincsAUKmodel.RDat
 
 #### check for correlation:
 
-```{r}
+```{r corcheck, cache=TRUE}
 nsim<-500
 d<-as.numeric(summary(bestModel)$dispersion)
 newdat<-generateNoise(nsim, fitted(bestModel), family='poisson', d=d)
 
-empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat,   model = bestModel, data = lincs, plot=TRUE,   returnDist = TRUE, dots=TRUE)
+empdistribution<-getRunsCritVals(n.sim = nsim, simData=newdat,   model = bestModel, data = lincs, plot=TRUE,   returnDist = TRUE, dots=FALSE)
 
 runs.test(residuals(bestModel, type='pearson'), critvals = empdistribution)
 acf(residuals(bestModel, type='pearson'))
@@ -114,7 +123,6 @@ acf(residuals(bestModel, type='pearson'))
 
 ### check data generation process
 ```{r}
-
 plotMean(bestModel, newdat)
 
 ```
@@ -125,7 +133,6 @@ plotVariance(bestModel, newdat)
 ```
 
 ```{r}
-
 par(mfrow=c(2,2))
 acf(lincs$response, main='Data')
 acf(newdat[,1], main='sim data')
@@ -148,14 +155,12 @@ quilt.plot(lincs$x.pos, lincs$y.pos, apply(newdat, 1, mean), main='Mean Simulate
 
 ### Generate impact data
 ```{r}
-
 nsim=500
 truebeta<-log(0.5)
 impdata.auk<-genOverallchangeData(changecoef.link = truebeta, model = bestModel, data = lincs)
 ```
 
 ```{r}
-
 t<-group_by(impdata.auk, eventphase)%>%
   summarise(sum=sum(truth), mean=mean(truth), n=n())
 t
@@ -193,13 +198,11 @@ ggplot( NULL ) + geom_raster( data = rdf1 , aes( x , y , fill = pct.change ) ) +
 
 
 ```{r}
-
 newdata.auk.imp<-generateNoise(nsim, impdata.auk$truth, family='poisson', d=summary(bestModel)$dispersion)
 
 ```
 
 ```{r}
-
 bestModel$splineParams[[1]]$dist<-rbind(bestModel$splineParams[[1]]$dist, bestModel$splineParams[[1]]$dist)
 auksim_glm<-update(bestModel, newdata.auk.imp[,1]~. + eventphase, data=impdata.auk)
 auksim_glm$panels<-impdata.auk$panels
@@ -208,14 +211,14 @@ auksim_glm$panels<-impdata.auk$panels
 
 
 make sure that the independent data is used to get the null distribution
-```{r}
+```{r warning=FALSE, message=FALSE}
 empdistpower.auk<-getRunsCritVals(n.sim = nsim, simData=newdata.auk.imp, 
-                                  model = auksim_glm, data = impdata.auk, plot=FALSE,  returnDist = TRUE, dots=TRUE)
+                                  model = auksim_glm, data = impdata.auk, plot=FALSE,  returnDist = TRUE, dots=FALSE)
 ```
 
 
 ```{r}
-preddata<-read.csv('data/lincspreddata.csv')
+preddata<-read.csv('../../data/lincspreddata.csv')
 
 # make predictions for month 10 - month with highest estimated density (from month partial plot)
 predictdata<-rbind(data.frame(preddata, month=10, area=1, eventphase=0), data.frame(preddata, month=10, area=1, eventphase=1))
@@ -226,24 +229,23 @@ g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit
 ```
 
 
-```{r}
-nsim=200
+```{r aukpower, cache=TRUE}
+nsim=400
 powerout.auk.oc<-powerSimPll(newdata.auk.imp, auksim_glm, empdistpower.auk, nsim=nsim, powercoefid=length(coef(auksim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=auksim_glm$splineParams, sigdif=TRUE, n.boot=500, nCores = 6)
 ```
 
 ```{r}
-save(powerout.auk.oc, file='testing/FinalReportCode/powerout.lincsauk.oc.RData', compress = 'bzip2')
+save(powerout.auk.oc, file='../FinalReportCode/powerout.lincsauk.oc.RData', compress = 'bzip2')
 ```
 
 
-```{r}
+```{r auknull, cache=TRUE}
 null.output.auk.oc<-pval.coverage.null(newdat.ind = newdata.auk.imp, newdat.corr = NULL, model = auksim_glm, nsim = nsim, powercoefid = length(coef(auksim_glm)))
 
 ```
 
 ```{r}
-
-save(null.output.auk.oc, file='testing/FinalReportCode/null.output.lincsauk.oc.RData', compress = 'bzip2')
+save(null.output.auk.oc, file='../FinalReportCode/null.output.lincsauk.oc.RData', compress = 'bzip2')
 
 ```
 
@@ -274,4 +276,93 @@ plot.sigdiff(powerout.auk.oc, coordinates = predictdata[predictdata$eventphase==
 
 ```{r}
 plot.sigdiff(powerout.auk.oc, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='sidak')
+```
+
+```{r}
+plot.sigdiff(powerout.auk.oc, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='bonferroni')
+```
+
+
+# Power analysis: 25% decline
+
+### Generate impact data
+```{r}
+nsim=500
+truebeta<-log(0.75)
+impdata.auk<-genOverallchangeData(changecoef.link = truebeta, model = bestModel, data = lincs)
+```
+
+```{r}
+t<-group_by(impdata.auk, eventphase)%>%
+  summarise(sum=sum(truth), mean=mean(truth), n=n())
+t
+```
+
+```{r}
+newdata.auk.imp<-generateNoise(nsim, impdata.auk$truth, family='poisson', d=summary(bestModel)$dispersion)
+```
+
+```{r}
+auksim_glm<-update(bestModel, newdata.auk.imp[,1]~. + eventphase, data=impdata.auk)
+auksim_glm$panels<-impdata.auk$panels
+```
+
+
+make sure that the independent data is used to get the null distribution
+```{r warning=FALSE, message=FALSE}
+empdistpower.auk<-getRunsCritVals(n.sim = nsim, simData=newdata.auk.imp, 
+                                  model = auksim_glm, data = impdata.auk, plot=FALSE,  returnDist = TRUE, dots=FALSE)
+
+```
+
+
+```{r aukpower25, cache=TRUE}
+nsim=400
+powerout.auk.oc25<-powerSimPll(newdata.auk.imp, auksim_glm, empdistpower.auk, nsim=nsim, powercoefid=length(coef(auksim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=auksim_glm$splineParams, sigdif=TRUE, n.boot=500, nCores = 6)
+```
+
+```{r}
+save(powerout.auk.oc25, file='../FinalReportCode/powerout.lincsauk.oc25.RData', compress = 'bzip2')
+```
+
+
+```{r auknull25, cache=TRUE}
+null.output.auk.oc25<-pval.coverage.null(newdat.ind = newdata.auk.imp, newdat.corr = NULL, model = auksim_glm, nsim = nsim, powercoefid = length(coef(auksim_glm)))
+
+```
+
+```{r}
+save(null.output.auk.oc25, file='../FinalReportCode/null.output.lincsauk.oc25.RData', compress = 'bzip2')
+
+```
+
+
+```{r}
+summary(powerout.auk.oc, null.output.auk.oc, truebeta=truebeta)
+```
+
+
+```{r}
+powerPlot(powerout.auk.oc)
+
+```
+
+```{r}
+plot.preds(powerout.auk.oc)
+```
+
+```{r}
+plot.diffs(powerout.auk.oc)
+```
+
+```{r}
+plot.sigdiff(powerout.auk.oc, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05)
+```
+
+```{r}
+plot.sigdiff(powerout.auk.oc, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='sidak')
+```
+
+```{r}
+plot.sigdiff(powerout.auk.oc, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='bonferroni')
 ```
