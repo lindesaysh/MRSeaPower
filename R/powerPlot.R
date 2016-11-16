@@ -19,8 +19,8 @@ powerPlot<-function(power.object){
   }
 
   maintitle = paste('For power = 80%, error rate = ', dat80[1,1], sep='')
-  
-  p <-ggplot(dat) + geom_line(aes(err, pow), color='blue', size=1) + xlab('Error Rate') + ylab('Power') + theme_bw() + scale_y_continuous(limits=c(0,100)) + geom_vline(xintercept=0.05, linetype=2)+ geom_vline(xintercept=0.01, linetype=2) + geom_hline(yintercept=dat80[1,2], linetype=4) + geom_vline(xintercept=dat80[1,1], linetype=4) + ggtitle(maintitle)
+
+  p <-ggplot(dat) + geom_line(aes(err, pow), color='blue', size=1) + xlab('Error Rate') + ylab('Power') + theme_bw() + scale_y_continuous(limits=c(0,100)) + geom_vline(xintercept=0.05, linetype=2, colour='grey')+ geom_vline(xintercept=0.01, linetype=2, colour='grey') + geom_hline(yintercept=dat80[1,2], linetype=4, colour='blue') + geom_vline(xintercept=dat80[1,1], linetype=4, colour='blue') + ggtitle(maintitle)
   return(p)
 }
 
