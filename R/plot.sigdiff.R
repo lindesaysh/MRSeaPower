@@ -11,7 +11,7 @@
 #' @export
 #'
 
-plot.sigdiff<-function(powerout, coordinates, tailed='two', error.rate=0.05, adjustment='none'){
+plot.sigdiff<-function(powerout, coordinates, tailed='two', error.rate=0.05, adjustment='none', gridcell.dim=NULL){
 
   require(ggplot2)
 
@@ -31,7 +31,7 @@ plot.sigdiff<-function(powerout, coordinates, tailed='two', error.rate=0.05, adj
       error.rate<-switch(adjustment,
                          sidak=round(1-(1-error.rate)^(1/nrow(coordinates)),4),
                          none=error.rate,
-                         bonferroni=error.rate/nrow(coordinates)
+                         bonferroni=round(error.rate/nrow(coordinates),4)
       )
       maintitle<-paste(t, ' ER = ', er.orig*100,'%; Invididual ER = ', error.rate*100,'% , Adj = "',adjustment, '"', sep='')
     }
@@ -54,9 +54,13 @@ plot.sigdiff<-function(powerout, coordinates, tailed='two', error.rate=0.05, adj
 
   if(is.null(nrow(coordinates))) stop("Error: coordinates does not contain two columns")
   if(dim(coordinates)[2]>2) warning('Warning: more than two coordinate columns, first two used')
-
+if(is.null(gridcell.dim)){
   height<-unique(coordinates[,2])[2]-unique(coordinates[,2])[1]
   width<-unique(coordinates[,1])[2]-unique(coordinates[,1])[1]
+}else{
+    height=gridcell.dim[1]
+    width=gridcell.dim[2]
+  }
 
   plotdata<-data.frame(coordinates, percentage=propsig)
   p<-ggplot(plotdata)

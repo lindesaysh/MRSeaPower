@@ -1,4 +1,4 @@
-powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predictionGrid=NULL, g2k=NULL, splineParams=NULL, bootstrapCI=TRUE, sigdif=TRUE, n.boot=1000, nCores=1){
+powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predictionGrid=NULL, g2k=NULL, splineParams=NULL, bootstrapCI=TRUE, sigdif=TRUE, n.boot=500, nCores=1){
 
   require(mvtnorm)
   data<-model$data
@@ -142,17 +142,17 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
         bootPreds<-do.bootstrap.cress.robust(sim_glm,predictionGrid, splineParams=splineParams, g2k=g2k, B=n.boot, robust=robust, cat.message=FALSE)
 
         # extract distribution of null differences
-        nulldifferences<-bootPreds[predictionGrid$eventphase==0,(1:(n.boot/2))] - bootPreds[predictionGrid$eventphase==0,(((n.boot/2)+1):n.boot)]
+        #nulldifferences<-bootPreds[predictionGrid$eventphase==0,(1:(n.boot/2))] - bootPreds[predictionGrid$eventphase==0,(((n.boot/2)+1):n.boot)]
 
         # find the predicted differences from this simulation
         preddifferences<-preds[predictionGrid$eventphase==1] - preds[predictionGrid$eventphase==0]
 
-        # calculate p-values for individual and family wide cells.
-        indpvals<-pval.differences(nulldifferences, preddifferences, family=FALSE)
-        familypvals<-pval.differences(nulldifferences, preddifferences, family=TRUE)
-
-        indpvals<-as.matrix(data.frame(indpvals))
-        familypvals<-as.matrix(data.frame(familypvals))
+        # # calculate p-values for individual and family wide cells.
+        # indpvals<-pval.differences(nulldifferences, preddifferences, family=FALSE)
+        # familypvals<-pval.differences(nulldifferences, preddifferences, family=TRUE)
+        #
+        # indpvals<-as.matrix(data.frame(indpvals))
+        # familypvals<-as.matrix(data.frame(familypvals))
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # ~~~~ Abundance/mean proportion ~~~~~~~~~
@@ -189,7 +189,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       } # end sigdif
 
 
-      return(list(imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, preds=preds, indpvals=indpvals, familypvals=familypvals, bsum=bsum, asum=asum, bootPreds=bootPreds, bootdifferences=bootdifferences, bootdifferences.pct=bootdifferences.pct))
+      return(list(imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, preds=preds, bsum=bsum, asum=asum, bootPreds=bootPreds, bootdifferences=bootdifferences, bootdifferences.pct=bootdifferences.pct, preddifferences=preddifferences))
     })
 
     stopCluster(myCluster)
@@ -199,9 +199,10 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     asum= sapply(Routputs, '[[','asum')
     powsimfits=sapply(Routputs, '[[','powsimfits')
     betacis=t(sapply(Routputs, '[[','betacis'))
-    indpvals = sapply(Routputs, '[[','indpvals', simplify='array')
-    familypvals = sapply(Routputs, '[[','familypvals', simplify='array')
+    # indpvals = sapply(Routputs, '[[','indpvals', simplify='array')
+    # familypvals = sapply(Routputs, '[[','familypvals', simplify='array')
     preds<-sapply(Routputs, '[[','preds')
+    preddifferences<-sapply(Routputs, '[[','preddifferences')
     bootdifferences=sapply(Routputs, '[[','bootdifferences', simplify='array')
     bootdifferences.pct=sapply(Routputs, '[[','bootdifferences.pct', simplify  ='array')
     #d2imp.plotdata=Routputs[[nsim]]$d2imp.plotdata
@@ -209,10 +210,10 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
 
    #~~~
     # try alply
-    require(plyr)
-    indpvals<-alply(indpvals,3)
-    familypvals<-alply(familypvals,3)
-    detach(package:plyr)
+    # require(plyr)
+    # indpvals<-alply(indpvals,3)
+    # familypvals<-alply(familypvals,3)
+    # detach(package:plyr)
     #~~~
 
     }else{
@@ -312,15 +313,15 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     if(sigdif==T){
       bootPreds<-do.bootstrap.cress.robust(sim_glm,predictionGrid, splineParams=splineParams, g2k=g2k, B=n.boot, robust=robust, cat.message=FALSE)
 
-      # extract distribution of null differences
-      nulldifferences<-bootPreds[predictionGrid$eventphase==0,(1:(n.boot/2))] - bootPreds[predictionGrid$eventphase==0,(((n.boot/2)+1):n.boot)]
+      # # extract distribution of null differences
+      # nulldifferences<-bootPreds[predictionGrid$eventphase==0,(1:(n.boot/2))] - bootPreds[predictionGrid$eventphase==0,(((n.boot/2)+1):n.boot)]
 
       # find the predicted differences from this simulation
       preddifferences[,i]<-preds[predictionGrid$eventphase==1,i] - preds[predictionGrid$eventphase==0,i]
 
-      # calculate p-values for individual and family wide cells.
-      indpvals[[i]]<-pval.differences(nulldifferences, preddifferences[,i], family=FALSE)
-      familypvals[[i]]<-pval.differences(nulldifferences, preddifferences[,i], family=TRUE)
+      # # calculate p-values for individual and family wide cells.
+      # indpvals[[i]]<-pval.differences(nulldifferences, preddifferences[,i], family=FALSE)
+      # familypvals[[i]]<-pval.differences(nulldifferences, preddifferences[,i], family=TRUE)
 
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       # ~~~~ Abundance/mean proportion ~~~~~~~~~
@@ -380,6 +381,17 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       meanp[2,2:3]<-quantile(asum, probs=quants)
       rownames(meanp)<-c('Before', 'After')
       colnames(meanp)<-c('Mean', 'LowerCI', 'UpperCI')
+    }
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~~~~ null differences and p-vals ~~~~~~~~~
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    nulldifferences<-preds[predictionGrid$eventphase==0,(1:(nsim/2))] - preds[predictionGrid$eventphase==0,(((nsim/2)+1):nsim)]
+
+    for(pval in 1:nsim){
+      indpvals[[pval]]<-pval.differences(nulldifferences, preddifferences[, pval], family=FALSE)
+      familypvals[[pval]]<-pval.differences(nulldifferences, preddifferences[, pval], family=TRUE)
     }
 
 
