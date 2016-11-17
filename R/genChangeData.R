@@ -31,7 +31,7 @@ genChangeData<-function(pct.change, model, data, panels=NULL, eventsite.bnd=NULL
     require(splancs)
     noneventcells<-ifelse(inout(data[,names(eventsite.bnd)], eventsite.bnd,quiet = T), 0, 1)
   }
-  
+
   if(length(pct.change)>1){
     overallchange.re=TRUE
     pct.change.oc=pct.change[2]
@@ -41,16 +41,17 @@ genChangeData<-function(pct.change, model, data, panels=NULL, eventsite.bnd=NULL
   dat2<-rbind(data.frame(data, eventphase=0, panels=panels), data.frame(data,eventphase=1, panels=max(panels)+panels))
 
   fitbefore<- fitted(model)
-  
+
   fitafter<-fitbefore*(pct.change/100)
   #fitafter<- fitbefore*0.5
 
   if(type=='re'){
+    dat2$noneventcells<- c(noneventcells, noneventcells)
     nonaffect<- which(noneventcells==1)
     fitafter<-fitbefore
     fitafter[-nonaffect]<- fitbefore[-nonaffect]*(pct.change/100)
     reldens<-fitted(model)[nonaffect]/sum(fitted(model)[nonaffect])
-    
+
     newcells<- fitafter
     newcells[nonaffect]<-newcells[nonaffect]+(sum(fitbefore[-nonaffect])-sum(fitafter[-nonaffect]))*reldens
 
