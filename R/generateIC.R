@@ -1,7 +1,7 @@
 generateIC<-function(data, corrs, panels, newdata, nsim, dots=FALSE){
 
-  require(Hmisc)
-  require(Matrix)
+  suppressPackageStartupMessages(require(Hmisc))
+  suppressPackageStartupMessages(require(Matrix))
   bids<-unique(data[,panels])
   #nsim=ncol(newdata)
   numRep=nsim # number of draws to be taken

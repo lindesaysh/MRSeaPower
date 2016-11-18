@@ -5,7 +5,7 @@
 \title{Function to plot the output from powerSim}
 \usage{
 \method{plot}{sigdiff}(powerout, coordinates, tailed = "two",
-  error.rate = 0.05, adjustment = "none")
+  error.rate = 0.05, adjustment = "none", gridcell.dim = NULL)
 }
 \arguments{
 \item{powerout}{power analysis object of class 'gamMRSea.power'}

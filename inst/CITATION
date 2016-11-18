@@ -1,0 +1,13 @@
+## R reference
+rref <- bibentry(
+  bibtype = "Manual",
+  title = "MRSeaPower: Power analysis method for gamMRSea models",
+  author = c(person("L.A.S. Scott-Hayward"), person("M.L.M Mackenzie")),
+  organization = "University of St Andrews",
+  note = "R package version 0.1.1",
+  year = 2016)
+
+## Different printing styles
+
+#print(rref, style = "Bibtex")
+

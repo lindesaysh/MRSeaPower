@@ -50,8 +50,8 @@ plotVariance<-function(model, simdat, cuts=20, quants=c(0.025, 0.975)){
   test_real<-data.frame(meansimfits= means.mod,
                         varsimfits.m=vars.mod,
                         gp=rep(1, nrow(means.mod)))
-  library(ggplot2)
-  library(gridExtra)
+  suppressPackageStartupMessages(library(ggplot2))
+  suppressPackageStartupMessages(library(gridExtra))
 
   p <- ggplot(data=newdat) + geom_line(aes(x=log(meansimfits), y=varsimfits.m)) + geom_line(data = test_real, aes(x=log(meansimfits), y=varsimfits.m), colour='red', size=1) + theme_bw() + xlab('Log Mean Fitted Values') + ylab("Residual Variance") +
     theme(panel.grid.major=element_blank(), panel.grid.minor=

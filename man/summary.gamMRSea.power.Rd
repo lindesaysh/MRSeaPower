@@ -4,7 +4,8 @@
 \alias{summary.gamMRSea.power}
 \title{Summary function for objects of class gamMRSea.power}
 \usage{
-\method{summary}{gamMRSea.power}(power.object, null.object = NULL, truebeta)
+\method{summary}{gamMRSea.power}(power.object, null.object = NULL,
+  truebeta = NULL)
 }
 \arguments{
 \item{power.object}{An object of class gamMRSea.power}

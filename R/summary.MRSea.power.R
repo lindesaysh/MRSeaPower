@@ -5,7 +5,7 @@
 #'
 #' @export
 #'
-summary.gamMRSea.power<-function(power.object, null.object=NULL, truebeta){
+summary.gamMRSea.power<-function(power.object, null.object=NULL, truebeta=NULL){
 
   nsim.m<-length(power.object$imppvals)
   model.power<-(length(which(power.object$imppvals<=0.05))/nsim.m)*100
@@ -47,25 +47,41 @@ print.summary.gamMRSea.power<-function (x, digits = max(3L, getOption("digits") 
   cat("\nNumber of power simulations = ", x$nsims[1])
   cat("\nNumber of no change simulations = ", x$nsims[2], "\n")
 
+  truebeta<-x$truebeta
+  
+  if(is.null(truebeta)){
+    type='re'
+    truebeta='unknown'
+    param = 'redistribution term'
+  }else{
+    type='oc'
+    truebeta<-format(x$truebeta, digits)
+    param='eventphase term'
+  }
+
   if(is.null(x$power$null)){
 
-    cat("\nPower to select 'change' term:\n")
-    cat('\n    Under Change (true parameter = ', format(x$truebeta, digits) , ') = ', x$power$model, '%\n', sep='')
+    cat("\nPower to select 'change' term (",param, "):\n", sep='')
+    cat('\n    Under Change (true parameter = ', truebeta , ') = ', x$power$model, '%\n', sep='')
     cat('    Under no change = Null distribution not specified\n')
 
-    cat("\nCoverage for 'change' coefficient:\n")
-    cat('\n    Under change = ', x$coverage$model.coverage, '%\n', sep='')
-    cat('    Under no change = Null distribution not specified\n', sep='')
+    if(type=='oc'){
+      cat("\nCoverage for 'change' coefficient:\n")
+      cat('\n    Under change = ', x$coverage$model.coverage, '%\n', sep='')
+      cat('    Under no change = Null distribution not specified\n', sep='')
+    }
 
   }else{
 
-    cat("\nPower to select 'change' term:\n")
-    cat('\n    Under Change (true parameter = ', format(x$truebeta, digits) , ') = ', x$power$model, '%\n', sep='')
+    cat("\nPower to select 'change' term (",param, "):\n", sep='')
+    cat('\n    Under Change (true parameter = ', truebeta , ') = ', x$power$model, '%\n', sep='')
     cat('    Under no change (true parameter = ', 0 ,') = ', x$power$null, '%\n', sep='')
 
-    cat("\nCoverage for 'change' coefficient:\n")
-    cat('\n    Under model = ', x$coverage$model.coverage, '%\n', sep='')
-    cat('    Under no change = ', x$coverage$null.coverage, '%\n', sep='')
+    if(type=='oc'){
+      cat("\nCoverage for 'change' coefficient:\n")
+      cat('\n    Under model = ', x$coverage$model.coverage, '%\n', sep='')
+      cat('    Under no change = ', x$coverage$null.coverage, '%\n', sep='')
+    }
   }
 
   if(x$modeltype=='count'){
