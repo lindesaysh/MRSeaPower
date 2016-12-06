@@ -60,7 +60,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       # ~~ power p-value ~~~~~~~~~
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~
       # get runs test result using empirical distribution
-      runspvalemp<-runs.test(residuals(sim_glm, type='pearson'),
+      runspvalemp<-runsTest(residuals(sim_glm, type='pearson'),
                              critvals = empdistribution)$p.value
 
       sim.anv<-anova.gamMRSea(sim_glm)
@@ -232,7 +232,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     # ~~ power p-value ~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # get runs test result using empirical distribution
-    runspvalemp<-runs.test(residuals(sim_glm, type='pearson'),
+    runspvalemp<-runsTest(residuals(sim_glm, type='pearson'),
                            critvals = empdistribution)$p.value
 
     sim.anv<-anova.gamMRSea(sim_glm)

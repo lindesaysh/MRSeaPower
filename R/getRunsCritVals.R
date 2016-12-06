@@ -8,7 +8,7 @@ for(i in 1:n.sim){
   splineParams = model$splineParams
   data$response=simData[,i]
   sim_glm<- update(model, response ~ ., data=data)
-  runs<-runs.test(residuals(sim_glm, type='pearson'))
+  runs<-runsTest(residuals(sim_glm, type='pearson'))
   runsstatH0[i]<-runs$statistic
   # if(imp.beta.coverage){
   #   betas[i]<-coefficients(model)[length(coefficients(model))]
