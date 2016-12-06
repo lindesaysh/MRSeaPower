@@ -17,6 +17,9 @@ require(raster)
 data(fat)
 fat$response<-ifelse(fat$response>0, 1, 0)
 
+
+setwd("C:/MarineScotlandPower/MRSeaPower")
+
 load('testing/Fat/FaT_model.RData')
 bestModel.fat<-bestModel
 fat.data<-bestModel.fat$data
@@ -30,9 +33,14 @@ newdata.fat<-generateNoise(n=100, response=fitted(bestModel.fat), family='binomi
 # ~~~~~~~~~~~~~~~~~~~
 nsim=500
 bnd.wf<-data.frame(x.pos=c(543289.6, 574317.5, 574892.1, 545588.0,543289.6),y.pos=c(6253767, 6253097, 6237016, 6236681,6253767))
-truebeta<-log(0.5)
-impdata.fat.re<-genRedistData(bestModel.fat, data=fat.data, changecoef.link=truebeta, panels='panel', imppoly=bnd.wf, impactcells = NULL)
+truebeta<-0.5
+impdata.fat.re<-genChangeData(truebeta*100, bestModel.fat, data=fat.data, panels='panel', eventsite.bnd = bnd.wf)
 newdata.fat.imp.re<-generateNoise(nsim, impdata.fat.re$truth, family='binomial', size=1)
+
+impdata.fat.re$redistid<-paste(impdata.fat.re$eventphase, impdata.fat.re$noneventcells)
+t<-group_by(impdata.fat.re, redistid)%>%
+  summarise(sum=sum(truth), mean=mean(truth), n=n())
+t
 
 
 fatsim_glm<-update(bestModel.fat, newdata.fat.imp.re[,1]~. + as.factor(eventphase) -
@@ -75,8 +83,8 @@ g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit
 
 
 
-nsim=100
-system.time(powerout.fat.re<-powerSimPll(newdata.fat.imp.re, bestModel_int, empdistpower.fat, nsim=nsim, powercoefid=length(coef(bestModel_int)), predictionGrid=predictdata, g2k=g2k, splineParams=bestModel_int$splineParams, sigdif=TRUE, n.boot=500, impact.loc=c(559347.4, 6244923), nCores = 8))
+nsim=200
+system.time(powerout.fat.re<-powerSimPll(newdata.fat.imp.re, bestModel_int, empdistpower.fat, nsim=nsim, powercoefid=length(coef(bestModel_int)), predictionGrid=predictdata, g2k=g2k, splineParams=bestModel_int$splineParams, n.boot=200, nCores = 6))
 
 save(powerout.fat.re, file='testing/FinalReportCode/powerout.fat.re.RData', compress = 'bzip2')
 
@@ -90,14 +98,8 @@ summary(powerout.fat.re, null.output.fat.re, truebeta=log(0.5))
 
 powerPlot(powerout.fat.re)
 
-plotdata<-plot.sigdiff(powerout.fat.re, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
+plotdata<-plot.sigdiff(powerout.fat.re, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05)
 plotdata
 
-plotdata<-plot.sigdiff(powerout.fat.re, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=TRUE)
+plotdata<-plot.sigdiff(powerout.fat.re, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='sidak')
 plotdata
-
-### Distance to event site plot
-
-plot.d2imp(powerout.fat.re)
-
-plot.d2imp(powerout.fat.re, pct.diff = FALSE)

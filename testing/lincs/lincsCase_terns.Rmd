@@ -184,10 +184,10 @@ runACF(lincs$panels, model = update(bestModel, newdat[,1]~.))
 
 ```{r}
 par(mfrow=c(2,2))
-quilt.plot(lincs$x.pos, lincs$y.pos, lincs$response, main='Original Data')
-quilt.plot(lincs$x.pos, lincs$y.pos, fitted(bestModel), main='Fitted Values')
-quilt.plot(lincs$x.pos, lincs$y.pos, newdatcor[,1], main='Simulated Data Example')
-quilt.plot(lincs$x.pos, lincs$y.pos, apply(newdatcor, 1, mean), main='Mean Simulated Data')
+quilt.plot(lincs$x.pos, lincs$y.pos, lincs$response, main='Original Data', ncol=40, nrow=40)
+quilt.plot(lincs$x.pos, lincs$y.pos, fitted(bestModel), main='Fitted Values', ncol=40, nrow=40)
+quilt.plot(lincs$x.pos, lincs$y.pos, newdatcor[,1], main='Simulated Data Example', ncol=40, nrow=40)
+quilt.plot(lincs$x.pos, lincs$y.pos, apply(newdatcor, 1, mean), main='Mean Simulated Data', ncol=40, nrow=40)
 
 ```
 
@@ -201,7 +201,7 @@ quilt.plot(lincs$x.pos, lincs$y.pos, apply(newdatcor, 1, mean) - fitted(bestMode
 ### Generate impact data
 ```{r}
 nsim=500
-truebeta<-0.5
+truebeta<-0.75
 impdata.auk<-genChangeData(truebeta*100, model = bestModel, data = lincs,panels = "panels")
 ```
 
@@ -258,7 +258,7 @@ auksim_glm$panels<-impdata.auk$panels.1
 
 make sure that the independent data is used to get the null distribution
 ```{r warning=FALSE, message=FALSE}
-empdistpower.auk<-getRunsCritVals(n.sim = nsim, simData=newdat.auk.imp, 
+empdistpower.auk<-getRunsCritVals(n.sim = nsim, simData=newdata.auk.imp, 
                                   model = auksim_glm, data = impdata.auk, plot=FALSE,  returnDist = TRUE, dots=FALSE)
 ```
 
@@ -266,7 +266,7 @@ empdistpower.auk<-getRunsCritVals(n.sim = nsim, simData=newdat.auk.imp,
 ```{r}
 
 # make predictions for month 10 - month with highest estimated density (from month partial plot)
-predictdata<-rbind(data.frame(pred_grid[,1:3], month=6, area=1, eventphase=0), data.frame(pred_grid[,1:3], month=6, area=1, eventphase=1))
+predictdata<-rbind(data.frame(pred_grid[,1:3], month=10, area=1, eventphase=0), data.frame(pred_grid[,1:3], month=10, area=1, eventphase=1))
 names(predictdata)[1:2]<-c('x.pos', 'y.pos')
 
 g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit(bestModel$splineParams[[1]]$knotgrid), knotmat = FALSE)$dataDist
@@ -275,143 +275,142 @@ g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit
 ```
 
 
-```{r aukpower, cache=TRUE}
-nsim=100
-powerout.auk.oc<-powerSimPll(newdatcor.auk.imp, auksim_glm, empdistpower.auk, nsim=nsim, powercoefid=length(coef(auksim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=auksim_glm$splineParams, sigdif=TRUE, n.boot=100, nCores = 6)
+```{r aukpoweroc, cache=TRUE}
+nsim=200
+powerout.auk.oc<-powerSimPll(newdatcor.auk.imp, auksim_glm, empdistpower.auk, nsim=nsim, powercoefid=length(coef(auksim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=auksim_glm$splineParams, sigdif=TRUE, n.boot=200, nCores = 6)
 ```
 
 ```{r}
-save(powerout.auk.oc.50, file='../FinalReportCode/powerout.lincsauk.oc50.RData', compress = 'bzip2')
+save(powerout.auk.oc, file='../FinalReportCode/powerout.lincsauk.oc.RData', compress = 'bzip2')
 ```
 
 
 ```{r auknull, cache=TRUE}
-null.output.auk.oc.50<-pval.coverage.null(newdat.ind = newdata.auk.imp, newdat.corr = NULL, model = auksim_glm, nsim = nsim, powercoefid = length(coef(auksim_glm)))
+null.output.auk.oc<-pval.coverage.null(newdat.ind = newdata.auk.imp, newdat.corr = NULL, model = auksim_glm, nsim = nsim, powercoefid = length(coef(auksim_glm)))
 
 ```
 
 ```{r}
-save(null.output.auk.oc.50, file='../FinalReportCode/null.output.lincsauk.oc50.RData', compress = 'bzip2')
+save(null.output.auk.oc, file='../FinalReportCode/null.output.lincsauk.oc.RData', compress = 'bzip2')
 
 ```
 
 
-
-```{r pow50summary}
-summary(powerout.auk.oc.50, null.output.auk.oc.50, truebeta=log(truebeta))
+```{r powauksummary}
+summary(powerout.auk.oc, null.output.auk.oc, truebeta=log(truebeta))
 ```
 
 
-```{r pow50powerplot}
-powerPlot(powerout.auk.oc.50)
-
-```
-
-```{r pow50predplot}
-plot.preds(powerout.auk.oc.50)
-```
-
-```{r pow50diffsplot}
-plot.diffs(powerout.auk.oc.50)
-```
-
-```{r pow50sigdiff}
-plot.sigdiff(powerout.auk.oc.50, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, gridcell.dim = c(1000,1000))
-```
-
-```{r pow50sigdiffsid}
-plot.sigdiff(powerout.auk.oc.50, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='sidak', gridcell.dim = c(1000,1000))
-```
-
-```{r pow50sigdiffbonf}
-plot.sigdiff(powerout.auk.oc.50, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='bonferroni', gridcell.dim = c(1000,1000))
-```
-
-
-# Power analysis: 25% decline
-
-```{r}
-nsim=500
-truebeta<-0.75
-impdata.auk<-genChangeData(truebeta*100, model = bestModel, data = lincs, panels = "panels")
-```
-
-
-```{r}
-t<-group_by(impdata.auk, eventphase)%>%
-  summarise(sum=sum(truth), mean=mean(truth), n=n())
-t
-```
-
-
-```{r}
-newdata.auk.imp<-generateNoise(nsim, impdata.auk$truth, family='poisson', d=d)
-
-newdatcor.auk.imp<-generateIC(data = impdata.auk, corrs = rbind(corrs,corrs), panels = 'panels.1', newdata = newdata.auk.imp, nsim = nsim, dots = FALSE)
-
-```
-
-```{r}
-auksim_glm<-update(bestModel, newdata.auk.imp[,1]~. + eventphase, data=impdata.auk)
-auksim_glm$panels<-impdata.auk$panels.1
-```
-
-
-make sure that the independent data is used to get the null distribution
-```{r warning=FALSE, message=FALSE}
-empdistpower.auk<-getRunsCritVals(n.sim = nsim, simData=newdata.auk.imp,
-                                  model = auksim_glm, data = impdata.auk, plot=FALSE,  returnDist = TRUE, dots=FALSE)
-
-```
-
-
-```{r aukpower25, cache=TRUE}
-nsim=100
-powerout.auk.oc25<-powerSimPll(newdata.auk.imp, auksim_glm, empdistpower.auk, nsim=nsim, powercoefid=length(coef(auksim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=auksim_glm$splineParams, sigdif=TRUE, n.boot=200, nCores = 6)
-```
-
-```{r}
-save(powerout.auk.oc25, file='../FinalReportCode/powerout.lincsauk.oc25.RData', compress = 'bzip2')
-```
-
-
-```{r auknull25, cache=TRUE}
-null.output.auk.oc25<-pval.coverage.null(newdat.ind = newdata.auk.imp, newdat.corr = NULL, model = auksim_glm, nsim = nsim, powercoefid = length(coef(auksim_glm)))
-
-```
-
-```{r}
-save(null.output.auk.oc25, file='../FinalReportCode/null.output.lincsauk.oc25.RData', compress = 'bzip2')
-
-```
-
-
-```{r}
-summary(powerout.auk.oc, null.output.auk.oc, truebeta=truebeta)
-```
-
-
-```{r}
+```{r powaukpowerplot}
 powerPlot(powerout.auk.oc)
 
 ```
 
-```{r}
+```{r powaukpredplot}
 plot.preds(powerout.auk.oc)
 ```
 
-```{r}
+```{r powaukdiffsplot}
 plot.diffs(powerout.auk.oc)
 ```
 
-```{r}
-plot.sigdiff(powerout.auk.oc, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05)
+```{r powauksigdiff}
+plot.sigdiff(powerout.auk.oc, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, gridcell.dim = c(1000,1000))
 ```
 
-```{r}
-plot.sigdiff(powerout.auk.oc, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='sidak')
+```{r powauksigdiffsid}
+plot.sigdiff(powerout.auk.oc, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='sidak', gridcell.dim = c(1000,1000))
 ```
 
-```{r}
-plot.sigdiff(powerout.auk.oc, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='bonferroni')
+```{r powauksigdiffbonf}
+plot.sigdiff(powerout.auk.oc, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='bonferroni', gridcell.dim = c(1000,1000))
 ```
+
+
+<!-- # Power analysis: 25% decline -->
+
+<!-- ```{r} -->
+<!-- nsim=500 -->
+<!-- truebeta<-0.75 -->
+<!-- impdata.auk<-genChangeData(truebeta*100, model = bestModel, data = lincs, panels = "panels") -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- t<-group_by(impdata.auk, eventphase)%>% -->
+<!--   summarise(sum=sum(truth), mean=mean(truth), n=n()) -->
+<!-- t -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- newdata.auk.imp<-generateNoise(nsim, impdata.auk$truth, family='poisson', d=d) -->
+
+<!-- newdatcor.auk.imp<-generateIC(data = impdata.auk, corrs = rbind(corrs,corrs), panels = 'panels.1', newdata = newdata.auk.imp, nsim = nsim, dots = FALSE) -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- auksim_glm<-update(bestModel, newdata.auk.imp[,1]~. + eventphase, data=impdata.auk) -->
+<!-- auksim_glm$panels<-impdata.auk$panels.1 -->
+<!-- ``` -->
+
+
+<!-- make sure that the independent data is used to get the null distribution -->
+<!-- ```{r warning=FALSE, message=FALSE} -->
+<!-- empdistpower.auk<-getRunsCritVals(n.sim = nsim, simData=newdata.auk.imp, -->
+<!--                                   model = auksim_glm, data = impdata.auk, plot=FALSE,  returnDist = TRUE, dots=FALSE) -->
+
+<!-- ``` -->
+
+
+<!-- ```{r aukpower25, cache=TRUE} -->
+<!-- nsim=100 -->
+<!-- powerout.auk.oc25<-powerSimPll(newdata.auk.imp, auksim_glm, empdistpower.auk, nsim=nsim, powercoefid=length(coef(auksim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=auksim_glm$splineParams, sigdif=TRUE, n.boot=200, nCores = 6) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- save(powerout.auk.oc25, file='../FinalReportCode/powerout.lincsauk.oc25.RData', compress = 'bzip2') -->
+<!-- ``` -->
+
+
+<!-- ```{r auknull25, cache=TRUE} -->
+<!-- null.output.auk.oc25<-pval.coverage.null(newdat.ind = newdata.auk.imp, newdat.corr = NULL, model = auksim_glm, nsim = nsim, powercoefid = length(coef(auksim_glm))) -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- save(null.output.auk.oc25, file='../FinalReportCode/null.output.lincsauk.oc25.RData', compress = 'bzip2') -->
+
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- summary(powerout.auk.oc25, null.output.auk.oc25, truebeta=log(truebeta)) -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- powerPlot(powerout.auk.oc25) -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- plot.preds(powerout.auk.oc25) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- plot.diffs(powerout.auk.oc25) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- plot.sigdiff(powerout.auk.oc25, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, gridcell.dim = c(1000, 1000)) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- plot.sigdiff(powerout.auk.oc25, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='sidak', gridcell.dim = c(1000, 1000)) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- plot.sigdiff(powerout.auk.oc25, coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='bonferroni', gridcell.dim = c(1000, 1000)) -->
+<!-- ``` -->

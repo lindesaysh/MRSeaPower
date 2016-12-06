@@ -26,6 +26,7 @@ fow.data<-bestModel.fow$data
 newdata.fow<-generateNoise(n=500, response=fitted(bestModel.fow), family='poisson', d=summary(bestModel.fow)$dispersion)
 
 corrmat.fow<-getCorrelationMat(panel=fow.data$newbidNum, data = fow.data$response)
+
 newdata.fow.cor<-generateIC(data = fow.data, corrs = corrmat.fow, panels = 'newbidNum', newdata=newdata.fow, nsim=500,dots = FALSE)
 
 # ~~~~~~~~~~~~~~~~~~~
@@ -33,7 +34,13 @@ newdata.fow.cor<-generateIC(data = fow.data, corrs = corrmat.fow, panels = 'newb
 # ~~~~~~~~~~~~~~~~~~~
 
 nsim=500
-impdata.fow<-genOverallchangeData(log(0.5), bestModel.fow, data = fow.data, panels = 'newbidNum')
+truebeta=0.5
+impdata.fow<-genChangeData(truebeta*100, bestModel.fow, data = fow.data, panels = 'newbidNum')
+
+
+t<-group_by(impdata.fow, eventphase)%>%
+  summarise(sum=sum(truth), mean=mean(truth), n=n())
+t
 
 newdata.fow.imp<-generateNoise(nsim, impdata.fow$truth, family='poisson', d=summary(bestModel.fow)$dispersion)
 corrmat.fow.imp<-rbind(corrmat.fow, corrmat.fow)
@@ -56,11 +63,10 @@ predictdata<-rbind(data.frame(fowshco.grid, TideState=1, WindStrength=0, SeaStat
 g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit(fowsim_glm$splineParams[[1]]$knotgrid), knotmat = FALSE)$dataDist
 
 # POWER ANALYSIS
-nsim=500
-system.time(
-  powerout.fow.oc<-powerSimPll(newdata.fow.cor, fowsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fowsim_glm$splineParams, n.boot=500, nCores=8)
+nsim=200
+  powerout.fow.oc<-powerSimPll(newdata.fow.cor, fowsim_glm, empdistpower, nsim=nsim, powercoefid=length(coef(fowsim_glm)), predictionGrid=predictdata, g2k=g2k, splineParams=fowsim_glm$splineParams, n.boot=200, nCores=6)
 
-)
+
 save(powerout.fow.oc, file='testing/FinalReportCode/powerout.fow.oc.RData', compress = 'bzip2')
 
 

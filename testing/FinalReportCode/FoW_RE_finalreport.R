@@ -13,6 +13,7 @@ mypalette<-rev(brewer.pal(length (ticks)-1,"Spectral"))
 require(sp)
 require(raster)
 
+setwd('C:\\MarineScotlandPower\\MRSeaPower')
 data(fowshco)
 load('testing/FoW/FoW_model.RData')
 bestModel.fow<-bestModel
@@ -35,8 +36,8 @@ impactcells<-arrange(mdat, index)$impactcells
 impactcells[which(is.na(impactcells))]<-1
 
 nsim=500
-truebeta<-log(0.5)
-impdata.fow.re<-genRedistData(bestModel.fow, data=fow.data, changecoef.link=truebeta, panels='newbidNum', imppoly=NULL, impactcells = impactcells)
+truebeta<-0.5
+impdata.fow.re<-genChangeData(truebeta*100, model = bestModel.fow, data=fow.data, panels='newbidNum', noneventcells = impactcells)
 
 ##
 newdata.fow.imp.re<-generateNoise(nsim, impdata.fow.re$truth, family='poisson', d=summary(bestModel.fow)$dispersion)
@@ -44,8 +45,8 @@ corrmat.fow.imp<-rbind(corrmat.fow, corrmat.fow)
 newdata.fow.cor.re<-generateIC(data = impdata.fow.re, corrs = corrmat.fow.imp, panels = 'panels', newdata=newdata.fow.imp.re, nsim=nsim)
 
 ##
-fowsim_glm<-update(bestModel.fow, newdata.fow.cor.re[,1] ~. + as.factor(eventphase) -
-                     LocalRadialFunction(radiusIndices, dists, radii, aR), data=impdata.fow.re)
+fowsim_glm<-update(bestModel.fow, newdata.fow.cor.re[,1] ~. + as.factor(eventphase) - LocalRadialFunction(radiusIndices, dists, radii, aR), data=impdata.fow.re)
+
 fowsim_glm<-make.gamMRSea(fowsim_glm, panelid=1:nrow(impdata.fow.re),
                           splineParams=fowsim_glm$splineParams,
                           varshortnames=fowsim_glm$varshortnames,gamMRSea=TRUE)
@@ -84,9 +85,9 @@ g2k<-makeDists(cbind(predictdata$x.pos, predictdata$y.pos), knotcoords = na.omit
 
 
 # POWER ANALYSIS
-nsim=100
+nsim=200
 system.time(
-  powerout.fow.re<-powerSimPll(newdata.fow.cor.re, bestModel_int, empdistpower, nsim=nsim, powercoefid=length(coef(bestModel_int)), predictionGrid=predictdata, g2k=g2k, splineParams=bestModel_int$splineParams, n.boot=500, impact.loc=c(510750, 6555700), nCores=8)
+  powerout.fow.re<-powerSimPll(newdata.fow.cor.re, bestModel_int, empdistpower, nsim=nsim, powercoefid=length(coef(bestModel_int)), predictionGrid=predictdata, g2k=g2k, splineParams=bestModel_int$splineParams, n.boot=200, nCores=6)
 
 )
 save(powerout.fow.re, file='testing/FinalReportCode/powerout.fow.re.RData', compress = 'bzip2')
@@ -96,18 +97,13 @@ null.output.fow.re<-pval.coverage.null(newdat.ind = newdata.fow.imp.re, newdat.c
 
 save(null.output.fow.re, file='testing/FinalReportCode/null.output.fow.re.RData', compress = 'bzip2')
 
-summary(powerout.fow.oc, null.output, truebeta=log(0.5))
+summary(powerout.fow.re, null.output.fow.re)
 
-powerPlot(powerout.fow.oc)
+powerPlot(powerout.fow.re)
 
-plotdata<-plot.sigdiff(powerout.fow.oc, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=FALSE)
+plotdata<-plot.sigdiff(powerout.fow.re, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05)
 plotdata
 
-plotdata<-plot.sigdiff(powerout.fow.oc, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, family=TRUE)
+plotdata<-plot.sigdiff(powerout.fow.re, predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')], tailed='two', error.rate = 0.05, adjustment='sidak')
 plotdata
 
-### Distance to event site plot
-
-plot.d2imp(powerout.fow.oc)
-
-plot.d2imp(powerout.fow.oc, pct.diff = FALSE)
