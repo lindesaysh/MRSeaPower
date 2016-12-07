@@ -4,7 +4,8 @@
 \alias{plotVariance}
 \title{Plotting function to assess the mean-variance relationship of generated data}
 \usage{
-plotVariance(model, simdat, cuts = 20, quants = c(0.025, 0.975))
+plotVariance(model, simdat, cuts = 20, quants = c(0.025, 0.975),
+  n.sim = NULL, store.data = FALSE)
 }
 \arguments{
 \item{model}{model object of class glm, gam or gamMRSea}
@@ -14,6 +15,8 @@ plotVariance(model, simdat, cuts = 20, quants = c(0.025, 0.975))
 \item{cuts}{The number of cut points for calculation of residual variance}
 
 \item{quants}{vector of length 2 stating the quantiles for the confidence interval bands for the simulated mean-variance relationship}
+
+\item{store.data}{Logical indicating whether or not to return the plotting data. Default is FALSE (no data stored).}
 }
 \description{
 Plotting function to assess the mean-variance relationship of generated data

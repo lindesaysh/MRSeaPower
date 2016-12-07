@@ -43,7 +43,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       require(Matrix)
       require(mvtnorm)
       devtools::load_all(pkg='C://MarineScotlandPower/MRSeaPower')
-      devtools::load_all(pkg='C://MarineScotlandPower/MRSea/MRSea')
+      require(MRSea)
     })
 
     # only do parametric boostrap if no data re-sampling and no nhats provided

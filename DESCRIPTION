@@ -1,14 +1,14 @@
 Package: MRSeaPower
 Type: Package
 Title: Package for Running Power Analysis on gamMRSea models.
-Version: 0.1.1
+Version: 0.1.1.01
 Authors@R: c(person("Lindesay",  "Scott-Hayward", email="lass@st-andrews.ac.uk", role=c('aut', 'cre')),
    person("Monique",  "Mackenzie", role=c('aut')))
 Description: some description
 License: Developed under contract to the Scottish Government (USA/012/15)
 LazyData: TRUE
 Imports:
-    MRSea,
+    MRSea (>=0.3.0),
     ggplot2,
     splancs,
     Hmisc,
