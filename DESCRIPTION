@@ -1,7 +1,7 @@
 Package: MRSeaPower
 Type: Package
 Title: Package for Running Power Analysis on gamMRSea models.
-Version: 0.1.1.01
+Version: 0.1.1.02
 Authors@R: c(person("Lindesay",  "Scott-Hayward", email="lass@st-andrews.ac.uk", role=c('aut', 'cre')),
    person("Monique",  "Mackenzie", role=c('aut')))
 Description: some description
