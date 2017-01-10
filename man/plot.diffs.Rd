@@ -4,7 +4,14 @@
 \alias{plot.diffs}
 \title{Function to plot the output from powerSim}
 \usage{
-\method{plot}{diffs}(power.object, returndata = FALSE)
+\method{plot}{diffs}(power.object, returndata = FALSE, cellsize = NULL)
+}
+\arguments{
+\item{power.object}{power analysis object of class gamMRSea.power}
+
+\item{returndata}{logical stating whether to return the plotting data}
+
+\item{cellsize}{vector of length two denoting the size of the gridcells (width, height).  If unspecified, geom_raster is used for plotting rather than geom_tile.}
 }
 \description{
 Function to plot the output from powerSim

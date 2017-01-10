@@ -2,7 +2,7 @@
 #'
 #'
 runsTest<-function (y, plot.it = FALSE, alternative = c("two.sided", "positive.correlated",
-                                                        "negative.correlated"), critvals = NULL)
+                                                        "negative.correlated"), emp.distribution = NULL)
 {
   alternative <- match.arg(alternative)
   DNAME = deparse(substitute(y))

@@ -8,7 +8,7 @@ Description: some description
 License: Developed under contract to the Scottish Government (USA/012/15)
 LazyData: TRUE
 Imports:
-    MRSea (>=0.3.0),
+    MRSea,
     ggplot2,
     splancs,
     Hmisc,

@@ -5,7 +5,7 @@
 \title{Runs Test for Randomness}
 \usage{
 runsTest(y, plot.it = FALSE, alternative = c("two.sided",
-  "positive.correlated", "negative.correlated"), critvals = NULL)
+  "positive.correlated", "negative.correlated"), emp.distribution = NULL)
 }
 \description{
 Runs Test for Randomness
