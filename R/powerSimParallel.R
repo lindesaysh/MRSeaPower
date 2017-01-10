@@ -61,7 +61,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~
       # get runs test result using empirical distribution
       runspvalemp<-runsTest(residuals(sim_glm, type='pearson'),
-                             critvals = empdistribution)$p.value
+                             emp.distribution = empdistribution)$p.value
 
       sim.anv<-anova.gamMRSea(sim_glm)
       if(length(pmatch("LocalRadialFunction(radiusIndices, dists, radii, aR):eventphase", rownames(sim.anv)))>0){
@@ -231,7 +231,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # get runs test result using empirical distribution
     runspvalemp<-runsTest(residuals(sim_glm, type='pearson'),
-                           critvals = empdistribution)$p.value
+                           emp.distribution = empdistribution)$p.value
 
     sim.anv<-anova.gamMRSea(sim_glm)
     if(length(pmatch("LocalRadialFunction(radiusIndices, dists, radii, aR):eventphase", rownames(sim.anv)))>0){
@@ -424,7 +424,7 @@ if(length(badids)>0){
 bootpredsmean<-rowMeans(bootPreds.all, na.rm=TRUE)
 bootpredscis<-t(apply(bootPreds.all, 1, quantile, probs=c(0.025, 0.975), na.rm=TRUE))
 estpreds<-data.frame(mean=bootpredsmean, bootpredscis,predictionGrid[,c('x.pos', 'y.pos', 'eventphase')])
-    
+
 bootdiffmean<-rowMeans(bootdifferences, na.rm=TRUE)
 bootdiffcis<-t(apply(bootdifferences, 1, quantile, probs=c(0.025, 0.975), na.rm=TRUE))
 estdiffs<-data.frame(mean=bootdiffmean, bootdiffcis, predictionGrid[predictionGrid$eventphase==0,c('x.pos', 'y.pos')])

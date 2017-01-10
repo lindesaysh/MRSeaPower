@@ -15,6 +15,10 @@ pval.coverage.null<-function(newdat.ind, newdat.corr=NULL, model, nsim, powercoe
   # if(!is.null(splineParams)){
   #   dists<-splineParams[[1]]$dist
   # }
+
+  require(Matrix)
+  require(mvtnorm)
+
   data<-model$data
   nc<-nsim/2
   nulldata.ind<-rbind(newdat.ind[data$eventphase==0, (1:nc)], newdat.ind[data$eventphase==0, ((nc+1):nsim)])
@@ -32,7 +36,7 @@ pval.coverage.null<-function(newdat.ind, newdat.corr=NULL, model, nsim, powercoe
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # calculate empirical distribution using the independent data
   if(is.null(empdistnull)){
-    empdistnull<-getRunsCritVals(n.sim = nsim, simData=nulldata.ind,
+    empdistnull<-getEmpDistribution(n.sim = nsim, simData=nulldata.ind,
                                       model = model, data = data, plot=FALSE,
                                       returnDist = TRUE, dots=FALSE)
   }
@@ -53,8 +57,8 @@ pval.coverage.null<-function(newdat.ind, newdat.corr=NULL, model, nsim, powercoe
     # ~~ power p-value ~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # get runs test result using empirical distribution
-    runspvalemp<-runs.test(residuals(sim_glm, type='pearson'),
-                           critvals = empdistnull)$p.value
+    runspvalemp<-runsTest(residuals(sim_glm, type='pearson'),
+                           emp.distribution = empdistnull)$p.value
     if(runspvalemp<=0.05){
       # significant, therefore correlated, use robust se
       class(sim_glm)<-c('gamMRSea', class(sim_glm))
