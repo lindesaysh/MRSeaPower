@@ -10,7 +10,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
   #cis<-array(NA, c(nrow(predictionGrid), 2, nsim))
   indpvals = familypvals = list(nsim)
   preds<-matrix(NA, nrow=nrow(predictionGrid), ncol=nsim)
-  bootdifferences=bootdifferences.pct=array(NA, c((nrow(predictionGrid)/2), n.boot, nsim))
+  bootdifferences=array(NA, c((nrow(predictionGrid)/2), n.boot, nsim))
 
   # if(!is.null(impact.loc)){
   #   # make difference dataset
@@ -145,6 +145,10 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
         # find the predicted differences from this simulation
         preddifferences<-preds[predictionGrid$eventphase==1] - preds[predictionGrid$eventphase==0]
 
+        bootdifferences<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
+        #bootdifferences.pct<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
+
+
         # # calculate p-values for individual and family wide cells.
         # indpvals<-pval.differences(nulldifferences, preddifferences, family=FALSE)
         # familypvals<-pval.differences(nulldifferences, preddifferences, family=TRUE)
@@ -155,6 +159,16 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # ~~~~ Abundance/mean proportion ~~~~~~~~~
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # remove bootstraps with excessive predictions.
+        badids<-which(colMeans(bootPreds)>max(preds))
+
+        if(length(badids)>0){
+          for(bad in 1:length(badids)){
+            bootPreds[, badids[bad]]<-NA
+            bootdifferences[, badids[bad]]<-NA
+          }
+        }
+
         if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
           #if(i==1){bsum=asum=vector(length=nsim)}
           bsum<-sum(bootPreds[predictionGrid$eventphase==0,])
@@ -180,14 +194,13 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
         #   d2imp.plotdata[,6]<-tapply(preddifferences.pct, preddiffs$cuts, mean)
         #   colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI', 'MeanDiff.pct', 'bootMeanDiff.pct', 'LowerCI.pct', 'UpperCI.pct')
         #
-           bootdifferences<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
-           bootdifferences.pct<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
+
         # }
 
       } # end sigdif
 
 
-      return(list(imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, preds=preds, bsum=bsum, asum=asum, bootPreds=bootPreds, bootdifferences=bootdifferences, bootdifferences.pct=bootdifferences.pct, preddifferences=preddifferences))
+      return(list(imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, preds=preds, bsum=bsum, asum=asum, bootPreds=bootPreds, bootdifferences=bootdifferences, preddifferences=preddifferences))
     })
 
     stopCluster(myCluster)
@@ -202,10 +215,13 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     preds<-sapply(Routputs, '[[','preds')
     preddifferences<-sapply(Routputs, '[[','preddifferences')
     bootdifferences=sapply(Routputs, '[[','bootdifferences', simplify='array')
-    bootdifferences.pct=sapply(Routputs, '[[','bootdifferences.pct', simplify  ='array')
+    #bootdifferences.pct=sapply(Routputs, '[[','bootdifferences.pct', simplify  ='array')
     #d2imp.plotdata=Routputs[[nsim]]$d2imp.plotdata
     bootPreds.all=sapply(Routputs, '[[','bootPreds', simplify='array')
 
+    rm(Routputs)
+    gc()
+    
    #~~~
     # try alply
     # require(plyr)
@@ -317,6 +333,10 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       # find the predicted differences from this simulation
       preddifferences[,i]<-preds[predictionGrid$eventphase==1,i] - preds[predictionGrid$eventphase==0,i]
 
+
+      bootdifferences[,,i]<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
+      #bootdifferences.pct[,,i]<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
+
       # # calculate p-values for individual and family wide cells.
       # indpvals[[i]]<-pval.differences(nulldifferences, preddifferences[,i], family=FALSE)
       # familypvals[[i]]<-pval.differences(nulldifferences, preddifferences[,i], family=TRUE)
@@ -324,6 +344,17 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       # ~~~~ Abundance/mean proportion ~~~~~~~~~
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+      # remove bootstraps with excessive predictions.
+      badids<-which(colMeans(bootPreds)>max(preds))
+
+      if(length(badids)>0){
+        for(bad in 1:length(badids)){
+          bootPreds[, badids[bad]]<-NA
+          bootdifferences[, badids[bad],i]<-NA
+        }
+      }
+
       if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
         if(i==1){bsum=asum=vector(length=nsim)}
         bsum[i]<-sum(bootPreds[predictionGrid$eventphase==0,])
@@ -349,8 +380,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       #   d2imp.plotdata[,6]<-tapply(preddifferences.pct, preddiffs$cuts, mean)
       #   colnames(d2imp.plotdata)<-c('MeanDist', 'MeanDiff', 'bootMeanDiff', 'LowerCI', 'UpperCI', 'MeanDiff.pct', 'bootMeanDiff.pct', 'LowerCI.pct', 'UpperCI.pct')
       #
-         bootdifferences[,,i]<-bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,]
-         bootdifferences.pct[,,i]<-((bootPreds[predictionGrid$eventphase==1,] - bootPreds[predictionGrid$eventphase==0,])/bootPreds[predictionGrid$eventphase==0,])*100
+
          bootPreds.all[,,i]<-bootPreds
       # }
 
@@ -365,18 +395,18 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     if(model$family[[1]]=='poisson' | model$family[[1]]=='quasipoisson'){
       quants<-c(0.025, 0.975)
       abund<-matrix(NA, 2, 3)
-      abund[,1]<-c(mean(bsum), mean(asum))
-      abund[1,2:3]<-quantile(bsum, probs=quants)
-      abund[2,2:3]<-quantile(asum, probs=quants)
+      abund[,1]<-c(mean(na.omit(bsum)), mean(na.omit(asum)))
+      abund[1,2:3]<-quantile(bsum, probs=quants, na.rm=T)
+      abund[2,2:3]<-quantile(asum, probs=quants, na.rm=T)
       rownames(abund)<-c('Before', 'After')
       colnames(abund)<-c('Abundance', 'LowerCI', 'UpperCI')
     }
     if(model$family[[1]]=='binomial' | model$family[[1]]=='quasibinomial'){
       quants<-c(0.025, 0.975)
       meanp<-matrix(NA, 2, 3)
-      meanp[,1]<-c(mean(bsum), mean(asum))
-      meanp[1,2:3]<-quantile(bsum, probs=quants)
-      meanp[2,2:3]<-quantile(asum, probs=quants)
+      meanp[,1]<-c(mean(na.omit(bsum)), mean(na.omit(asum)))
+      meanp[1,2:3]<-quantile(bsum, probs=quants, na.rm=T)
+      meanp[2,2:3]<-quantile(asum, probs=quants, na.rm=T)
       rownames(meanp)<-c('Before', 'After')
       colnames(meanp)<-c('Mean', 'LowerCI', 'UpperCI')
     }
