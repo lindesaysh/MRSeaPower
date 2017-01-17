@@ -90,7 +90,7 @@ plotVariance<-function(model, simdat, cuts=20, quants=c(0.025, 0.975), n.sim=NUL
     dispout<-list(sim.dispersion=disp, model.dispersion = summary(model)$dispersion)
     p2<-ggplot(data.frame(disp), aes(disp)) + geom_histogram(colour='black', fill='lightgrey', bins=15) + theme_bw() + xlab("Estimated Dispersion") + ylab("Frequency") + ggtitle("") + geom_vline(xintercept = summary(model)$dispersion, colour='blue', size=2 , linetype=2)
 
-    grid.arrange(p, p2)
+    grid.arrange(p, p2, nrow=1)
   }else{
     dispout=NULL
     print(p)
