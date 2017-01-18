@@ -42,8 +42,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       require(dplyr)
       require(Matrix)
       require(mvtnorm)
-      devtools::load_all(pkg='C://MarineScotlandPower/MRSeaPower')
-      require(MRSea)
+      require(MRSeaPower)
     })
 
     # only do parametric boostrap if no data re-sampling and no nhats provided
@@ -205,6 +204,8 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
 
     stopCluster(myCluster)
 
+    cat("Creating Outputs...")
+
     imppvals= sapply(Routputs, '[[','imppvals')
     bsum= sapply(Routputs, '[[','bsum')
     asum= sapply(Routputs, '[[','asum')
@@ -221,7 +222,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
 
     rm(Routputs)
     gc()
-    
+
    #~~~
     # try alply
     # require(plyr)
