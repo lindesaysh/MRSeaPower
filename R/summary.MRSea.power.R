@@ -48,7 +48,7 @@ print.summary.gamMRSea.power<-function (x, digits = max(3L, getOption("digits") 
   cat("\nNumber of no change simulations = ", x$nsims[2], "\n")
 
   truebeta<-x$truebeta
-  
+
   if(is.null(truebeta)){
     type='re'
     truebeta='unknown'
@@ -64,11 +64,13 @@ print.summary.gamMRSea.power<-function (x, digits = max(3L, getOption("digits") 
     cat("\nPower to select 'change' term (",param, "):\n", sep='')
     cat('\n    Under Change (true parameter = ', truebeta , ') = ', x$power$model, '%\n', sep='')
     cat('    Under no change = Null distribution not specified\n')
+    cat("      (Should be ~5%)\n")
 
     if(type=='oc'){
       cat("\nCoverage for 'change' coefficient:\n")
       cat('\n    Under change = ', x$coverage$model.coverage, '%\n', sep='')
       cat('    Under no change = Null distribution not specified\n', sep='')
+      cat("      (Should be ~95%)\n")
     }
 
   }else{
