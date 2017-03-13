@@ -4,6 +4,7 @@
 #' @param changecoef.link Coefficient on the scale of the link function to determine the overall change in the population.
 #' @param length.panels vector denoting the length of the panels to be created.
 #' @param binary logical (default = FALSE) denoting whether to generate binary data.  If FALSE, poisson data is generated.
+#' @param b0 intercept parameter
 #'
 #' @return Returns a data frame of columns
 #'    \code{x} x covariate

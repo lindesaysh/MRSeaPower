@@ -14,9 +14,17 @@
 #'
 #' @examples
 #'
+#' data(nystedA_slim)
+#'
+#' model<-glm(response ~ depth  + as.factor(phase),
+#'               family='poisson', data=nysted)
+#'
+#' simData<-generateNoise(n=500, response=fitted(model), family='poisson')
+#'
+#' @author LAS Scott-Hayward, University of St Andrews
+#'
 #' @export
 #'
-
 generateNoise<-function(n, response, family, ...){
   simData<-matrix(NA, nrow=length(response), ncol=n)
   for(i in 1:n){

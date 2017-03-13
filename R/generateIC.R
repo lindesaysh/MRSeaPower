@@ -1,3 +1,31 @@
+#' Function to add correlated noise to data
+#'
+#' @details This function is based on work by Iman and Conover (1982).
+#'
+#' @param data data to be assessed for correlation
+#' @param corrs matrix definig the correlation for each panel (each row of matrix) defined in the data
+#' @param panels character giving the column of \code{data} contaning the information about panel structure
+#' @param newdata simulated sets of data (independent)
+#' @param nsim number of simulations
+#' @param dots (default = FALSE). Logical flag stating whether to show progress dots printed in workspace.
+#'
+#' @examples
+#' data(nystedA_slim)
+#' nysted$panelid<-as.numeric(nysted$unique.transect.label)
+#'
+#' model<-glm(response ~ depth  + as.factor(phase),
+#'               family='poisson', data=nysted)
+#'
+#' simData<-generateNoise(n=500, response=fitted(model), family='poisson')
+#' corrs<-getCorrelationMat(panel = nysted$panelid, data=nysted$response, dots = FALSE)
+#' generateIC(nysted, corrs, "panelid", simData, nsim=10, dots = FALSE)
+#'
+#' @author LAS Scott-Hayward, University of St Andrews
+#'
+#' @references Iman and Conover (1982).
+#'
+#' @export
+
 generateIC<-function(data, corrs, panels, newdata, nsim, dots=FALSE){
 
   suppressPackageStartupMessages(require(Hmisc))

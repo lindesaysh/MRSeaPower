@@ -16,10 +16,26 @@ plotVariance(model, simdat, cuts = 20, quants = c(0.025, 0.975),
 
 \item{quants}{vector of length 2 stating the quantiles for the confidence interval bands for the simulated mean-variance relationship}
 
+\item{n.sim}{(default = NULL) denotes how many simulations from \code{simdat} to use. If \code{NULL} then all are used.}
+
 \item{store.data}{Logical indicating whether or not to return the plotting data. Default is FALSE (no data stored).}
 }
 \description{
 Plotting function to assess the mean-variance relationship of generated data
+}
+\examples{
+data(nystedA_slim)
+
+initialModel<-MRSea::gamMRSea(response ~ 1 + as.factor(yearmonth)+depth +
+                     x.pos + y.pos + offset(log(area)),  data=nysted,
+                     family=quasipoisson)
+
+nsim<-550
+d<-as.numeric(summary(initialModel)$dispersion)
+newdat<-generateNoise(nsim, fitted(initialModel), family='poisson', d=d)
+
+plotVariance(initialModel, newdat)
+
 }
 \author{
 Lindesay Scott-Hayward (University of St Andrews)

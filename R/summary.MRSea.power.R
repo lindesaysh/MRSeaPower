@@ -1,7 +1,23 @@
 #' Summary function for objects of class gamMRSea.power
 #'
 #' @param power.object  An object of class gamMRSea.power
-#' @param thing
+#' @param null.object Object containing information regarding the error rate when no change is present in the data.
+#' @param truebeta Value indicating the proportion of data affected by the change. Only required for a site wide change.
+#'
+#' @return printed summary output
+#'
+#' If only the power.object is provided, then the summary is reduced or informs the reader of some unknowns.
+#'
+#' @examples
+#'
+#' # Load two power objects that were created with a 20% sitewide decline
+#' # 50 simulations were run
+#' data(nysted.power.oc)
+#' data(nysted.power.oc.null)
+#'
+#' summary(nysted.power.oc, nysted.power.oc.null, truebeta=0.8)
+#'
+#' @author LAS Scott-Hayward
 #'
 #' @export
 #'

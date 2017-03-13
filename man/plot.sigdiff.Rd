@@ -17,9 +17,26 @@
 \item{error.rate}{number stating the error rate required, default is 0.05 (5\% error rate)}
 
 \item{adjustment}{character stating the adjustment, if any, for multiple testing.  The default value is 'none'.  Alternatives are 'sidak' and 'bonferroni'.}
+
+\item{gridcell.dim}{vector of length 2 denoting the dimensions of the grid cells to be plotted.}
+}
+\value{
+Figure showing, for every grid cell, the proportion of simulations that showed a significant difference.
 }
 \description{
 Function to plot the output from powerSim
+}
+\examples{
+
+# Load two power objects that were created with a 20\% sitewide decline
+# 50 simulations were run
+data(nysted.power.oc)
+data(nysted.power.oc.null)
+
+plot.sigdiff(powerout.nysted.oc, coordinates =
+             predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')],
+             tailed='two', error.rate = 0.05, gridcell.dim = c(1000,1000))
+
 }
 \author{
 Lindesay Scott-Hayward (University of St Andrews)

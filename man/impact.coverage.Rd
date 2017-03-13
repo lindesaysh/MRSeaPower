@@ -7,12 +7,12 @@
 impact.coverage(truebeta, betacis)
 }
 \description{
-@param truebeta thing
- @param betacis thing
+@param truebeta true coefficient value
+ @param betacis dataframe of upper and lower intervals, where the number of rows is the number of bootstrap simulations
 }
 \details{
 @export
 
-@author Lindesay Scott-Hayward
+@author Lindesay Scott-Hayward, university of St Andrews
 }
 

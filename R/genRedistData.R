@@ -6,7 +6,7 @@
 #' @param changecoef.link Coefficient(s) on the scale of the link function to determine the change in the population.  If of length 1, then the change occurs in the impact zone, whilst maintaining overall population size.  If of length 2, then there is a redistribution of the population with an an additional overall decrease.
 #' @param panels Character vector denoting the column of \code{data} containing the panel structure.
 #' @param eventsite.bnd A data frame containing the coordinates of a polygon defining the region of the defined event The variable names must match the coordinate system in the data.
-#' @param noneventcells
+#' @param noneventcells vector of zeros and ones of length the same as data. zeros represent event cells and ones represent non-event cells.
 #'
 #'@return Returns a data frame twice the size of the original input with additional columns for panel id, eventphase and truth.  The truth column represents the input data for the first half (pre-event; eventphase==0) and the second half has the change imposed (post-event; eventphase==1).
 #'

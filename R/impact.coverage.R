@@ -1,13 +1,13 @@
 #'
 #'  Get the coverage for the impact coefficient
 #'
-#'  @param truebeta thing
-#'  @param betacis thing
+#'  @param truebeta true coefficient value
+#'  @param betacis dataframe of upper and lower intervals, where the number of rows is the number of bootstrap simulations
 #'
 #'
 #'  @export
 #'
-#'  @author Lindesay Scott-Hayward
+#'  @author Lindesay Scott-Hayward, university of St Andrews
 #'
 
 impact.coverage<-function(truebeta, betacis){

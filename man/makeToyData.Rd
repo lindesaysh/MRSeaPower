@@ -15,6 +15,8 @@ makeToyData(n, changecoef.link = 0, length.panels = 1, binary = FALSE,
 \item{length.panels}{vector denoting the length of the panels to be created.}
 
 \item{binary}{logical (default = FALSE) denoting whether to generate binary data.  If FALSE, poisson data is generated.}
+
+\item{b0}{intercept parameter}
 }
 \value{
 Returns a data frame of columns

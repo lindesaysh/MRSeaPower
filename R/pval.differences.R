@@ -3,9 +3,9 @@
 #'
 #' @param null cell differences under the null hypothesis of no change
 #' @param estimate vector or estimates for a given cell
+#' @param family Whether to calculate a family p-value.  Default is FALSE.
 #'
-#' @examples
-#'
+#' @author L Scott-Hayward, University of St Andrews
 #' @export
 #'
 

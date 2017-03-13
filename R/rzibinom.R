@@ -32,13 +32,26 @@ qzibinom<-function (p, size, prob, pstr0 = 0)
   ans
 }
 
-
+#' rzibinom function from the VGAM package
+#'
+#'
+#' @author VGAM package
+#'
+#' @export
+#'
 rzibinom<-function (n, size, prob, pstr0 = 0)
 {
   qzibinom(runif(n), size, prob, pstr0 = pstr0)
 }
 
 
+#' qposbinom function from the VGAM package
+#'
+#'
+#' @author VGAM package
+#'
+#' @export
+#'
 qposbinom<-function (p, size, prob){
   ans <- qbinom(pbinom(0, size, prob, lower.tail = FALSE) *
                   p + dbinom(0, size, prob), size, prob)

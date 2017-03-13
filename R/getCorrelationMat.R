@@ -2,6 +2,14 @@
 #'
 #' @param panel vector identifying the panel to which each row of data belongs.  Data are considered correlated within a panel and independent between panels.
 #' @param data vector of response data.
+#' @param dots (default = FALSE). Logical flag stating whether to show progress dots printed in workspace.
+#'
+#' data(nystedA_slim)
+#' nysted$panelid<-as.numeric(nysted$unique.transect.label)
+#'
+#' corrs<-getCorrelationMat(panel = nysted$panelid, data=nysted$response, dots = FALSE)
+#'
+#' @author LAS Scott-Hayward, University of St Andrews
 #'
 #' @export
 

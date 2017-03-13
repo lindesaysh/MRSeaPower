@@ -7,6 +7,8 @@ Authors@R: c(person("Lindesay",  "Scott-Hayward", email="lass@st-andrews.ac.uk",
 Description: some description
 License: Developed under contract to the Scottish Government (USA/012/15)
 LazyData: TRUE
+Depends:
+    R (>= 2.10)
 Imports:
     MRSea,
     ggplot2,
@@ -14,3 +16,6 @@ Imports:
     Hmisc,
     Matrix
 RoxygenNote: 5.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

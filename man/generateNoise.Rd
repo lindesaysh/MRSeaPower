@@ -25,5 +25,15 @@ The zibinomial family requires the \code{VGAM} library to generate zero inflated
 }
 \examples{
 
+data(nystedA_slim)
+
+model<-glm(response ~ depth  + as.factor(phase),
+              family='poisson', data=nysted)
+
+simData<-generateNoise(n=500, response=fitted(model), family='poisson')
+
+}
+\author{
+LAS Scott-Hayward, University of St Andrews
 }
 

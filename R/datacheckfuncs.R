@@ -4,14 +4,26 @@
 #' @param simdat matrix of simulated response data.  Each column is a new simulated data set
 #' @param cuts The number of cut points for calculation of residual variance
 #' @param quants vector of length 2 stating the quantiles for the confidence interval bands for the simulated mean-variance relationship
+#' @param n.sim (default = NULL) denotes how many simulations from \code{simdat} to use. If \code{NULL} then all are used.
 #' @param store.data Logical indicating whether or not to return the plotting data. Default is FALSE (no data stored).
 #'
+#' @examples
+#' data(nystedA_slim)
+#'
+#' initialModel<-MRSea::gamMRSea(response ~ 1 + as.factor(yearmonth)+depth +
+#'                      x.pos + y.pos + offset(log(area)),  data=nysted,
+#'                      family=quasipoisson)
+#'
+#' nsim<-550
+#' d<-as.numeric(summary(initialModel)$dispersion)
+#' newdat<-generateNoise(nsim, fitted(initialModel), family='poisson', d=d)
+#'
+#' plotVariance(initialModel, newdat)
 #'
 #' @author Lindesay Scott-Hayward (University of St Andrews)
 #'
 #' @export
 #'
-
 
 plotVariance<-function(model, simdat, cuts=20, quants=c(0.025, 0.975), n.sim=NULL, store.data=FALSE){
   ow<-options("warn")
@@ -110,7 +122,19 @@ plotVariance<-function(model, simdat, cuts=20, quants=c(0.025, 0.975), n.sim=NUL
 #' @param bins number of bins to be plotted on the histogram
 #' @param quants vector of length 2 stating the quantiles for the confidence interval bands for the simulated data
 #'
+#' @examples
+#' data(nystedA_slim)
 #'
+#' initialModel<-MRSea::gamMRSea(response ~ 1 + as.factor(yearmonth)+depth +
+#'                      x.pos + y.pos + offset(log(area)),  data=nysted,
+#'                      family=quasipoisson)
+#'
+#' nsim<-550
+#' d<-as.numeric(summary(initialModel)$dispersion)
+#' newdat<-generateNoise(nsim, fitted(initialModel), family='poisson', d=d)
+#'
+#' plotMean(initialModel, newdat)
+
 #' @author Lindesay Scott-Hayward (University of St Andrews)
 #'
 #' @export

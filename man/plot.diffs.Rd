@@ -13,10 +13,23 @@
 
 \item{cellsize}{vector of length two denoting the size of the gridcells (width, height).  If unspecified, geom_raster is used for plotting rather than geom_tile.}
 }
+\value{
+Figure showing the mean (middle), lower 2.5% (left) and upper 97.5% (right) of estimated differences between before and after the event. (difference = post - pre)
+}
 \description{
 Function to plot the output from powerSim
 }
+\examples{
+
+# Load two power objects that were created with a 20\% sitewide decline
+# 50 simulations were run
+data(nysted.power.oc)
+data(nysted.power.oc.null)
+
+plot.diffs(nysted.power.oc)
+
+}
 \author{
-Lindesay Scott-Hayward (University of St Andrews)
+LAS Scott-Hayward
 }
 

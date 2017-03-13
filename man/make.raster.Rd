@@ -2,14 +2,21 @@
 % Please edit documentation in R/make.raster.R
 \name{make.raster}
 \alias{make.raster}
-\title{Function to make non-regular data into a raster to calculate the differences.}
+\title{Function to make non-regular data into a raster}
 \usage{
 make.raster(ncell.y, xyzdata, z.name = "response")
 }
 \arguments{
-\item{legend.name}{}
+\item{ncell.y}{number of raster cells required in the y dimension.}
+
+\item{xyzdata}{data frame containing c(x.pos, y.pos, truth)}
+
+\item{z.name}{Character variable denoting the name to be given to the z covariate}
 }
 \description{
-Function to make non-regular data into a raster to calculate the differences.
+This function is useful for when the aim is to calculate the differences between two surfaces which may not have exactly the same grid.
+}
+\author{
+LAS Scott-Hayward, University of St Andrews
 }
 

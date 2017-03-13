@@ -26,6 +26,22 @@ Returns a data frame twice the size of the original input with additional column
 \description{
 Function to impose an change impact effect
 }
+\examples{
+data(nystedA_slim)
+
+initialModel<-MRSea::gamMRSea(response ~ 1 + as.factor(yearmonth)+depth +
+                     x.pos + y.pos + offset(log(area)),  data=nysted,
+                     family=quasipoisson)
+
+# generate a 20\% site-wide change:
+changedata1<-genChangeData(pct.change=80, model=initialModel, data=nysted, panels="panelid")
+
+# generate a 50\% decline in the windfarm footprint:
+data("nysted.bndwf")
+changedata2<-genChangeData(pct.change=50, model=initialModel, data=nysted, panels="panelid",
+                            eventsite.bnd=nysted.bndwf)
+
+}
 \author{
 Lindesay Scott-Hayward, University of St Andrews
 }

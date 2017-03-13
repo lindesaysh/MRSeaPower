@@ -18,7 +18,7 @@ genRedistData(model, data, changecoef.link, panels = NULL,
 
 \item{eventsite.bnd}{A data frame containing the coordinates of a polygon defining the region of the defined event The variable names must match the coordinate system in the data.}
 
-\item{noneventcells}{}
+\item{noneventcells}{vector of zeros and ones of length the same as data. zeros represent event cells and ones represent non-event cells.}
 }
 \value{
 Returns a data frame twice the size of the original input with additional columns for panel id, eventphase and truth.  The truth column represents the input data for the first half (pre-event; eventphase==0) and the second half has the change imposed (post-event; eventphase==1).

@@ -1,12 +1,23 @@
 #' Function to estimate the coverage of the overall change impact coefficient.
 #'
 #' @param newdat.ind simulated independent response data
+#' @param newdat.corr (default= NULL). simulated correlated response data (if available).
 #' @param model glm or gamMRSea model object
 #' @param nsim number of simulations in newdat.ind
 #' @param powercoefid coefficient id that relates to the eventchange term
 #' @param empdistnull if known, provide the empirical distribution for the runs test.
 #'
-#' @author Lindesay Scott-Hayward
+#' @return An list object containing:
+#'
+#' \item{imppvals}{p-values for the event change term for each simulated run}
+#' \item{betacis}{Confidence intervals for the event term coefficient (only if site-wide change)}
+#' \item{empdistnull}{Null distribution of runs test statistics.}
+#'
+#' @examples
+#'
+#' # see the vignette for using this function
+#'
+#' @author Lindesay Scott-Hayward, University of St Andrews
 #'
 #' @export
 

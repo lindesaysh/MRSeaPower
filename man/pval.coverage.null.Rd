@@ -10,6 +10,8 @@ pval.coverage.null(newdat.ind, newdat.corr = NULL, model, nsim, powercoefid,
 \arguments{
 \item{newdat.ind}{simulated independent response data}
 
+\item{newdat.corr}{(default= NULL). simulated correlated response data (if available).}
+
 \item{model}{glm or gamMRSea model object}
 
 \item{nsim}{number of simulations in newdat.ind}
@@ -18,10 +20,22 @@ pval.coverage.null(newdat.ind, newdat.corr = NULL, model, nsim, powercoefid,
 
 \item{empdistnull}{if known, provide the empirical distribution for the runs test.}
 }
+\value{
+An list object containing:
+
+\item{imppvals}{p-values for the event change term for each simulated run}
+\item{betacis}{Confidence intervals for the event term coefficient (only if site-wide change)}
+\item{empdistnull}{Null distribution of runs test statistics.}
+}
 \description{
 Function to estimate the coverage of the overall change impact coefficient.
 }
+\examples{
+
+# see the vignette for using this function
+
+}
 \author{
-Lindesay Scott-Hayward
+Lindesay Scott-Hayward, University of St Andrews
 }
 

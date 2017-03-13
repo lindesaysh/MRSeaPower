@@ -1,3 +1,24 @@
+#' Function to show how the power to detect change varies with the error rate.
+#'
+#' @param power.object An object of class gamMRSea.power
+#'
+#' @return
+#' Plot showing how the power to detect change varies with increasing error rate. The first grey dashed line is at 1% and the second at 5%, traditionally values used as p-value cutoffs. The blue dashed lines indicate the error rate required to get a power of 80%. This value is given in the title.
+#'
+#' @examples
+#'
+#' # Load two power objects that were created with a 20% sitewide decline
+#' # 50 simulations were run
+#' data(nysted.power.oc)
+#' data(nysted.power.oc.null)
+#'
+#' powerPlot(nysted.power.oc)
+#'
+#' @author LAS Scott-Hayward
+#'
+#' @export
+
+
 powerPlot<-function(power.object){
 
   require(ggplot2)

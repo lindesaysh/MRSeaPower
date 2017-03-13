@@ -18,6 +18,19 @@ plotMean(model, simdat, bins = 15, quants = c(0.025, 0.975))
 \description{
 Plotting function to assess the mean of generated data
 }
+\examples{
+data(nystedA_slim)
+
+initialModel<-MRSea::gamMRSea(response ~ 1 + as.factor(yearmonth)+depth +
+                     x.pos + y.pos + offset(log(area)),  data=nysted,
+                     family=quasipoisson)
+
+nsim<-550
+d<-as.numeric(summary(initialModel)$dispersion)
+newdat<-generateNoise(nsim, fitted(initialModel), family='poisson', d=d)
+
+plotMean(initialModel, newdat)
+}
 \author{
 Lindesay Scott-Hayward (University of St Andrews)
 }

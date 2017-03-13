@@ -10,8 +10,18 @@ getCorrelationMat(panel, data, dots = FALSE)
 \item{panel}{vector identifying the panel to which each row of data belongs.  Data are considered correlated within a panel and independent between panels.}
 
 \item{data}{vector of response data.}
+
+\item{dots}{(default = FALSE). Logical flag stating whether to show progress dots printed in workspace.
+
+data(nystedA_slim)
+nysted$panelid<-as.numeric(nysted$unique.transect.label)
+
+corrs<-getCorrelationMat(panel = nysted$panelid, data=nysted$response, dots = FALSE)}
 }
 \description{
 Function to get the correlation for each panel defined in the data
+}
+\author{
+LAS Scott-Hayward, University of St Andrews
 }
 

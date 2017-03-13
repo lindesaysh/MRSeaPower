@@ -1,4 +1,38 @@
-powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predictionGrid=NULL, g2k=NULL, splineParams=NULL, bootstrapCI=TRUE, sigdif=TRUE, n.boot=500, nCores=1){
+#' Function to run a power analysis for a model of type 'gamMRSea'
+#'
+#' @param newdat matrix of values whose rows are observations and columns are simulated sets of response data
+#' @param model model object of class `gamMRSea`.  This is the model used to generate the data, updated for the inclusion of an event term.
+#' @param empdistribution Empirical distribution for the runs test
+#' @param nsim number of simulations to compute
+#' @param powercoefid the ID of the coefficient in \code{model} that represents the event term
+#' @param predictionGrid dataframe containing a coordinate grid with covariates.  This grid is used in the assessment of before and after change differences.
+#' @param g2k object required for \code{MRSea} model with spline terms
+#' @param splineParams object required for \code{MRSea} model with spline terms
+#' @param n.boot Number of bootstraps to use to get percentile based confidence intervals for predictions.
+#' @param nCores How many cores to use for parallel processing.  If one, then parallel computing is not used and a progress bar is printed. If parallel, estimated time till finish along with a progress bar is provided.
+#'
+#' @return An object of class \code{gamMRSea.power}.
+#'
+#' \item{rawrob}{Vector of zeros and ones indicating whether raw or robust s.e. have been used.}
+#' \item{imppvals}{p-values for the event change term for each simulated run}
+#' \item{betacis}{Confidence intervals for the event term coefficient (only if site-wide change)}
+#' \item{powsimfits}{Fitted values each model}
+#' \item{bootdifferences}{data frame of bootstrapped differences (before and after event). Number of rows is the number of rows in the prediction grid divided by 2}
+#' \item{bootpreds}{data frame of bootstrapped predictions.}
+#' \item{Abundance}{Table of sitewide abundance (with upper and lower 95\% CI)}
+#'
+#'
+#' @examples
+#' # See the vignette for an example of how to run this code.
+#'
+#' @author LAS Scott-Hayward, University of St Andrews
+#'
+#' @export
+#'
+#'
+powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predictionGrid=NULL, g2k=NULL, splineParams=NULL, n.boot=500, nCores=1){
+
+  sigdif<-TRUE
 
   require(mvtnorm)
   data<-model$data
