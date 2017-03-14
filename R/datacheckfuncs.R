@@ -123,7 +123,7 @@ plotVariance<-function(model, simdat, cuts=20, quants=c(0.025, 0.975), n.sim=NUL
 #' @param quants vector of length 2 stating the quantiles for the confidence interval bands for the simulated data
 #'
 #' @details
-#' The histogram returned shows the lower 2.5 and upper 97.5 quantiles (grey, long dash lines) for the mean.  The grey solid line is the mean of the fitted values from the inputed  model. The black short dashed line is the mean of the response data.
+#' The histogram returned shows the lower 2.5 and upper 97.5 quantiles (dark grey, long dash lines) for the mean.  The grey solid line is the mean of the fitted values from the inputed  model. The black short dashed line is the mean of the response data.
 #'
 #' @examples
 #' data(nystedA_slim)
@@ -152,7 +152,7 @@ plotMean<-function(model, simdat, bins=15, quants=c(0.025, 0.975)){
   cis<-quantile(dat2, probs=quants)
   xlims=range(c(dat2, mean(dat$response), mean(fitted(model))))
 
-  p3<-ggplot(data.frame(dat2), aes(dat2)) + geom_histogram(colour='black', fill='white', bins=bins) + theme_bw() + xlab("Mean") + ylab("Frequency") + ggtitle("")  + geom_vline(xintercept = mean(fitted(model)), colour='black', size=2, linetype=1 ) + geom_vline(xintercept=mean(dat$response), colour='grey', size=2, linetype=3) + xlim(xlims) + theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())  + geom_vline(xintercept=cis[1], colour='grey', size=2, linetype=2) + geom_vline(xintercept=cis[2], colour='grey', size=2, linetype=2)
+  p3<-ggplot(data.frame(dat2), aes(dat2)) + geom_histogram(colour='black', fill='white', bins=bins) + theme_bw() + xlab("Mean") + ylab("Frequency") + ggtitle("")  + geom_vline(xintercept = mean(fitted(model)), colour='black', size=2, linetype=1 ) + geom_vline(xintercept=mean(dat$response), colour='grey', size=2, linetype=4) + xlim(xlims) + theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())  + geom_vline(xintercept=cis[1], colour='darkgrey', size=2, linetype=2) + geom_vline(xintercept=cis[2], colour='darkgrey', size=2, linetype=2)
   print(p3)
   options(ow)
 }

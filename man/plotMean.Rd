@@ -18,6 +18,9 @@ plotMean(model, simdat, bins = 15, quants = c(0.025, 0.975))
 \description{
 Plotting function to assess the mean of generated data
 }
+\details{
+The histogram returned shows the lower 2.5 and upper 97.5 quantiles (grey, long dash lines) for the mean.  The grey solid line is the mean of the fitted values from the inputed  model. The black short dashed line is the mean of the response data.
+}
 \examples{
 data(nystedA_slim)
 
