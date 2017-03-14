@@ -6,14 +6,13 @@
 #'
 #' @examples
 #'
-#' # Load two power objects that were created with a 20\% sitewide decline
+#' # Load a power object that was created with a 20\% sitewide decline
 #' # 50 simulations were run
 #' data(nysted.power.oc)
-#' data(nysted.power.oc.null)
 #'
 #' plot.preds(nysted.power.oc)
 #'
-#' @author LAS Scott-Hayward
+#' @author LAS Scott-Hayward, University of St Andrews
 #'
 #' @export
 #'
