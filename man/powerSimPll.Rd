@@ -50,4 +50,3 @@ Function to run a power analysis for a model of type 'gamMRSea'
 \author{
 LAS Scott-Hayward, University of St Andrews
 }
-

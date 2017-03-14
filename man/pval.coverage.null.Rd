@@ -38,4 +38,3 @@ Function to estimate the coverage of the overall change impact coefficient.
 \author{
 Lindesay Scott-Hayward, University of St Andrews
 }
-

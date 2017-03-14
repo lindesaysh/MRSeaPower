@@ -35,4 +35,3 @@ summary(nysted.power.oc, nysted.power.oc.null, truebeta=0.8)
 \author{
 LAS Scott-Hayward
 }
-

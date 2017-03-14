@@ -37,10 +37,9 @@ corrs<-getCorrelationMat(panel = nysted$panelid, data=nysted$response, dots = FA
 generateIC(nysted, corrs, "panelid", simData, nsim=10, dots = FALSE)
 
 }
-\author{
-LAS Scott-Hayward, University of St Andrews
-}
 \references{
 Iman and Conover (1982).
 }
-
+\author{
+LAS Scott-Hayward, University of St Andrews
+}

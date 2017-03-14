@@ -6,7 +6,7 @@ cite_options(citation_format = 'pandoc', cite.style = 'authoryear', max.names = 
 
 ## ----setup, echo=FALSE, warning=FALSE, message=FALSE---------------------
 require(MRSea)
-devtools::load_all(pkg='C://MarineScotlandPower/MRSeaPower')
+devtools::load_all(pkg='../../MRSeaPower')
 
 ## ------------------------------------------------------------------------
 data("nystedA_slim")
@@ -36,11 +36,6 @@ anova(initialModel, test='F')
 
 ## ------------------------------------------------------------------------
 bestModel<-initialModel
-
-## ---- cache=TRUE, eval=TRUE, echo=TRUE-----------------------------------
-nsim<-550
-d<-as.numeric(summary(bestModel)$dispersion)
-newdat<-generateNoise(nsim, fitted(bestModel), family='poisson', d=d)
 
 ## ----echo=TRUE, comment=""-----------------------------------------------
 runsTest(residuals(bestModel, type='pearson'), emp.distribution = empdistribution)
@@ -261,21 +256,8 @@ predictdata<-rbind(data.frame(nysted.predgrid[,2:8], yearmonth='2002/2',
                               area=nysted.predgrid$area, eventphase=1))
 
 
-## ----aukpowerre, echo=TRUE, eval=TRUE, cache=TRUE------------------------
-nsim=50
-powerout.nysted.re<-powerSimPll(newdatcor.ny.impre, nyresim_glm, empdistpower.nyre, 
-                             nsim=nsim, powercoefid=length(coef(nyresim_glm)), 
-                             predictionGrid=predictdata, 
-                             n.boot=200, nCores = 2)
-
 ## ----echo=TRUE, eval=FALSE-----------------------------------------------
 #  save(powerout.nysted.re, file='data/powerout.nystedslim.re.RData', compress = 'bzip2')
-
-## ----auknullre, echo=TRUE, eval=TRUE, cache=TRUE-------------------------
-null.output.nysted.re<-pval.coverage.null(newdat.ind = newdata.ny.impre, newdat.corr = NULL, 
-                                       model = nyresim_glm, nsim = nsim, 
-                                       powercoefid = length(coef(nyresim_glm)))
-
 
 ## ----echo=TRUE, eval=FALSE-----------------------------------------------
 #  save(null.output.nysted.re, file='data/null.output.nystedslim.re.RData', compress = 'bzip2')

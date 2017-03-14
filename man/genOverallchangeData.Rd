@@ -24,4 +24,3 @@ Function to impose an overall change impact effect
 \author{
 Lindesay Scott-Hayward, University of St Andrews
 }
-

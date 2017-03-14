@@ -12,4 +12,3 @@ qposbinom function from the VGAM package
 \author{
 VGAM package
 }
-

@@ -41,4 +41,3 @@ plot.sigdiff(powerout.nysted.oc, coordinates =
 \author{
 Lindesay Scott-Hayward (University of St Andrews)
 }
-

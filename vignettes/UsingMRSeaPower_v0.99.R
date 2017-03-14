@@ -6,7 +6,7 @@ cite_options(citation_format = 'pandoc', cite.style = 'authoryear', max.names = 
 
 ## ----setup, echo=FALSE, warning=FALSE, message=FALSE---------------------
 require(MRSea)
-devtools::load_all(pkg='C://MarineScotlandPower/MRSeaPower')
+devtools::load_all(pkg='../../MRSeaPower')
 
 ## ------------------------------------------------------------------------
 data("nystedA_slim")

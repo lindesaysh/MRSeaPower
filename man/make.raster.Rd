@@ -19,4 +19,3 @@ This function is useful for when the aim is to calculate the differences between
 \author{
 LAS Scott-Hayward, University of St Andrews
 }
-
