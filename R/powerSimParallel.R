@@ -204,8 +204,8 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
 
         if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
           #if(i==1){bsum=asum=vector(length=nsim)}
-          bsum<-sum(bootPreds[predictionGrid$eventphase==0,])
-          asum<-sum(bootPreds[predictionGrid$eventphase==1,])
+          bsum<-sum(bootPreds[predictionGrid$eventphase==0,])/ncol(bootPreds)
+          asum<-sum(bootPreds[predictionGrid$eventphase==1,])/ncol(bootPreds)
         }
         if(sim_glm$family[[1]]=='binomial' | sim_glm$family[[1]]=='quasibinomial'){
           #if(i==1){bmean=amean=vector(length=nsim)}
@@ -392,8 +392,8 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
 
       if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
         if(i==1){bsum=asum=vector(length=nsim)}
-        bsum[i]<-sum(bootPreds[predictionGrid$eventphase==0,])
-        asum[i]<-sum(bootPreds[predictionGrid$eventphase==1,])
+        bsum[i]<-sum(bootPreds[predictionGrid$eventphase==0,])/nrow(bootPreds)
+        asum[i]<-sum(bootPreds[predictionGrid$eventphase==1,])/nrow(bootPreds)
       }
       if(sim_glm$family[[1]]=='binomial' | sim_glm$family[[1]]=='quasibinomial'){
         if(i==1){bsum=asum=vector(length=nsim)}
