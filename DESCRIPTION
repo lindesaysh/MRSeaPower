@@ -15,7 +15,8 @@ Imports:
     splancs,
     Hmisc,
     Matrix
-RoxygenNote: 6.0.1
-Suggests: knitr,
+RoxygenNote: 5.0.1
+Suggests:
+    knitr,
     rmarkdown
 VignetteBuilder: knitr

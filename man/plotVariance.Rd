@@ -40,3 +40,4 @@ plotVariance(initialModel, newdat)
 \author{
 Lindesay Scott-Hayward (University of St Andrews)
 }
+

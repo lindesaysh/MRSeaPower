@@ -15,3 +15,4 @@ impact.coverage(truebeta, betacis)
 
 @author Lindesay Scott-Hayward, university of St Andrews
 }
+

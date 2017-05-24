@@ -28,3 +28,4 @@ powerPlot(nysted.power.oc)
 \author{
 LAS Scott-Hayward
 }
+

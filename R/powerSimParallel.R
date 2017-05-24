@@ -20,6 +20,7 @@
 #' \item{bootdifferences}{data frame of bootstrapped differences (before and after event). Number of rows is the number of rows in the prediction grid divided by 2}
 #' \item{bootpreds}{data frame of bootstrapped predictions.}
 #' \item{Abundance}{Table of sitewide abundance (with upper and lower 95\% CI)}
+#' \item{link}{List of the link function (link) and inverse link function (linkinv)}
 #'
 #'
 #' @examples
@@ -97,7 +98,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
                              emp.distribution = empdistribution)$p.value
 
       sim.anv<-anova.gamMRSea(sim_glm)
-      if(length(pmatch("LocalRadialFunction(radiusIndices, dists, radii, aR):eventphase", rownames(sim.anv)))>0){
+      if(length(pmatch("s(x.pos, y.pos):eventphase", rownames(sim.anv)))>0){
         if(runspvalemp<=0.05){
           # significant, therefore correlated, use robust se
           class(sim_glm)<-c('gamMRSea', class(sim_glm))
@@ -166,7 +167,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       # ~~ predictions to grid ~~~
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~
       #dists<<-g2k
-      preds<-predict.gamMRSea(predictionGrid, g2k = g2k, model=sim_glm, type = 'response')
+      preds<-predict.gamMRSea(newdata = predictionGrid, g2k = g2k, object =sim_glm, type = 'response')
 
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~
       # ~~~~ Differences ~~~~~~~~~
@@ -285,7 +286,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
                            emp.distribution = empdistribution)$p.value
 
     sim.anv<-anova.gamMRSea(sim_glm)
-    if(length(pmatch("LocalRadialFunction(radiusIndices, dists, radii, aR):eventphase", rownames(sim.anv)))>0){
+    if(length(pmatch("s(x.pos, y.pos):eventphase", rownames(sim.anv)))>0){
       if(runspvalemp<=0.05){
         # significant, therefore correlated, use robust se
         class(sim_glm)<-c('gamMRSea', class(sim_glm))
@@ -354,7 +355,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     # ~~ predictions to grid ~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     #dists<<-g2k
-    preds[,i]<-predict.gamMRSea(predictionGrid, g2k = g2k, model=sim_glm, type = 'response')
+    preds[,i]<-predict.gamMRSea(predictionGrid, g2k = g2k, object =sim_glm, type = 'response')
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~~~ Differences ~~~~~~~~~
@@ -499,7 +500,7 @@ estdiffs<-data.frame(mean=bootdiffmean, bootdiffcis, predictionGrid[predictionGr
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
   # ~~ Return list object~~~~~
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-  output<-list(rawrob=rawrob, imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, significant.differences=list(individual=indpvals), bootdifferences=estdiffs, bootpreds=estpreds)
+  output<-list(rawrob=rawrob, imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, significant.differences=list(individual=indpvals), bootdifferences=estdiffs, bootpreds=estpreds, linkfunction=list(link=model$family$linkfun, linkinv=model$family$linkinv))
 
   if(model$family[[1]]=='poisson' | model$family[[1]]=='quasipoisson'){
     output$Abundance = abund

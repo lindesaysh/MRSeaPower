@@ -32,3 +32,4 @@ plot.diffs(nysted.power.oc)
 \author{
 LAS Scott-Hayward
 }
+

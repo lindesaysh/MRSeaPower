@@ -32,3 +32,4 @@ Function to create a toy dataset for package testing
 \author{
 Lindesay Scott-Hayward, University of St Andrews
 }
+

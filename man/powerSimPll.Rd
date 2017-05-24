@@ -39,6 +39,7 @@ An object of class \code{gamMRSea.power}.
 \item{bootdifferences}{data frame of bootstrapped differences (before and after event). Number of rows is the number of rows in the prediction grid divided by 2}
 \item{bootpreds}{data frame of bootstrapped predictions.}
 \item{Abundance}{Table of sitewide abundance (with upper and lower 95\% CI)}
+\item{link}{List of the link function (link) and inverse link function (linkinv)}
 }
 \description{
 Function to run a power analysis for a model of type 'gamMRSea'
@@ -50,3 +51,4 @@ Function to run a power analysis for a model of type 'gamMRSea'
 \author{
 LAS Scott-Hayward, University of St Andrews
 }
+

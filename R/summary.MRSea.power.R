@@ -15,7 +15,7 @@
 #' data(nysted.power.oc)
 #' data(nysted.power.oc.null)
 #'
-#' summary(nysted.power.oc, nysted.power.oc.null, truebeta=0.8)
+#' summary(nysted.power.oc, nysted.power.oc.null, truebeta=log(0.8))
 #'
 #' @author LAS Scott-Hayward
 #'
