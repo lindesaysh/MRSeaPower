@@ -31,4 +31,3 @@ plot.coverage(nysted.power.oc, truebeta.response=0.8)
 \author{
 LAS Scott-Hayward, University of St Andrews
 }
-

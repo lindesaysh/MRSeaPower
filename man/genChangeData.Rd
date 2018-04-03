@@ -45,4 +45,3 @@ changedata2<-genChangeData(pct.change=50, model=initialModel, data=nysted, panel
 \author{
 Lindesay Scott-Hayward, University of St Andrews
 }
-
