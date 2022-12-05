@@ -90,7 +90,7 @@ generateIC<-function(data, corrs, panels, newdata, nsim, dots=FALSE){
     # NB T=rcorr(R_star)#from dodgey Haas code
 
     Q=try(t(chol(T$r)), silent=TRUE)
-    if(class(Q)=='try-error'){
+    if(class(Q)[1]=='try-error'){
       Q=t(chol(nearPD(T$r)$mat))
     }
 
