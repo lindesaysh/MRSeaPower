@@ -14,7 +14,7 @@
 \item{cellsize}{vector of length two denoting the size of the gridcells (width, height).  If unspecified, geom_raster is used for plotting rather than geom_tile.}
 }
 \value{
-Figure showing the mean (middle), lower 2.5% (left) and upper 97.5% (right) of estimated differences between before and after the event. (difference = post - pre)
+Figure showing the mean (middle), lower 2.5\% (left) and upper 97.5\% (right) of estimated differences between before and after the event. (difference = post - pre)
 }
 \description{
 Function to plot the output from powerSim

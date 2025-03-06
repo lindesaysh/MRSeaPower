@@ -4,8 +4,14 @@
 \alias{genChangeData}
 \title{Function to impose an change impact effect}
 \usage{
-genChangeData(pct.change, model, data, panels = NULL, eventsite.bnd = NULL,
-  noneventcells = NULL)
+genChangeData(
+  pct.change,
+  model,
+  data,
+  panels = NULL,
+  eventsite.bnd = NULL,
+  noneventcells = NULL
+)
 }
 \arguments{
 \item{pct.change}{percentage change to occur. e.g. 50\% gives 50\% site wide decline.  If a redistribution effect (one of \code{eventsite.bnd} or \code{noneventcells} must be specified) then the change refers only to the event site cells.  For an additional site-wide change when using a re-distribution, \code{pct.change} is a vector with the first number the event site re-distribution and the second, the site wide change.}

@@ -2,3 +2,6 @@
 ^\.Rproj\.user$
 ^\vignettes
 ^\testing
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

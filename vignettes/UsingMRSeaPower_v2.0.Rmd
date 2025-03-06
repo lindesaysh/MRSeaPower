@@ -4,7 +4,7 @@ author: "LAS Scott-Hayward and ML Mackenzie"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Software for analysing the Power to Detect Change}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -28,8 +28,8 @@ cite_options(citation_format = 'pandoc', cite.style = 'authoryear', max.names = 
 ```
 
 ```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
-require(MRSea)
-devtools::load_all(pkg='../../MRSeaPower')
+require(MRSeaPower)
+#devtools::load_all(pkg='../../MRSeaPower')
 ```
 
 # Initial Setup
@@ -390,9 +390,9 @@ nysted.power.oc<-powerSimPll(newdatcor.ny.imp, nysim_glm, empdistpower.ny, nsim=
                              g2k=NULL, splineParams=NULL, n.boot=100, nCores = 2)
 ```
 
-```{r echo=TRUE, eval=FALSE}
-save(nysted.power.oc, file='data/powerout.nystedslim.oc.RData', compress = 'bzip2')
-```
+<!-- ```{r echo=TRUE, eval=FALSE} -->
+<!-- save(nysted.power.oc, file='data/powerout.nystedslim.oc.RData', compress = 'bzip2') -->
+<!-- ``` -->
 
 
 ```{r eval=TRUE, echo=FALSE}
@@ -410,9 +410,9 @@ nysted.power.oc.null<-pval.coverage.null(newdat.ind = newdata.ny.imp,
 
 ```
 
-```{r echo=TRUE, eval=FALSE}
-save(nysted.power.oc.null, file='data/null.output.nystedslim.oc.RData', compress = 'bzip2')
-```
+<!-- ```{r echo=TRUE, eval=FALSE} -->
+<!-- save(nysted.power.oc.null, file='data/null.output.nystedslim.oc.RData', compress = 'bzip2') -->
+<!-- ``` -->
 
 
 ```{r eval=TRUE, echo=FALSE}
@@ -593,9 +593,9 @@ powerout.nysted.re<-powerSimPll(newdatcor.ny.impre, nyresim_glm, empdistpower.ny
                              n.boot=200, nCores = 2)
 ```
 
-```{r echo=TRUE, eval=FALSE}
-save(powerout.nysted.re, file='data/powerout.nystedslim.re.RData', compress = 'bzip2')
-```
+<!-- ```{r echo=TRUE, eval=FALSE} -->
+<!-- save(powerout.nysted.re, file='data/powerout.nystedslim.re.RData', compress = 'bzip2') -->
+<!-- ``` -->
 
 
 ```{r auknullre, echo=TRUE, eval=TRUE, cache=TRUE}
@@ -605,9 +605,9 @@ null.output.nysted.re<-pval.coverage.null(newdat.ind = newdata.ny.impre, newdat.
 
 ```
 
-```{r echo=TRUE, eval=FALSE}
-save(null.output.nysted.re, file='data/null.output.nystedslim.re.RData', compress = 'bzip2')
-```
+<!-- ```{r echo=TRUE, eval=FALSE} -->
+<!-- save(null.output.nysted.re, file='data/null.output.nystedslim.re.RData', compress = 'bzip2') -->
+<!-- ``` -->
 
 
 ## Outputs

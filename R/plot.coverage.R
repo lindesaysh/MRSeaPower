@@ -1,7 +1,7 @@
 #' Function to plot the confidence intervals from the change parameter
 #'
 #' @param power.object A power analysis object of class gamMRSea.power
-#' @param truebeta.response The true coeficient of the change covariate on the scale of the response. E.g. 0.8 is a 20\% decline in overall numbers.
+#' @param truebeta.response The true coeficient of the change covariate on the scale of the response. E.g. 0.8 is a 20\\% decline in overall numbers.
 #' @param alternativebeta An alternative coefficient which you wish to test if it is a plausible value for the truth (i.e. sits within the confidence interval for the coefficient). Defaults to no change.
 #' @param plot (default = TRUE).  Logical stating whether the results should be plotted.
 #'

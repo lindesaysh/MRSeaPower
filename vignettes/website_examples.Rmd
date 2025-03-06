@@ -2,7 +2,7 @@
 title: "Examples on the MRSeaPower website"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Examples on the MRSea website}
+  %\VignetteIndexEntry{Examples on the MRSeaPower website}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

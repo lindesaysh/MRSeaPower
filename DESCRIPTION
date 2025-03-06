@@ -4,9 +4,7 @@ Title: Package for Running Power Analysis on gamMRSea models.
 Version: 2.00.01
 Authors@R: c(person("Lindesay",  "Scott-Hayward", email="lass@st-andrews.ac.uk", role=c('aut', 'cre')),
    person("Monique",  "Mackenzie", role=c('aut')))
-Description: some description
-License: Developed under contract to the Scottish Government (USA/012/15)
-LazyData: TRUE
+Description: Suite of functions for simulating post "impact" data and assessing spatially explicit power.  Developed under contract to the Scottish Government (USA/012/15)
 Depends:
     R (>= 3.1),
     MRSea
@@ -24,7 +22,7 @@ Note: Scott-Hayward LAS and Mackenzie ML
     University of St. Andrews
 URL: http://creem2.st-and.ac.uk/software.aspx,
     http://lindesaysh.github.io/MRSeaPower/
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Encoding: UTF-8
 VignetteBuilder: knitr
 BuildVignettes: true

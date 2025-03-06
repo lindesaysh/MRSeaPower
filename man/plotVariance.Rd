@@ -4,8 +4,14 @@
 \alias{plotVariance}
 \title{Plotting function to assess the mean-variance relationship of generated data}
 \usage{
-plotVariance(model, simdat, cuts = 20, quants = c(0.025, 0.975),
-  n.sim = NULL, store.data = FALSE)
+plotVariance(
+  model,
+  simdat,
+  cuts = 20,
+  quants = c(0.025, 0.975),
+  n.sim = NULL,
+  store.data = FALSE
+)
 }
 \arguments{
 \item{model}{model object of class glm, gam or gamMRSea}

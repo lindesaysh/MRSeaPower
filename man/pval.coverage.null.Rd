@@ -4,8 +4,14 @@
 \alias{pval.coverage.null}
 \title{Function to estimate the coverage of the overall change impact coefficient.}
 \usage{
-pval.coverage.null(newdat.ind, newdat.corr = NULL, model, nsim, powercoefid,
-  empdistnull = NULL)
+pval.coverage.null(
+  newdat.ind,
+  newdat.corr = NULL,
+  model,
+  nsim,
+  powercoefid,
+  empdistnull = NULL
+)
 }
 \arguments{
 \item{newdat.ind}{simulated independent response data}

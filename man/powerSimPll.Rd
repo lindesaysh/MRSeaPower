@@ -4,14 +4,23 @@
 \alias{powerSimPll}
 \title{Function to run a power analysis for a model of type 'gamMRSea'}
 \usage{
-powerSimPll(newdat, model, empdistribution, nsim, powercoefid,
-  predictionGrid = NULL, g2k = NULL, splineParams = NULL, n.boot = 500,
-  nCores = 1)
+powerSimPll(
+  newdat,
+  model,
+  empdistribution,
+  nsim,
+  powercoefid,
+  predictionGrid = NULL,
+  g2k = NULL,
+  splineParams = NULL,
+  n.boot = 500,
+  nCores = 1
+)
 }
 \arguments{
 \item{newdat}{matrix of values whose rows are observations and columns are simulated sets of response data}
 
-\item{model}{model object of class `gamMRSea`.  This is the model used to generate the data, updated for the inclusion of an event term.}
+\item{model}{model object of class \code{gamMRSea}.  This is the model used to generate the data, updated for the inclusion of an event term.}
 
 \item{empdistribution}{Empirical distribution for the runs test}
 
@@ -38,7 +47,7 @@ An object of class \code{gamMRSea.power}.
 \item{powsimfits}{Fitted values each model}
 \item{bootdifferences}{data frame of bootstrapped differences (before and after event). Number of rows is the number of rows in the prediction grid divided by 2}
 \item{bootpreds}{data frame of bootstrapped predictions.}
-\item{Abundance}{Table of sitewide abundance (with upper and lower 95\% CI)}
+\item{Abundance}{Table of sitewide abundance (with upper and lower 95\\\% CI)}
 \item{link}{List of the link function (link) and inverse link function (linkinv)}
 }
 \description{

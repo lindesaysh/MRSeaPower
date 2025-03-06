@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.preds.R
 \name{plot.preds}
 \alias{plot.preds}
-\title{Function plot the mean, lower 2.5\% and upper 97.5\% of predicted animal counts before and after the event.}
+\title{Function plot the mean, lower 2.5\\\% and upper 97.5\\\% of predicted animal counts before and after the event.}
 \usage{
 \method{plot}{preds}(power.object, returndata = FALSE, cellsize)
 }
@@ -14,11 +14,11 @@
 \item{cellsize}{vector of length two denoting the size of the gridcells (width, height).  If unspecified, geom_raster is used for plotting rather than geom_tile.}
 }
 \description{
-Function plot the mean, lower 2.5\% and upper 97.5\% of predicted animal counts before and after the event.
+Function plot the mean, lower 2.5\\\% and upper 97.5\\\% of predicted animal counts before and after the event.
 }
 \examples{
 
-# Load a power object that was created with a 20\\\% sitewide decline
+# Load a power object that was created with a 20\\% sitewide decline
 # 50 simulations were run
 data(nysted.power.oc)
 

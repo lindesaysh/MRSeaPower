@@ -26,4 +26,6 @@ navbar:
         href: articles/UsingMRSeaPower_v2.0.html
       - text: Basic examples
       - text: ---
+      - text: Publications
+        href: articles/web/Publications.html
 
