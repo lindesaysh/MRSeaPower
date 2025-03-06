@@ -4,8 +4,14 @@
 \alias{plot.sigdiff}
 \title{Function to plot the output from powerSim}
 \usage{
-\method{plot}{sigdiff}(powerout, coordinates, tailed = "two",
-  error.rate = 0.05, adjustment = "none", gridcell.dim = NULL)
+\method{plot}{sigdiff}(
+  powerout,
+  coordinates,
+  tailed = "two",
+  error.rate = 0.05,
+  adjustment = "none",
+  gridcell.dim = NULL
+)
 }
 \arguments{
 \item{powerout}{power analysis object of class 'gamMRSea.power'}
@@ -14,7 +20,7 @@
 
 \item{tailed}{takes on the value 'one' or 'two' depending on the type of test required}
 
-\item{error.rate}{number stating the error rate required, default is 0.05 (5\% error rate)}
+\item{error.rate}{number stating the error rate required, default is 0.05 (5\\\% error rate)}
 
 \item{adjustment}{character stating the adjustment, if any, for multiple testing.  The default value is 'none'.  Alternatives are 'sidak' and 'bonferroni'.}
 

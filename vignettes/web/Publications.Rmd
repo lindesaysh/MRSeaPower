@@ -1,0 +1,15 @@
+---
+title: "Publications"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# R package
+
+### MRSeaPower package: 
+
+- Scott-Hayward, L.A.S. and M.L. Mackenzie (2017). MRSeaPower: Power analysis method for gamMRSea models. R package version 2.0.
+
+### Original Contract/Package documentation (2013)
+
+- Mackenzie, M.L., Scott-Hayward, L.A.S., Paxton, C.G. and M.L. Burt (2017). Quantifying the Power to Detect Change: methodological development and implementation using the R package MRSeaPower.

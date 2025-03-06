@@ -4,8 +4,14 @@
 \alias{genRedistData}
 \title{Function to impose a re-distribution impact effect}
 \usage{
-genRedistData(model, data, changecoef.link, panels = NULL,
-  eventsite.bnd = NULL, noneventcells = NULL)
+genRedistData(
+  model,
+  data,
+  changecoef.link,
+  panels = NULL,
+  eventsite.bnd = NULL,
+  noneventcells = NULL
+)
 }
 \arguments{
 \item{model}{A glm or gamMRSea model object.}

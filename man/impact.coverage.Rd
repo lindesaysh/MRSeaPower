@@ -8,7 +8,7 @@ impact.coverage(truebeta, betacis)
 }
 \description{
 @param truebeta true coefficient value
- @param betacis dataframe of upper and lower intervals, where the number of rows is the number of bootstrap simulations
+@param betacis dataframe of upper and lower intervals, where the number of rows is the number of bootstrap simulations
 }
 \details{
 @export

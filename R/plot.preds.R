@@ -1,4 +1,4 @@
-#' Function plot the mean, lower 2.5\% and upper 97.5\% of predicted animal counts before and after the event.
+#' Function plot the mean, lower 2.5\\% and upper 97.5\\% of predicted animal counts before and after the event.
 #'
 #' @param power.object power analysis object of class gamMRSea.power
 #' @param returndata logical stating whether to return the plotting data

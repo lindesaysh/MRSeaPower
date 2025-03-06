@@ -4,7 +4,7 @@ rref <- bibentry(
   title = "MRSeaPower: Power analysis method for gamMRSea models",
   author = c(person("L.A.S. Scott-Hayward"), person("M.L.M Mackenzie")),
   organization = "University of St Andrews",
-  note = "R package version 0.99",
+  note = "R package version 2.0",
   year = 2017)
 
 ## Different printing styles

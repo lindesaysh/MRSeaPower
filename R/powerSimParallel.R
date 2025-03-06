@@ -19,7 +19,7 @@
 #' \item{powsimfits}{Fitted values each model}
 #' \item{bootdifferences}{data frame of bootstrapped differences (before and after event). Number of rows is the number of rows in the prediction grid divided by 2}
 #' \item{bootpreds}{data frame of bootstrapped predictions.}
-#' \item{Abundance}{Table of sitewide abundance (with upper and lower 95\% CI)}
+#' \item{Abundance}{Table of sitewide abundance (with upper and lower 95\\% CI)}
 #' \item{link}{List of the link function (link) and inverse link function (linkinv)}
 #'
 #'

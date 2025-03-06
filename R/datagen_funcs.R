@@ -4,37 +4,37 @@
 generateDistribData<-function(nsim, model, coeff, data, dist.func=NULL){
   rcoef<-rmvnorm(nsim, coeff, summary(model)$cov.unscaled)
   newdata<-model$family$linkinv(model.matrix(model)%*%t(rcoef))
-  
+
   # make new datasets from fitted values of gee or gam:
   newdata2ndsim<-matrix(NA, nrow=nrow(newdata), ncol=nsim)
   for(i in 1:nsim){
-    newdata2ndsim[,i]<-rpois.od(n = nrow(newdata), lambda = newdata[,i], d = as.numeric(summary(model)$dispersion[1])) 
+    newdata2ndsim[,i]<-rpois.od(n = nrow(newdata), lambda = newdata[,i], d = as.numeric(summary(model)$dispersion[1]))
   }
   return(newdata2ndsim)
 }
 
 generateDistribData2<-function(nsim, model, newdata, betasamp=FALSE, coeff=NULL, dist.func='quasipoisson', disp){
-  
+
   if(betasamp==TRUE){
     rcoef<-rmvnorm(nsim, coeff, summary(model)$cov.unscaled)
     newdata<-model$family$linkinv(model.matrix(model)%*%t(rcoef))
     # make new datasets from fitted values of gee or gam:
     newdata2ndsim<-matrix(NA, nrow=nrow(newdata), ncol=nsim)
     for(i in 1:nsim){
-      newdata2ndsim[,i]<-rpois.od(n = nrow(newdata), lambda = newdata[,i], d = disp) 
+      newdata2ndsim[,i]<-rpois.od(n = nrow(newdata), lambda = newdata[,i], d = disp)
     }
   }else{
     # make new datasets from fitted values of gee or gam:
     newdata2ndsim<-matrix(NA, nrow=nrow(newdata), ncol=nsim)
     for(i in 1:nsim){
-      newdata2ndsim[,i]<-rpois.od(n = nrow(newdata), lambda = newdata, d = disp) 
-    }  
+      newdata2ndsim[,i]<-rpois.od(n = nrow(newdata), lambda = newdata, d = disp)
+    }
   }
   return(newdata2ndsim)
 }
 
 generateDistribData2_bin<-function(nsim, model, newdata, betasamp=FALSE, coeff=NULL, dist.func='quasipoisson', disp=1){
-  
+
   if(dist.func=='quasipoisson'){
     if(betasamp==TRUE){
       rcoef<-rmvnorm(nsim, coeff, summary(model)$cov.unscaled)
@@ -42,14 +42,14 @@ generateDistribData2_bin<-function(nsim, model, newdata, betasamp=FALSE, coeff=N
       # make new datasets from fitted values of gee or gam:
       newdata2ndsim<-matrix(NA, nrow=nrow(newdata), ncol=nsim)
       for(i in 1:nsim){
-        newdata2ndsim[,i]<-rpois.od(n = nrow(newdata), lambda = newdata[,i], d = disp) 
+        newdata2ndsim[,i]<-rpois.od(n = nrow(newdata), lambda = newdata[,i], d = disp)
       }
     }else{
       # make new datasets from fitted values of gee or gam:
       newdata2ndsim<-matrix(NA, nrow=nrow(newdata), ncol=nsim)
       for(i in 1:nsim){
-        newdata2ndsim[,i]<-rpois.od(n = nrow(newdata), lambda = newdata, d = disp) 
-      }  
+        newdata2ndsim[,i]<-rpois.od(n = nrow(newdata), lambda = newdata, d = disp)
+      }
     }
   }
   if(dist.func=='binomial'){
@@ -59,14 +59,14 @@ generateDistribData2_bin<-function(nsim, model, newdata, betasamp=FALSE, coeff=N
       # make new datasets from fitted values of gee or gam:
       newdata2ndsim<-matrix(NA, nrow=nrow(newdata), ncol=nsim)
       for(i in 1:nsim){
-        newdata2ndsim[,i]<-rbinom(n = nrow(newdata), size = 1, prob = newdata[,i]) 
+        newdata2ndsim[,i]<-rbinom(n = nrow(newdata), size = 1, prob = newdata[,i])
       }
     }else{
       # make new datasets from fitted values of gee or gam:
       newdata2ndsim<-matrix(NA, nrow=nrow(newdata), ncol=nsim)
       for(i in 1:nsim){
-        newdata2ndsim[,i]<-rbinom(n = nrow(newdata), size=1, prob = newdata) 
-      }  
+        newdata2ndsim[,i]<-rbinom(n = nrow(newdata), size=1, prob = newdata)
+      }
     }
   }
   return(newdata2ndsim)
@@ -74,18 +74,11 @@ generateDistribData2_bin<-function(nsim, model, newdata, betasamp=FALSE, coeff=N
 # ~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~
 
-rpois.od<-function(n, lambda, d=1){
-  if(d[1]==1)
-    rpois(n, lambda)
-  else
-    rnbinom(n, size=(lambda/(d-1)), mu=lambda)
-}
-
 
 # ~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~
 
-acffunc_dat<-function (block, data) 
+acffunc_dat<-function (block, data)
 {
   blocktab <- table(block)
   acfmat <- matrix(NA, length(unique(block)), max(blocktab))
@@ -101,7 +94,7 @@ acffunc_dat<-function (block, data)
 }
 
 
-acffunc_dat2<-function (block, data) 
+acffunc_dat2<-function (block, data)
 {
   blocktab <- table(block)
   acfmat <- matrix(NA, length(unique(block)), max(blocktab))
@@ -129,13 +122,13 @@ numRep=nsim # number of draws to be taken
 
 for(iter in 1:length(bids)){
   cat(iter , '\n')
-  
+
   tempid<-which(data[,block]==bids[iter])
-  
+
   vars<-t(newdata[tempid,1:nsim])
-  
+
   numVar=length(tempid)  # number of variables to consider
-  
+
   bcorr<-na.omit(corrs$acfmat[iter, ])
   if(bcorr[1]!=1){
     bcorr[1]<-1
@@ -145,7 +138,7 @@ for(iter in 1:length(bids)){
     sigma[i,(i:ncol(sigma))]<-bcorr[1:(ncol(sigma)-(i-1))]
   }
   sigma[lower.tri(sigma)]<-t(sigma)[lower.tri(sigma)]
-  
+
   entryR=qnorm((1:numRep)/(numRep+1))
   absDiff=numVar*numVar-numVar
   for (j in 1:200) { #Pick a "good" r matrix - note: 100 is different to numrep
@@ -162,17 +155,17 @@ for(iter in 1:length(bids)){
     }
     #cat(thisAbsDiff,', ' , absDiff, '\n')
   }
-  
-  P=t(chol(sigma)) 
+
+  P=t(chol(sigma))
   R_star=R%*%t(P)
   T=rcorr_sub(R)
   # NB T=rcorr(R_star)#from dodgey Haas code
-  
+
   Q=try(t(chol(T$r)), silent=TRUE)
   if(class(Q)=='try-error'){
-    Q=t(chol(nearPD(T$r)$mat))  
+    Q=t(chol(nearPD(T$r)$mat))
   }
-  
+
   S=P%*%solve(Q)
   Rb_star=R%*%t(S)
   #NB Rb_star=R_star%*%t(S)#from dodgey Haas code
@@ -185,20 +178,20 @@ for(iter in 1:length(bids)){
     iin<-vars
     outs<-t(t(order(Rb_star)))
   }
-              
+
   for (i in 1:numVar) {
     #repVars[order(Rb_star[,i]),i]=sort(vars[,i])
     repVars[outs[,i],i]<-iin[,i]
-   # RrepVars[order(R_star[,i]),i]=sort(vars[,i])  
+   # RrepVars[order(R_star[,i]),i]=sort(vars[,i])
   }
   #rcorr(repVars)$r
   #rcorr(RrepVars)$r
-  
+
   if(iter==1){
     totalrepVars<-NULL
     #totalRrepVars<-NULL
   }
-  
+
   totalrepVars <- rbind(totalrepVars, t(repVars))
   #totalRrepVars <- rbind(totalRrepVars, t(RrepVars))
 }
@@ -209,23 +202,23 @@ return(totalrepVars)
 # ~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~
 generateIC_meancor<-function(data, corrs, block, newdata, nsim){
-  
+
   # corrs is the output from acf with max block length
   require(Hmisc)
   require(Matrix)
   bids<-unique(data[,block])
   #nsim=ncol(newdata)
   numRep=nsim # number of draws to be taken
-  
+
   for(iter in 1:length(bids)){
     cat(iter , '\n')
-    
+
     tempid<-which(data[,block]==bids[iter])
-    
+
     vars<-t(newdata[tempid,1:nsim])
-    
+
     numVar=length(tempid)  # number of variables to consider
-    
+
     bcorr<-corrs[1:length(tempid)]
     # if(bcorr[1]!=1){
     #   bcorr[1]<-1
@@ -239,7 +232,7 @@ generateIC_meancor<-function(data, corrs, block, newdata, nsim){
       }
     }
     sigma[lower.tri(sigma)]<-t(sigma)[lower.tri(sigma)]
-    
+
     entryR=qnorm((1:numRep)/(numRep+1))
     absDiff=numVar*numVar-numVar
     for (j in 1:200) { #Pick a "good" r matrix - note: 100 is different to numrep
@@ -256,17 +249,17 @@ generateIC_meancor<-function(data, corrs, block, newdata, nsim){
       }
       #cat(thisAbsDiff,', ' , absDiff, '\n')
     }
-    
-    P=t(chol(sigma)) 
+
+    P=t(chol(sigma))
     R_star=R%*%t(P)
     T=rcorr_sub(R)
     # NB T=rcorr(R_star)#from dodgey Haas code
-    
+
     Q=try(t(chol(T$r)), silent=TRUE)
     if(class(Q)=='try-error'){
-      Q=t(chol(nearPD(T$r)$mat))  
+      Q=t(chol(nearPD(T$r)$mat))
     }
-    
+
     S=P%*%solve(Q)
     Rb_star=R%*%t(S)
     #NB Rb_star=R_star%*%t(S)#from dodgey Haas code
@@ -279,20 +272,20 @@ generateIC_meancor<-function(data, corrs, block, newdata, nsim){
       iin<-vars
       outs<-t(t(order(Rb_star)))
     }
-    
+
     for (i in 1:numVar) {
       #repVars[order(Rb_star[,i]),i]=sort(vars[,i])
       repVars[outs[,i],i]<-iin[,i]
-      # RrepVars[order(R_star[,i]),i]=sort(vars[,i])  
+      # RrepVars[order(R_star[,i]),i]=sort(vars[,i])
     }
     #rcorr(repVars)$r
     #rcorr(RrepVars)$r
-    
+
     if(iter==1){
       totalrepVars<-NULL
       #totalRrepVars<-NULL
     }
-    
+
     totalrepVars <- rbind(totalrepVars, t(repVars))
     #totalRrepVars <- rbind(totalRrepVars, t(RrepVars))
   }
@@ -301,22 +294,22 @@ generateIC_meancor<-function(data, corrs, block, newdata, nsim){
 
 # ~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~
-rcorr_sub<-function (x, y, type = c("pearson", "spearman")) 
+rcorr_sub<-function (x, y, type = c("pearson", "spearman"))
 {
   type <- match.arg(type)
-  if (!missing(y)) 
+  if (!missing(y))
     x <- cbind(x, y)
   x[is.na(x)] <- 1e+50
   storage.mode(x) <- "double"
   p <- as.integer(ncol(x))
-  if (p < 1) 
+  if (p < 1)
     stop("must have >1 column")
   n <- as.integer(nrow(x))
-  if (n < 5) 
+  if (n < 5)
     stop("must have >4 observations")
-  h <- .Fortran("rcorr", x, n, p, itype = as.integer(1 + (type == 
-                                                            "spearman")), hmatrix = double(p * p), npair = integer(p * 
-                                                                                                                     p), double(n), double(n), double(n), double(n), double(n), 
+  h <- .Fortran("rcorr", x, n, p, itype = as.integer(1 + (type ==
+                                                            "spearman")), hmatrix = double(p * p), npair = integer(p *
+                                                                                                                     p), double(n), double(n), double(n), double(n), double(n),
                 integer(n), PACKAGE = "Hmisc")
   npair <- matrix(h$npair, ncol = p)
   h <- matrix(h$hmatrix, ncol = p)
@@ -324,7 +317,7 @@ rcorr_sub<-function (x, y, type = c("pearson", "spearman"))
   nam <- dimnames(x)[[2]]
   dimnames(h) <- list(nam, nam)
   dimnames(npair) <- list(nam, nam)
-  # P <- matrix(2 * (1 - pt(abs(h) * sqrt(npair - 2)/sqrt(1 - 
+  # P <- matrix(2 * (1 - pt(abs(h) * sqrt(npair - 2)/sqrt(1 -
   #                                                         h * h), npair - 2)), ncol = p)
   # P[abs(h) == 1] <- 0
   # diag(P) <- NA
@@ -347,7 +340,7 @@ return(inside)
 # ~~~~~~~~~~~~~~~~~~~~
 
 simfunc_SW<- function(nsim, model, impactcoeff, datatype='Independent', simdata, correlations=NULL){
-  
+
   # find the correction for the se's and also the correction for the variance-covariance matrix (to some extent these are the same)
   data<-model$data
   # find eventphase correction
@@ -356,8 +349,8 @@ simfunc_SW<- function(nsim, model, impactcoeff, datatype='Independent', simdata,
   fitgee<-update(model, .~. + eventphase, data=data)
   correc_imp<-summary(fitgee)$coefficients[,2]/summary(fitglm)$coefficients[,2]
   #correc_imp
-  
-  
+
+
   # generate independent data
   if(is.null(simdata)){
     newdata2ndsim<-generateDistribData(nsim, fitgee, coeff = coef(fitgee))
@@ -369,46 +362,46 @@ simfunc_SW<- function(nsim, model, impactcoeff, datatype='Independent', simdata,
   }else{
     newdata2ndsim<-simdata
   }
-  
+
   # make storage outputs
   betas=matrix(NA, length(coef(fitgee)), nsim)
   ses_glm=ses_gee=ses_cimp=matrix(NA, length(coef(fitgee)), nsim)
   disp=vector(length=nsim)
   inside_glm=inside_gee= inside_corr=matrix(NA, nsim, length(coef(fitgee)))
   pvalsimp<-matrix(NA, nsim, 3)
-  
-  # re-fit model (gam) with new response vectors. 
+
+  # re-fit model (gam) with new response vectors.
   for(i in 1:nsim){
     print(i)
     data$simsimresp<-newdata2ndsim[,i]
-    
+
     # glm impact fit
     simfit_glmimp<-update(fitglm, simsimresp ~., data=data)
     pvalsimp[i,1]<-summary(simfit_glmimp)$coefficients[6,4]
     betas[,i]<-summary(simfit_glmimp)$coefficients[,1]
     ses_glm[,i]<-summary(simfit_glmimp)$coefficients[,2]
     inside_glm[i,]<-getBetaCoverage(betas[,i], ses_glm[,i], summary(simfit_glmimp)$df[2], c(coef(model), impactcoeff))
-    
+
     # gee impact fit (should be no different as no correlation actually present)
     simfit_geeimp<-update(fitgee, simsimresp ~., data=data)
     pvalsimp[i,2]<-summary(simfit_geeimp)$coefficients[6,4]
     ses_gee[,i]<-summary(simfit_geeimp)$coefficients[,2]
     disp[i]<-as.numeric(summary(simfit_geeimp)$dispersion[1])
     inside_gee[i,]<-getBetaCoverage(betas[,i], ses_gee[,i], summary(simfit_geeimp)$df[2], c(coef(model), impactcoeff))
-    
+
     # find the corrected se's and see if coverage is better.
     ses_cimp[,i]<-summary(simfit_glmimp)$coefficients[,2]*correc_imp
     inside_corr[i,]<-getBetaCoverage(betas[,i], ses_cimp[,i], summary(simfit_geeimp)$df[2], c(coef(model), impactcoeff))
-    
+
     # take glm output and use corrected standard errors to make new teststat
     teststat<-summary(simfit_glmimp)$coefficients[6,1]/ses_cimp[6,i]
     # and p-value
     pvalsimp[i,3]<-2*pt(-abs(teststat), summary(simfit_glmimp)$df[2])
   }
-  
+
   glm.out<-list(sderr=ses_glm, sderr.corrected=ses_cimp, betas=betas, beta.coverage=inside_glm)
   gee.out<-list(sderr=ses_gee, betas=betas, disp=disp, beta.coverage=inside_glm, beta.coverage.corrected=inside_corr)
-  
+
   output<-list(correc_imp=correc_imp,glm.out=glm.out, gee.out=gee.out, p.evphase=pvalsimp, newdata2ndsim=newdata2ndsim)
   return(output)
 }
@@ -416,7 +409,7 @@ simfunc_SW<- function(nsim, model, impactcoeff, datatype='Independent', simdata,
 
 
 simfunc_SW2<- function(nsim, model, initialcoeff, datatype='Independent', simdata, correlations=NULL){
-  
+
   # find the correction for the se's and also the correction for the variance-covariance matrix (to some extent these are the same)
   data<-model$data
   # find eventphase correction
@@ -425,8 +418,8 @@ simfunc_SW2<- function(nsim, model, initialcoeff, datatype='Independent', simdat
   fitgee<-update(model, .~. + eventphase, data=data)
   correc_imp<-summary(fitgee)$coefficients[,2]/summary(fitglm)$coefficients[,2]
   #correc_imp
-  
-  
+
+
   # generate independent data
   if(is.null(simdata)){
     newdata2ndsim<-generateDistribData(nsim, fitgee, coeff = coef(fitgee))
@@ -438,46 +431,46 @@ simfunc_SW2<- function(nsim, model, initialcoeff, datatype='Independent', simdat
   }else{
     newdata2ndsim<-simdata
   }
-  
+
   # make storage outputs
   betas=matrix(NA, length(coef(fitgee)), nsim)
   ses_glm=ses_gee=ses_cimp=matrix(NA, length(coef(fitgee)), nsim)
   disp=vector(length=nsim)
   inside_glm=inside_gee= inside_corr=matrix(NA, nsim, length(coef(fitgee)))
   pvalsimp<-matrix(NA, nsim, 3)
-  
-  # re-fit model (gam) with new response vectors. 
+
+  # re-fit model (gam) with new response vectors.
   for(i in 1:nsim){
     print(i)
     data$simsimresp<-newdata2ndsim[,i]
-    
+
     # glm impact fit
     simfit_glmimp<-update(fitglm, simsimresp ~., data=data)
     pvalsimp[i,1]<-summary(simfit_glmimp)$coefficients[6,4]
     betas[,i]<-summary(simfit_glmimp)$coefficients[,1]
     ses_glm[,i]<-summary(simfit_glmimp)$coefficients[,2]
     inside_glm[i,]<-getBetaCoverage(betas[,i], ses_glm[,i], summary(simfit_glmimp)$df[2], initialcoeff)
-    
+
     # gee impact fit (should be no different as no correlation actually present)
     simfit_geeimp<-update(fitgee, simsimresp ~., data=data)
     pvalsimp[i,2]<-summary(simfit_geeimp)$coefficients[6,4]
     ses_gee[,i]<-summary(simfit_geeimp)$coefficients[,2]
     disp[i]<-as.numeric(summary(simfit_geeimp)$dispersion[1])
     inside_gee[i,]<-getBetaCoverage(betas[,i], ses_gee[,i], summary(simfit_geeimp)$df[2], initialcoeff)
-    
+
     # find the corrected se's and see if coverage is better.
     ses_cimp[,i]<-summary(simfit_glmimp)$coefficients[,2]*correc_imp
     inside_corr[i,]<-getBetaCoverage(betas[,i], ses_cimp[,i], summary(simfit_geeimp)$df[2], initialcoeff)
-    
+
     # take glm output and use corrected standard errors to make new teststat
     teststat<-summary(simfit_glmimp)$coefficients[6,1]/ses_cimp[6,i]
     # and p-value
     pvalsimp[i,3]<-2*pt(-abs(teststat), summary(simfit_glmimp)$df[2])
   }
-  
+
   glm.out<-list(sderr=ses_glm, sderr.corrected=ses_cimp, betas=betas, beta.coverage=inside_glm)
   gee.out<-list(sderr=ses_gee, betas=betas, disp=disp, beta.coverage=inside_glm, beta.coverage.corrected=inside_corr)
-  
+
   output<-list(correc_imp=correc_imp,glm.out=glm.out, gee.out=gee.out, p.evphase=pvalsimp, newdata2ndsim=newdata2ndsim)
   return(output)
 }
@@ -487,20 +480,20 @@ simfunc_SW2<- function(nsim, model, initialcoeff, datatype='Independent', simdat
 generateDistribData_sim<-function(nsim, model, coeff, data, disp, dist.func=NULL){
   rcoef<-rmvnorm(nsim, coeff, summary(model)$cov.unscaled)
   newdata<-model$family$linkinv(model.matrix(model)%*%t(rcoef))
-  
+
   # make new datasets from fitted values of gee or gam:
   newdata2ndsim<-matrix(NA, nrow=nrow(newdata), ncol=nsim)
-  
+
   if(dist.func=='quasipoisson'){
   for(i in 1:nsim){
-    newdata2ndsim[,i]<-rpois.od(n = nrow(newdata), lambda = newdata[,i], d = disp) 
+    newdata2ndsim[,i]<-rpois.od(n = nrow(newdata), lambda = newdata[,i], d = disp)
   }
   }
-  
+
   if(dist.func=='binomial'){
       for(i in 1:nsim){
-        newdata2ndsim[,i]<-rbinom(n = nrow(newdata), size=1, prob = newdata) 
-      }  
+        newdata2ndsim[,i]<-rbinom(n = nrow(newdata), size=1, prob = newdata)
+      }
     }
   return(newdata2ndsim)
 }
@@ -511,7 +504,7 @@ generateDistribData_sim<-function(nsim, model, coeff, data, disp, dist.func=NULL
 
 
 simfunc_SW_disp<- function(nsim, model, impactcoeff, datatype='Independent', simdata, correlations=NULL, disp){
-  
+
   # find the correction for the se's and also the correction for the variance-covariance matrix (to some extent these are the same)
   data<-model$data
   # find eventphase correction
@@ -520,8 +513,8 @@ simfunc_SW_disp<- function(nsim, model, impactcoeff, datatype='Independent', sim
   fitgee<-update(model, .~. + eventphase, data=data)
   correc_imp<-summary(fitgee)$coefficients[,2]/summary(fitglm)$coefficients[,2]
   #correc_imp
-  
-  
+
+
   # generate independent data
   if(is.null(simdata)){
     newdata2ndsim<-generateDistribData_sim(nsim, fitgee, coeff = coef(fitgee), disp = disp, dist.func='quasipoisson')
@@ -533,46 +526,46 @@ simfunc_SW_disp<- function(nsim, model, impactcoeff, datatype='Independent', sim
   }else{
     newdata2ndsim<-simdata
   }
-  
+
   # make storage outputs
   betas=matrix(NA, length(coef(fitgee)), nsim)
   ses_glm=ses_gee=ses_cimp=matrix(NA, length(coef(fitgee)), nsim)
   disp=vector(length=nsim)
   inside_glm=inside_gee= inside_corr=matrix(NA, nsim, length(coef(fitgee)))
   pvalsimp<-matrix(NA, nsim, 3)
-  
-  # re-fit model (gam) with new response vectors. 
+
+  # re-fit model (gam) with new response vectors.
   for(i in 1:nsim){
     print(i)
     data$simsimresp<-newdata2ndsim[,i]
-    
+
     # glm impact fit
     simfit_glmimp<-update(fitglm, simsimresp ~., data=data)
     pvalsimp[i,1]<-summary(simfit_glmimp)$coefficients[6,4]
     betas[,i]<-summary(simfit_glmimp)$coefficients[,1]
     ses_glm[,i]<-summary(simfit_glmimp)$coefficients[,2]
     inside_glm[i,]<-getBetaCoverage(betas[,i], ses_glm[,i], summary(simfit_glmimp)$df[2], c(coef(model), impactcoeff))
-    
+
     # gee impact fit (should be no different as no correlation actually present)
     simfit_geeimp<-update(fitgee, simsimresp ~., data=data)
     pvalsimp[i,2]<-summary(simfit_geeimp)$coefficients[6,4]
     ses_gee[,i]<-summary(simfit_geeimp)$coefficients[,2]
     disp[i]<-as.numeric(summary(simfit_geeimp)$dispersion[1])
     inside_gee[i,]<-getBetaCoverage(betas[,i], ses_gee[,i], summary(simfit_geeimp)$df[2], c(coef(model), impactcoeff))
-    
+
     # find the corrected se's and see if coverage is better.
     ses_cimp[,i]<-summary(simfit_glmimp)$coefficients[,2]*correc_imp
     inside_corr[i,]<-getBetaCoverage(betas[,i], ses_cimp[,i], summary(simfit_geeimp)$df[2], c(coef(model), impactcoeff))
-    
+
     # take glm output and use corrected standard errors to make new teststat
     teststat<-summary(simfit_glmimp)$coefficients[6,1]/ses_cimp[6,i]
     # and p-value
     pvalsimp[i,3]<-2*pt(-abs(teststat), summary(simfit_glmimp)$df[2])
   }
-  
+
   glm.out<-list(sderr=ses_glm, sderr.corrected=ses_cimp, betas=betas, beta.coverage=inside_glm)
   gee.out<-list(sderr=ses_gee, betas=betas, disp=disp, beta.coverage=inside_glm, beta.coverage.corrected=inside_corr)
-  
+
   output<-list(correc_imp=correc_imp,glm.out=glm.out, gee.out=gee.out, p.evphase=pvalsimp, newdata2ndsim=newdata2ndsim)
   return(output)
 }
@@ -581,7 +574,7 @@ simfunc_SW_disp<- function(nsim, model, impactcoeff, datatype='Independent', sim
 #~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~
 simfunc_SW_disp_slim<- function(nsim, model, impactcoeff, correc_imp, datatype='Independent', simdata, correlations=NULL, disp, geemodel=NULL){
-  
+
   data<-model$data
   # generate independent data
   if(is.null(simdata)){
@@ -594,25 +587,25 @@ simfunc_SW_disp_slim<- function(nsim, model, impactcoeff, correc_imp, datatype='
   }else{
     newdata2ndsim<-simdata
   }
-  
+
   # make storage outputs
   #betas=matrix(NA, length(coef(model)), nsim)
   ses_cimp=matrix(NA, length(coef(model)), nsim)
   #disp=vector(length=nsim)
   #inside_glm=inside_gee= inside_corr=matrix(NA, nsim, length(coef(model)))
   pvalsimp<-matrix(NA, nsim, 2)
-  
-  
-  # re-fit model (gam) with new response vectors. 
+
+
+  # re-fit model (gam) with new response vectors.
   for(i in 1:nsim){
     print(i)
     data$simsimresp<-newdata2ndsim[,i]
-    
+
     impcoefid<-length(coef(model))
     # glm impact fit
     simfit_glmimp<-update(model, simsimresp ~., data=data)
     pvalsimp[i,1]<-summary(simfit_glmimp)$coefficients[impcoefid,4]
-    
+
     # # gee impact fit (should be no different as no correlation actually present)
     if(datatype=='Correlated'){
       simfit_geeimp<-update(geemodel, simsimresp ~., data=data)
@@ -623,13 +616,13 @@ simfunc_SW_disp_slim<- function(nsim, model, impactcoeff, correc_imp, datatype='
       # take glm output and use corrected standard errors to make new teststat
       teststat<-summary(simfit_glmimp)$coefficients[impcoefid,1]/ses_cimp[impcoefid,i]
       # and p-value
-      pvalsimp[i,2]<-2*pt(-abs(teststat), summary(simfit_glmimp)$df[2])  
+      pvalsimp[i,2]<-2*pt(-abs(teststat), summary(simfit_glmimp)$df[2])
     }
   }
-  
+
   #glm.out<-list(sderr.corrected=ses_cimp)
   #gee.out<-list(sderr=ses_gee, betas=betas, disp=disp, beta.coverage=inside_glm, beta.coverage.corrected=inside_corr)
-  
+
   output<-list(p.evphase=pvalsimp)
   return(output)
 }
@@ -638,7 +631,7 @@ simfunc_SW_disp_slim<- function(nsim, model, impactcoeff, correc_imp, datatype='
 # ~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~
 simfunc_SW_bin_slim<- function(nsim, model, impactcoeff, correc_imp, datatype='Independent', simdata, correlations=NULL, geemodel=NULL){
-  
+
   data<-model$data
   # generate independent data
   if(is.null(simdata)){
@@ -651,25 +644,25 @@ simfunc_SW_bin_slim<- function(nsim, model, impactcoeff, correc_imp, datatype='I
   }else{
     newdata2ndsim<-simdata
   }
-  
+
   # make storage outputs
   #betas=matrix(NA, length(coef(model)), nsim)
   ses_cimp=matrix(NA, length(coef(model)), nsim)
   #disp=vector(length=nsim)
   #inside_glm=inside_gee= inside_corr=matrix(NA, nsim, length(coef(model)))
   pvalsimp<-matrix(NA, nsim, 2)
-  
-  
-  # re-fit model (gam) with new response vectors. 
+
+
+  # re-fit model (gam) with new response vectors.
   for(i in 1:nsim){
     print(i)
     data$simsimresp<-newdata2ndsim[,i]
-    
+
     impcoefid<-length(coef(model))
     # glm impact fit
     simfit_glmimp<-update(model, simsimresp ~., data=data)
     pvalsimp[i,1]<-summary(simfit_glmimp)$coefficients[impcoefid,4]
-    
+
     # # gee impact fit (should be no different as no correlation actually present)
     if(datatype=='Correlated'){
       simfit_geeimp<-update(geemodel, simsimresp ~., data=data)
@@ -680,13 +673,13 @@ simfunc_SW_bin_slim<- function(nsim, model, impactcoeff, correc_imp, datatype='I
       # take glm output and use corrected standard errors to make new teststat
       teststat<-summary(simfit_glmimp)$coefficients[impcoefid,1]/ses_cimp[impcoefid,i]
       # and p-value
-      pvalsimp[i,2]<-2*pt(-abs(teststat), summary(simfit_glmimp)$df[2])  
+      pvalsimp[i,2]<-2*pt(-abs(teststat), summary(simfit_glmimp)$df[2])
     }
   }
-  
+
   #glm.out<-list(sderr.corrected=ses_cimp)
   #gee.out<-list(sderr=ses_gee, betas=betas, disp=disp, beta.coverage=inside_glm, beta.coverage.corrected=inside_corr)
-  
+
   output<-list(p.evphase=pvalsimp)
   return(output)
 }

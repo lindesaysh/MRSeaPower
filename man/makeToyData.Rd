@@ -4,8 +4,7 @@
 \alias{makeToyData}
 \title{Function to create a toy dataset for package testing}
 \usage{
-makeToyData(n, changecoef.link = 0, length.panels = 1, binary = FALSE,
-  b0 = 1)
+makeToyData(n, changecoef.link = 0, length.panels = 1, binary = FALSE, b0 = 1)
 }
 \arguments{
 \item{n}{number denoting the amount of data to generate.}
@@ -20,11 +19,11 @@ makeToyData(n, changecoef.link = 0, length.panels = 1, binary = FALSE,
 }
 \value{
 Returns a data frame of columns
-   \code{x} x covariate
-   \code{evph} covariate denoting pre(0)/post(1) event
-   \code{mu} poisson response
-   \code{mu.bin} binary response (only if \code{binary==TRUE})
-   \code{panels} column denoting which panel each row corresponds to.  Used to subsequently add correlation to the data.
+\code{x} x covariate
+\code{evph} covariate denoting pre(0)/post(1) event
+\code{mu} poisson response
+\code{mu.bin} binary response (only if \code{binary==TRUE})
+\code{panels} column denoting which panel each row corresponds to.  Used to subsequently add correlation to the data.
 }
 \description{
 Function to create a toy dataset for package testing

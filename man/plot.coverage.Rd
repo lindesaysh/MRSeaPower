@@ -4,13 +4,12 @@
 \alias{plot.coverage}
 \title{Function to plot the confidence intervals from the change parameter}
 \usage{
-\method{plot}{coverage}(power.object, truebeta.response,
-  alternativebeta = NULL, plot = TRUE)
+\method{plot}{coverage}(power.object, truebeta.response, alternativebeta = NULL, plot = TRUE)
 }
 \arguments{
 \item{power.object}{A power analysis object of class gamMRSea.power}
 
-\item{truebeta.response}{The true coeficient of the change covariate on the scale of the response. E.g. 0.8 is a 20\% decline in overall numbers.}
+\item{truebeta.response}{The true coeficient of the change covariate on the scale of the response. E.g. 0.8 is a 20\\\% decline in overall numbers.}
 
 \item{alternativebeta}{An alternative coefficient which you wish to test if it is a plausible value for the truth (i.e. sits within the confidence interval for the coefficient). Defaults to no change.}
 
@@ -21,7 +20,7 @@ Function to plot the confidence intervals from the change parameter
 }
 \examples{
 
-# Load a power object that was created with a 20\\\% sitewide decline
+# Load a power object that was created with a 20\\% sitewide decline
 # 50 simulations were run
 data(nysted.power.oc)
 
