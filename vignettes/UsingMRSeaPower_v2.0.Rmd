@@ -66,17 +66,18 @@ nysted$foldid<-getCVids(nysted, 10, 'panelid')
 
 4.  Make a plot of the data and windfarm boundary to confirm all looks ok.
 
-```{r nysteddatplot, fig.cap='Figure showing the survey effort and proposed windfarm site for the Greater Wash.', comment=FALSE, message=FALSE, fig.height=6, fig.width=8}
-require(splancs)
-plot(nysted$x.pos, nysted$y.pos, pch=20, cex=0.8, col='grey', xlab='x-coordinate (m)',
-     ylab='y-coordinate (m)', asp=1)
-polymap(nysted.bndwf, add=T)
-polymap(nysted.studybnd, add=T)
+```{r nysteddatplot, fig.cap='Figure showing the survey effort and proposed windfarm site for the Nysted Windfarm.', comment=FALSE, message=FALSE, fig.height=6, fig.width=8}
+library(ggplot2)
+ggplot() + 
+  geom_point(data = nysted, aes(x.pos, y.pos), col="grey") +
+  geom_path(data=nysted.bndwf, aes(x.pos, y.pos)) +
+  geom_path(data=nysted.studybnd, aes(x.pos, y.pos)) +
+  coord_equal() + theme_bw()
 ```
 
 # Model Fitting
 
-Now that we have our data in order, we can begin the modelling process. This practical takes fits a very simplistic model (linear terms only) in order that you may progress to the power analysis step quickly.
+Now that we have our data in order, we can begin the modelling process. This practical fits a very simplistic model (linear terms only) in order that you may progress to the power analysis step quickly.
 
 1. Fit an initial model
 
@@ -114,8 +115,13 @@ newdat<-generateNoise(nsim, fitted(bestModel), family='poisson', d=d)
 + If you use `dots=TRUE` then a progress bar will be printed. 
 
 ```{r corcheck, cache=TRUE, eval=TRUE, echo=TRUE}
-empdistribution<-getEmpDistribution(n.sim = nsim, simData=newdat,   model = bestModel, 
-                                 data = nysted, plot=FALSE,   returnDist = TRUE, dots=FALSE)
+empdistribution<-getEmpDistribution(n.sim = nsim, 
+                                    simData=newdat,  
+                                    model = bestModel, 
+                                    data = nysted, 
+                                    plot=FALSE,   
+                                    returnDist = TRUE, 
+                                    dots=FALSE)
 ```
 
 + Find the runs test result for our model residuals and plot the acf function for comparison.
@@ -419,7 +425,7 @@ data("nysted.power.oc.null")
 1. Summary:
 
 ```{r powauksummary, comment=''}
-summary(nysted.power.oc, nysted.power.oc.null, truebeta=log(truebeta))
+summary.gamMRSea.power(nysted.power.oc, nysted.power.oc.null, truebeta=log(truebeta))
 ```
 
 2. Burden of proof plot:
@@ -607,7 +613,7 @@ save(null.output.nysted.re, file='data/null.output.nystedslim.re.RData', compres
 ## Outputs
 
 ```{r powaukresummaryre, comment=''}
-summary(powerout.nysted.re, null.output.nysted.re)
+summary.gamMRSea.power(powerout.nysted.re, null.output.nysted.re)
 ```
 
 
