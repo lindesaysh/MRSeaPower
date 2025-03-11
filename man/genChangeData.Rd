@@ -10,13 +10,14 @@ genChangeData(
   data,
   panels = NULL,
   eventsite.bnd = NULL,
-  noneventcells = NULL
+  noneventcells = NULL,
+  modelfits = NULL
 )
 }
 \arguments{
 \item{pct.change}{percentage change to occur. e.g. 50\% gives 50\% site wide decline.  If a redistribution effect (one of \code{eventsite.bnd} or \code{noneventcells} must be specified) then the change refers only to the event site cells.  For an additional site-wide change when using a re-distribution, \code{pct.change} is a vector with the first number the event site re-distribution and the second, the site wide change.}
 
-\item{model}{A glm or gamMRSea model object.}
+\item{model}{A glm or gamMRSea model object. If specified, the fitted values from the model will be used to impose the change. Leave out if parameter \code{modelfits} is specified instead}
 
 \item{data}{Data frame used to fit \code{model}}
 
@@ -25,6 +26,8 @@ genChangeData(
 \item{eventsite.bnd}{A data frame containing the coordinates of a polygon defining the region of the defined event The variable names must match the coordinate system in the data.}
 
 \item{noneventcells}{logical (0/1) vector of length the same as the data indicating which cells the event did not occur (1).}
+
+\item{modelfits}{Character vector denoting the name of column in \code{data} containing the model fits.}
 }
 \value{
 Returns a data frame twice the size of the original input with additional columns for panel id, eventphase and truth.  The truth column represents the input data for the first half (pre-event; eventphase==0) and the second half has the change imposed (post-event; eventphase==1).
@@ -34,6 +37,7 @@ Function to impose an change impact effect
 }
 \examples{
 data(nystedA_slim)
+nysted$panelid <- paste0(nysted$yearmonth, ".t", nysted$TNO_ID)
 
 initialModel<-MRSea::gamMRSea(response ~ 1 + as.factor(yearmonth)+depth +
                      x.pos + y.pos + offset(log(area)),  data=nysted,
