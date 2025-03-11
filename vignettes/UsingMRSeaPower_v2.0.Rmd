@@ -16,7 +16,7 @@ vignette: >
 
 
 **Please reference this document as:**
-Scott-Hayward, L.A.S. and Mackenzie, M.L. (2017). Vignette for the MRSeaPower Package v0.99: Software for analysing the Power to Detect Change. Centre for Research into Ecological and Environmental Modelling, University of St Andrews.
+Scott-Hayward, L.A.S. and Mackenzie, M.L. (2017). Vignette for the MRSeaPower Package v2.0: Software for analysing the Power to Detect Change. Centre for Research into Ecological and Environmental Modelling, University of St Andrews.
 
 *******
 
@@ -31,6 +31,8 @@ cite_options(citation_format = 'pandoc', cite.style = 'authoryear', max.names = 
 require(MRSeaPower)
 #devtools::load_all(pkg='../../MRSeaPower')
 ```
+
+
 
 # Initial Setup
 
@@ -55,7 +57,7 @@ data("nysted.predgrid")
 ```
 
 3. Add two new columns to the dataset. 
-
+ 
     - For the modelling process later, it will be useful to define a potential blocking structure, here we use unique transect label.
     - We also create an identifier defining the fold of data for each data point for use in cross-validation calculation later. By defining the blocking structure, if any correlation is found to be present in model residuals, the nature of it will be preserved in each fold. 
     
@@ -295,7 +297,7 @@ rdf1<-make.raster(ncell.y=60,
                   z.name = "Mean.count")
 
 rdf2<-make.raster(ncell.y=60, 
-                  xyzdata=impdata.ny[impdata.ny$eventphase==0,c("x.pos", "y.pos", "truth")],
+                  xyzdata=impdata.ny[impdata.ny$eventphase==1,c("x.pos", "y.pos", "truth")],
                   z.name="Mean.count")
 
 rdf<-rbind(data.frame(rdf1, evph=0), data.frame(rdf2, evph=1))
@@ -341,7 +343,6 @@ newdatcor.ny.imp<-generateIC(data = impdata.ny, corrs = rbind(corrs,corrs),
 ```{r echo=TRUE, eval=TRUE}
 nysim_glm<-update(bestModel, newdata.ny.imp[,1]~. + eventphase, data=impdata.ny)
 nysim_glm$panels<-impdata.ny$panels
-
 ```
 
 ## Update empirical distribution and prediction grid
