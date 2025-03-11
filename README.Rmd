@@ -17,12 +17,15 @@ knitr::opts_chunk$set(
 
 # MRSeaPower
 
+**Please Note: the website and all associated materials are currently under construction/development. Please contact the author if you would like any help/guidance.**
+
 The latest version is **2.0** (10/03/2025)
 
 The latest development version is **2.0** (10/03/2025)
 
-The [MRSeaPower](https://lindesaysh.github.io/MRSeaPower) packages allows the fitting of **spatially adaptive regression
-splines using SALSA**.
+The [MRSeaPower](https://lindesaysh.github.io/MRSeaPower) package allows the estimation of spatially explicit power for `gamMRSea` models.
+
+
 
 <!-- It was developed to examine animal survey data for signs of changes in animal abundance and distribution following marine renewables development. However the methods are suitable for a wide range of applications. -->
 
