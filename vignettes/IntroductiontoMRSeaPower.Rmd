@@ -141,7 +141,7 @@ ggplot() +
   scale_fill_distiller(palette = "Spectral",name="Animal Counts") +
   geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +
   geom_path(data = nysted.studybnd, aes(x.pos, y.pos))+ 
-  xlab("Easting") + ylab("Northing")
+  xlab("Easting") + ylab("Northing") + theme_bw()
 ```
 
 ## 3) Simulate new observation data
@@ -232,7 +232,7 @@ plot.preds(powerout.nysted.re, cellsize=c(1,1))
 
 
 ```{r powaukdiffsplot, fig.cap='Figure showing the mean (middle), lower 2.5% (left) and upper 97.5% (right) of estimated differences between before and after the event. (difference = post - pre)', fig.height=4, fig.width=10, echo=FALSE}
-plot.diffs(powerout.nysted.re, cellsize=c(1, 1))
+plot.diffs(powerout.nysted.re, cellsize=c(1, 1)) 
 ```
 
 ```{r powaukresigdiffre, fig.cap='Figure showing, for every grid cell, the proportion of simulations that showed a significant difference.', fig.height=4, fig.width=8, echo=FALSE}
