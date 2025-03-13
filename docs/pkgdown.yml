@@ -1,0 +1,13 @@
+pandoc: '3.2'
+pkgdown: 2.1.1
+pkgdown_sha: ~
+articles:
+  web/generatingChanges: web/generatingChanges.html
+  IntroductiontoMRSeaPower: IntroductiontoMRSeaPower.html
+  web/Publications: web/Publications.html
+  UsingMRSeaPower: UsingMRSeaPower.html
+  website_examples: website_examples.html
+last_built: 2025-03-13T14:00Z
+urls:
+  reference: http://lindesaysh.github.io/MRSeaPower/reference
+  article: http://lindesaysh.github.io/MRSeaPower/articles
