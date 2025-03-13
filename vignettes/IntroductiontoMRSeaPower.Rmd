@@ -18,7 +18,7 @@ Scott-Hayward, L.A.S. and Mackenzie, M.L. (2017). Vignette for the MRSeaPower Pa
 
 *******
 
-```{r}
+```{r echo=FALSE}
 knitr::opts_chunk$set(fig=TRUE, warning=FALSE, message=FALSE,
                       eval=TRUE, cache=FALSE, echo=FALSE,
                       comment = '#>', collapse=TRUE, dev='png')
@@ -41,17 +41,23 @@ This document gives an overview of the power analysis process alongside some out
 
 # Power Analysis Process
 
-1) Fit model to baseline data.  
-2) Decide on the kind of change you would like to impose.  
+The process for spatially explicit power is as follows:
+
+1) Fit a spatial model to baseline data using `MRSea`.  
+2) Decide on the kind of change you would like to impose (e.g. overall decline or redistribution)  
 3) Simulate new pre and post impact observation data (noisy data). 
 4) Update the baseline model to include impact term. 
-5) Using simulated data, run power analysis. 
+5) Using simulated data, run spatially explicit power analysis. 
+
+The following sections give more detail to each stage of this process.
 
 ## 1) Baseline Model
 
-If no baseline data is available, there are alternative methods (help files under development).
+To use the functionality of this package, fit a `gamMRSea` model using the [`MRSea` package](https://lindesaysh.github.io/MRSea/) to the baseline data. 
 
-To use the functionality of this package, fit a `gamMRSea` model using the [`MRSea` package](https://lindesaysh.github.io/MRSea/).
+If no baseline data is available, there are alternative methods (help files and functions are under development).
+
+The figure below shows an example of 2 years of winter surveys in the Nysted region of Denmark.  
 
 ```{r}
 nysted <- readRDS("web/data/nystedphaseA.rds")
@@ -59,16 +65,10 @@ data("nysted.studybnd")
 nysted.studybnd <- nysted.studybnd/1000
 data("nysted.bndwf")
 nysted.bndwf <- nysted.bndwf/1000
-
 ```
 
-```{r}
-initialModel<-MRSea::gamMRSea(Count ~ 1 + as.factor(YearMonth) + Depth + x.pos + y.pos + offset(log(Area)), 
-                      data=nysted,
-                      family=quasipoisson)
-```
 
-```{r nysteddatplot, fig.cap='Figure showing the survey effort and proposed windfarm site for the Nysted Windfarm.', comment=FALSE, message=FALSE, fig.height=6, fig.width=8, echo=FALSE}
+```{r nysteddatplot, fig.cap='Figure showing the survey effort and proposed windfarm site for the Nysted Windfarm.', comment=FALSE, message=FALSE, fig.height=4, fig.width=10, echo=FALSE}
 ggplot() + 
   geom_point(data = filter(nysted, Count==0), aes(x.pos, y.pos), col="grey", size=0.7) +
   geom_point(data = filter(nysted, Count>0), aes(x.pos, y.pos, size=log(Count/Area)), colour="red", alpha=1/2) +
@@ -78,10 +78,21 @@ ggplot() +
   xlab("Easting") + ylab("Northing")
 ```
 
+The response data are counts of birds in a given area so we have a quasi-Poisson model with year-month, depth and coordinates. 
+
+```{r}
+initialModel<-MRSea::gamMRSea(Count ~ 1 + as.factor(YearMonth) + Depth + x.pos + y.pos + offset(log(Area)), 
+                      data=nysted,
+                      family=quasipoisson)
+```
+
+
 
 ## 2) Impose Change 
 
 The `genChange` function allows overall (site-wide) changes, redistribution of animals from a polygon to the rest of the surface and a combination of both.  You can also provide your own surface to simulate data from. 
+
+In this example, we'll impose a 40% decline in birds in the footprint of the wind farm (plus 2km buffer) and a 10% decline elsewhere.
 
 ```{r, echo=FALSE}
 bestModel<-make.gamMRSea(initialModel, panelid=nysted$TransectID)
@@ -111,24 +122,25 @@ pct.change<-((rdf$Mean.count[rdf$evph==1] - rdf$Mean.count[rdf$evph==0])/
 ```
 
 
-```{r, fig.height=6, fig.width=8, echo=FALSE}
-ggplot( NULL ) + geom_raster( data = rdf1 , aes( x , y , fill = pct.change ) ) +
+```{r, fig.height=6, fig.width=10, fig.cap="Figure showing the percentage change imposed for each grid cell."}
+ggplot( NULL ) + 
+  geom_raster( data = rdf1 , aes( x , y , fill = pct.change ) ) +
   scale_fill_gradientn(colours=mypalette, values=c(0,1), space = "Lab", 
                        na.value = "grey50", guide = "colourbar", name="Pct Difference") + 
   theme_bw() + coord_equal() +
   geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +
-  geom_path(data = nysted.studybnd/1000, aes(x.pos, y.pos)) + 
+  geom_path(data = nysted.studybnd, aes(x.pos, y.pos)) + 
   xlab("Easting") + ylab("Northing")
 ```
 
-```{r, echo=FALSE}
+```{r, fig.height=4, fig.width=10, fig.cap="Figure showing the mean count for the baseline (0) and post impact (1)."}
 ggplot() +
   geom_raster(data = rdf , aes(x , y , fill = Mean.count)) +
   facet_wrap(~evph) +
   coord_equal() +
   scale_fill_distiller(palette = "Spectral",name="Animal Counts") +
   geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +
-  geom_path(data = nysted.studybnd/1000, aes(x.pos, y.pos))+ 
+  geom_path(data = nysted.studybnd, aes(x.pos, y.pos))+ 
   xlab("Easting") + ylab("Northing")
 ```
 
@@ -136,7 +148,7 @@ ggplot() +
 
 We want to generate data that has the same characteristics as the original data.  Do do this we sample from the distribution used to model the baseline using the `generateNoise` function from the `MRSea` package. Distributions available are Gaussian, Poisson, quasiPoisson, Binomial, zero-inflated binomial, Gamma and Tweedie).  This gives us the same mean-variance relationship observed (assuming the baseline was modelled appropriately).  This part is possible at both the observed data locations and any location you can predict to from your model.  
 
-The second component is the observed correlation. If we wish to simulate new data using the original transect then we can use `getCorrelationMat` to get the correlation matrix from the baseline model.  This gets the correlation for each panel defined. If you want to use a different survey design, then we can use the mean correlation seen in the original model.  The function `generateIC` will then restructure the simulated data to match the correlation specified.  
+The second component is the observed correlation. If we wish to simulate new data using the original transect then we can use `getCorrelationMat` to get the correlation matrix from the baseline model.  This gets the correlation for each panel defined. If you want to use a different survey design, lifting data from the surface in places not observed, then we can use the mean correlation seen in the original model.  Once the correlation is estimated or specified, the function `generateIC` restructures the simulated data to match the correlation specified.  
 
 ```{r}
 nsim=500
@@ -174,9 +186,17 @@ nysim_glm$panels<-impdata.ny$TransectID
 
 ## 5) Power analysis
 
+The power analysis takes each of the simulated data sets and re-fits the spatial model (with impact term included). Predictions are made from these models to the whole study region.  At the same time, models are fitted to data where no change has been imposed (the null models).  
+
+
 ```{r, echo=FALSE}
 nsim=300
-empdistpower.ny<-getEmpDistribution(n.sim = nsim, simData=newdata.ny.imp, model = nysim_glm, data = impdata.ny, plot=FALSE, returnDist = TRUE, dots=FALSE)
+empdistpower.ny<-getEmpDistribution(n.sim = nsim,
+                                    simData=newdata.ny.imp, 
+                                    model = nysim_glm, 
+                                    data = impdata.ny, 
+                                    plot=FALSE, returnDist = TRUE,
+                                    dots=FALSE)
 
 data("nysted.predgrid")
 nysted.predgrid <- nysted.predgrid %>%
@@ -198,25 +218,24 @@ powerout.nysted.re<-powerSimPll(newdat = newdatcor.ny.imp,
                              n.boot=10, nCores = 2)
 ```
 
-```{r, echo=FALSE}
-#summary.gamMRSea.power(powerout.nysted.re)
-```
-```{r powaukpowerplot, fig.cap='Figure showing how the power to detect change varies with the error rate chosen for the Forth and Tay redistribution analysis.  The first grey dashed line is at 1% and the second at 5%, traditionally values used as $p$-value cutoffs. The blue dashed lines indicate the error rate required to get a power of 80%.  The value is given in the title.', fig.height=6, fig.width=8, echo=FALSE}
+The power to detect the redistribution of birds in this example is `r summary.gamMRSea.power(powerout.nysted.re)$power$model`. 
+
+
+```{r powaukpowerplot, fig.cap='Figure showing how the power to detect change varies with the error rate chosen.  The first grey dashed line is at 1% and the second at 5%, traditionally values used as $p$-value cutoffs. The blue dashed lines indicate the error rate required to get a power of 80%.  The value is given in the title.', fig.height=6, fig.width=8}
 powerPlot(powerout.nysted.re)
-
 ```
 
 
-```{r powaukpredplot, fig.height=12, fig.width=8, fig.cap='Figure showing the mean (middle), lower 2.5% (top) and upper 97.5% (bottom) of predicted animal counts before (left) and after (right) the event.', echo=FALSE}
+```{r powaukpredplot, fig.height=8, fig.width=8, fig.cap='Figure showing the mean (middle), lower 2.5% (top) and upper 97.5% (bottom) of predicted animal counts before (left) and after (right) the event.', echo=FALSE}
 plot.preds(powerout.nysted.re, cellsize=c(1,1))
 ```
 
 
-```{r powaukdiffsplot, fig.cap='Figure showing the mean (middle), lower 2.5% (left) and upper 97.5% (right) of estimated differences between before and after the event. (difference = post - pre)', fig.height=4, fig.width=8, echo=FALSE}
+```{r powaukdiffsplot, fig.cap='Figure showing the mean (middle), lower 2.5% (left) and upper 97.5% (right) of estimated differences between before and after the event. (difference = post - pre)', fig.height=4, fig.width=10, echo=FALSE}
 plot.diffs(powerout.nysted.re, cellsize=c(1, 1))
 ```
 
-```{r powaukresigdiffre, fig.cap='Figure showing, for every grid cell, the proportion of simulations that showed a significant difference.', fig.height=6, fig.width=8, echo=FALSE}
+```{r powaukresigdiffre, fig.cap='Figure showing, for every grid cell, the proportion of simulations that showed a significant difference.', fig.height=4, fig.width=8, echo=FALSE}
 plot.sigdiff(powerout.nysted.re, 
              coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')],
              tailed='two', error.rate = 0.05, gridcell.dim = c(1,1))
