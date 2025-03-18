@@ -7,9 +7,9 @@
 under construction/development. Please contact the author if you would
 like any help/guidance.**
 
-The latest version is **1.1** (10/03/2025)
+The latest version is **1.0.99-beta** (10/03/2025)
 
-The latest development version is **1.1** (10/03/2025)
+The latest development version is **1.0.99-beta** (10/03/2025)
 
 The [MRSeaPower](https://lindesaysh.github.io/MRSeaPower) package allows
 the estimation of spatially explicit power for `gamMRSea` models.
@@ -20,13 +20,11 @@ the estimation of spatially explicit power for `gamMRSea` models.
 
 ## Installation
 
-# You can install the latest bugfix release of MRSeaPower from
-# [GitHub](https://github.com/lindesaysh/MRSeaPower) with:
-# 
-# ``` r
-# # install.packages("devtools")
-# devtools::install_github("lindesaysh/MRSeaPower", ref="stable")
-# ```
+<!-- You can install the latest bugfix release of MRSeaPower from [GitHub](https://github.com/lindesaysh/MRSeaPower) with: -->
+<!-- ```{r gh-bugfix-installation, eval = FALSE} -->
+<!-- # install.packages("devtools") -->
+<!-- devtools::install_github("lindesaysh/MRSeaPower", ref="stable") -->
+<!-- ``` -->
 
 You can install the development version of MRSeaPower from
 [GitHub](https://github.com/lindesaysh/MRSeaPower) with:

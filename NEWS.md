@@ -1,4 +1,4 @@
-# MRSea 1.1-beta (devo)
+# MRSeaPower 1.0.99-beta (devo)
 
 ## Notes
 
