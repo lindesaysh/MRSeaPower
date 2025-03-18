@@ -20,19 +20,19 @@ the estimation of spatially explicit power for `gamMRSea` models.
 
 ## Installation
 
-You can install the latest bugfix release of MRSeaPower from
-[GitHub](https://github.com/lindesaysh/MRSeaPower) with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("lindesaysh/MRSeaPower", ref="stable")
-```
+# You can install the latest bugfix release of MRSeaPower from
+# [GitHub](https://github.com/lindesaysh/MRSeaPower) with:
+# 
+# ``` r
+# # install.packages("devtools")
+# devtools::install_github("lindesaysh/MRSeaPower", ref="stable")
+# ```
 
 You can install the development version of MRSeaPower from
 [GitHub](https://github.com/lindesaysh/MRSeaPower) with:
 
 ``` r
-devtools::install_github("lindesaysh/MRSeaPower", ref="master")
+devtools::install_github("lindesaysh/MRSeaPower", ref="development")
 ```
 
 The package may also be downloaded as a `.zip` or `.tar.gz` from the

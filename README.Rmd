@@ -35,17 +35,17 @@ The [MRSeaPower](https://lindesaysh.github.io/MRSeaPower) package allows the est
 
 ## Installation
 
-You can install the latest bugfix release of MRSeaPower from [GitHub](https://github.com/lindesaysh/MRSeaPower) with:
+<!-- You can install the latest bugfix release of MRSeaPower from [GitHub](https://github.com/lindesaysh/MRSeaPower) with: -->
 
-```{r gh-bugfix-installation, eval = FALSE}
-# install.packages("devtools")
-devtools::install_github("lindesaysh/MRSeaPower", ref="stable")
-```
+<!-- ```{r gh-bugfix-installation, eval = FALSE} -->
+<!-- # install.packages("devtools") -->
+<!-- devtools::install_github("lindesaysh/MRSeaPower", ref="stable") -->
+<!-- ``` -->
 
 You can install the development version of MRSeaPower from [GitHub](https://github.com/lindesaysh/MRSeaPower) with:
 
 ```{r gh-installation, eval = FALSE}
-devtools::install_github("lindesaysh/MRSeaPower", ref="master")
+devtools::install_github("lindesaysh/MRSeaPower", ref="development")
 ```
 
 The package may also be downloaded as a `.zip` or `.tar.gz` from the latest release
