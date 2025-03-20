@@ -1,0 +1,2 @@
+"0","pct.change<-((rdf$Mean.count[rdf$evph==1] - rdf$Mean.count[rdf$evph==0])/"
+"0","               rdf$Mean.count[rdf$evph==0])*100"

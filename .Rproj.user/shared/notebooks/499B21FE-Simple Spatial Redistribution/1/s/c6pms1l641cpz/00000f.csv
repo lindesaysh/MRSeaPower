@@ -1,0 +1,7 @@
+"0","require(raster)"
+"0","# 5km buffer, units are km"
+"0","bndwf_buf<-data.frame(buffer(SpatialPolygons(list("
+"0","                Polygons(list(Polygon(nysted.bndwf)),ID = 1))), width=5)@"
+"0","                polygons[[1]]@Polygons[[1]]@coords)"
+"0","names(bndwf_buf)<-c('x.pos', 'y.pos')"
+"0","detach(package:raster)"

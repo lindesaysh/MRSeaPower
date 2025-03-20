@@ -1,0 +1,4 @@
+"0","require(dplyr)"
+"0","t<-group_by(changedata.oc, eventphase)%>%"
+"0","  summarise(sum=sum(truth), mean=mean(truth), n=n())"
+"0","t"

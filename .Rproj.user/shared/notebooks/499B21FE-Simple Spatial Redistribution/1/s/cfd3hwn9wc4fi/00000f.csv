@@ -1,0 +1,3 @@
+"0","null.output.nysted.re <- pval.coverage.null(newdat.ind=newdatcor.ny.imp,"
+"0","                                      newdat.corr=NULL, model=simmodel, nsim=nsim,"
+"0","                                      powercoefid=length(coef(simmodel)))"

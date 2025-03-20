@@ -1,0 +1,2 @@
+"0","pct.change.re<-((rdf.re$Mean.count[rdf.re$evph==1] - rdf.re$Mean.count[rdf.re$evph==0])/"
+"0","               rdf.re$Mean.count[rdf.re$evph==0])*100"

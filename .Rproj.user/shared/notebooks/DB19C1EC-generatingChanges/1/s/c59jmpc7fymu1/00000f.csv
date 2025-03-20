@@ -1,0 +1,7 @@
+"0","ggplot() +"
+"0","  geom_raster(data = rdf.re , aes(x , y , fill = Mean.count)) +"
+"0","  facet_wrap(~evph) +"
+"0","  coord_equal() +"
+"0","  scale_fill_distiller(palette = ""Spectral"",name=""Animal Counts"")+"
+"0","  geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +"
+"0","  geom_path(data = nysted.studybnd, aes(x.pos, y.pos))"

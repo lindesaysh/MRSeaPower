@@ -1,0 +1,3 @@
+"0","initialModel<-MRSea::gamMRSea(Count ~ 1 + as.factor(YearMonth)+Depth +"
+"0","                      x.pos + y.pos + offset(log(Area)),  data=count.data,"
+"0","                      family=quasipoisson)"

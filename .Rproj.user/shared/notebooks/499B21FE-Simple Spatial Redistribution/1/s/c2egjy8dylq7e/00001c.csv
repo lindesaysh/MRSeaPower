@@ -1,0 +1,8 @@
+"0","plot.sigdiff(powerout.nysted.re, 
+             coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')],
+             tailed='two', error.rate = 0.05, gridcell.dim = c(1,1)) +
+  scale_fill_gradient(low=""darkgreen"", high = ""purple"", name = ""% Power"") +
+    geom_path(data = bndwf_buf, aes(x.pos, y.pos)) 
+"
+"2","[38;5;232mScale for [32mfill[38;5;232m is already present.
+Adding another scale for [32mfill[38;5;232m, which will replace the existing scale.[39m"

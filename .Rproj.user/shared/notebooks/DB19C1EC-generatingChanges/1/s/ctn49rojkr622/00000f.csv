@@ -1,0 +1,2 @@
+"0","pct.change.ocre<-((rdf.ocre$Mean.count[rdf.ocre$evph==1] - rdf.ocre$Mean.count[rdf.ocre$evph==0])/"
+"0","               rdf.ocre$Mean.count[rdf.ocre$evph==0])*100"

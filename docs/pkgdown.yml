@@ -5,9 +5,10 @@ articles:
   web/generatingChanges: web/generatingChanges.html
   IntroductiontoMRSeaPower: IntroductiontoMRSeaPower.html
   web/Publications: web/Publications.html
-  UsingMRSeaPower: UsingMRSeaPower.html
+  web/Simple Spatial Redistribution: web/Simple Spatial Redistribution.html
+  web/UsingMRSeaPower: web/UsingMRSeaPower.html
   website_examples: website_examples.html
-last_built: 2025-03-18T08:28Z
+last_built: 2025-03-20T19:06Z
 urls:
   reference: http://lindesaysh.github.io/MRSeaPower/reference
   article: http://lindesaysh.github.io/MRSeaPower/articles

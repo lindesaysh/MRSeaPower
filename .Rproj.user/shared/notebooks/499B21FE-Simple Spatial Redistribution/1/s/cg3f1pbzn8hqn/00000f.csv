@@ -1,0 +1,7 @@
+"0","simplemodel$call"
+"1","gamMRSea(formula = Count ~ LRF.g(radiusIndices, dists, radii, 
+"
+"1","    aR) + offset(log(Area)), family = tweedie(var.power = 1.51918367346939, 
+"
+"1","    link.power = 0), data = count.data, splineParams = splineParams)
+"

@@ -1,0 +1,7 @@
+"0","nsim=500"
+"0","# add noise"
+"0","newdata.ny.imp<-generateNoise(nsim, "
+"0","                              impdata.ny$truth, family='tweedie', "
+"0","                               phi=summary(simplemodel)$dispersion,"
+"0","                              xi = 1.52)"
+"0",""

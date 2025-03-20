@@ -1,0 +1,7 @@
+"0","ggplot( NULL ) + geom_raster( data = rdf1.ocre , aes( x , y , fill = pct.change.ocre) ) +"
+"0","  scale_fill_gradientn(colours=mypalette,values=c(0,1), space = ""Lab"", "
+"0","                       na.value = ""grey50"", guide = ""colourbar"") + "
+"0","  theme_bw() + coord_equal() +"
+"0","  geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +"
+"0","  geom_path(data = nysted.studybnd, aes(x.pos, y.pos))"
+"0",""

@@ -1,0 +1,2 @@
+"0","plot.preds(powerout.nysted.re, cellsize=c(1,1)) +"
+"0","    geom_path(data = bndwf_buf, aes(x.pos, y.pos)) "

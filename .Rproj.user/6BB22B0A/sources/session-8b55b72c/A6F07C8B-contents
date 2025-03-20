@@ -1,0 +1,36 @@
+url: http://lindesaysh.github.io/MRSeaPower/
+
+template:
+  bootstrap: 5
+  bootswatch: cerulean
+  # ganalytics: G-H10ZB5KXN8
+  # params:
+  #     google_site_verification: dUtyCOSNh9HYALyeXliAlT0ZBt-A4tor8kaiLgS3DRc
+  includes:
+    in_header: |
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBZCL5WTHG"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-LBZCL5WTHG');
+        </script>
+navbar:
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: Introduction to the package
+        href: articles/IntroductiontoMRSeaPower.html
+      - text: Introduction to analysis
+        href: articles/web/UsingMRSeaPower.html
+      - text: Generating Changes
+        href: articles/web/generatingChanges.html
+      - text: Spatial Model with Redistribution
+        href: articles/web/Simple Spatial Redistribution.html
+      - text: ---
+      - text: Publications
+        href: articles/web/Publications.html
+

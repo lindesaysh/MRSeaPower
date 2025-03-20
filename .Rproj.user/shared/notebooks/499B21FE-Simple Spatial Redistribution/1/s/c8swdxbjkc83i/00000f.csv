@@ -1,0 +1,7 @@
+"0","nsim=300"
+"0","empdistpower.ny<-getEmpDistribution(n.sim = nsim,"
+"0","                                    simData=newdata.ny.imp, "
+"0","                                    model = simmodel, "
+"0","                                    data = impdata.ny, "
+"0","                                    plot=FALSE, returnDist = TRUE,"
+"0","                                    dots=FALSE)"

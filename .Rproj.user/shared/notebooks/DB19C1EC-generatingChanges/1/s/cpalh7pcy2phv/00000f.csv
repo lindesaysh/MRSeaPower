@@ -1,0 +1,5 @@
+"0","# generate a 20% site-wide change:"
+"0","changedata.oc <-genChangeData(pct.change=60, "
+"0","                           model=initialModel, "
+"0","                           data=count.data,"
+"0","                           panels = ""TransectID"")"

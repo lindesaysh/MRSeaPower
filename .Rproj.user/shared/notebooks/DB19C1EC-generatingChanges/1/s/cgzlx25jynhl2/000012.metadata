@@ -1,0 +1,1 @@
+{"height":6.0,"width":8.0,"size_behavior":1,"conditions":[[1,"Warning: \u001B[38;5;232mRaster pixels are placed at uneven horizontal intervals and will be shifted\n\u001B[36mℹ\u001B[38;5;232m Consider using `geom_tile()` instead.\u001B[39m"]]}

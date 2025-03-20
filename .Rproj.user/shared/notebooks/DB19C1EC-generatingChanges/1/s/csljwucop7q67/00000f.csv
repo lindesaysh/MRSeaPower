@@ -1,0 +1,8 @@
+"0","# generate a 50% decline in the windfarm footprint:"
+"0","changedata.ocre<-genChangeData(pct.change=c(60, 90),"
+"0","                            eventsite.bnd=nysted.bndwf, "
+"0","                            model=initialModel, "
+"0","                            data=count.data, "
+"0","                            panels=""TransectID"")"
+"2","Warning: List/data.frame components should be named x and y"
+"2","Warning: List/data.frame components should be named x and y"

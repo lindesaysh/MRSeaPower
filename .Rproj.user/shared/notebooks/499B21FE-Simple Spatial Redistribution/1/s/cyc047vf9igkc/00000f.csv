@@ -1,0 +1,4 @@
+"0","require(knitcitations)"
+"0","cleanbib()"
+"0","#biblio <- read.bibtex(""newref.bib"")"
+"0","cite_options(citation_format = 'pandoc', cite.style = 'authoryear', max.names = 1, longnamesfirst=FALSE)"

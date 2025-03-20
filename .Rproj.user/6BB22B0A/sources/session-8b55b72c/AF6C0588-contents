@@ -1,0 +1,289 @@
+---
+title: "Simple Redistribution Model"
+author: "LAS Scott-Hayward"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simple Redistribution Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+require(knitcitations)
+cleanbib()
+#biblio <- read.bibtex("newref.bib")
+cite_options(citation_format = 'pandoc', cite.style = 'authoryear', max.names = 1, longnamesfirst=FALSE)
+```
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
+require(MRSeaPower)
+library(ggplot2)
+library(statmod)
+library(tweedie)
+library(dplyr)
+```
+
+
+1. Load data
+
+```{r warning=FALSE, message=FALSE}
+count.data <- readRDS("data/nystedphaseA.rds")
+count.data$response <- count.data$Count
+panelid <- as.numeric(count.data$TransectID)
+nysted.bndwf <- nysted.bndwf/1000
+nysted.studybnd <- nysted.studybnd/1000
+```
+
+```{r, warning=FALSE, message=FALSE}
+require(raster)
+# 5km buffer, units are km
+bndwf_buf<-data.frame(buffer(SpatialPolygons(list(
+                Polygons(list(Polygon(nysted.bndwf)),ID = 1))), width=5)@
+                polygons[[1]]@Polygons[[1]]@coords)
+names(bndwf_buf)<-c('x.pos', 'y.pos')
+detach(package:raster)
+```
+
+2. Fit Spatial Model
+
+Let's start simple by pooling all survey data and using no environmental covariates.
+
+```{r echo=FALSE, eval=FALSE}
+# run this code initially to get the model
+profout <- tweedie.profile(Count ~ x.pos + y.pos,
+                           data=count.data,
+                           xi.vec = seq(1.01, 1.99, by=0.05), do.plot=TRUE)
+
+initialModel <- glm(Count ~ 1 + offset(log(Area)),
+                    family=tweedie(var.power=profout$xi.max, link.power = 0),
+                    data = count.data)
+
+kg <- getKnotgrid(coordData = count.data[,c('x.pos', 'y.pos')], plot=FALSE)
+
+dists <- makeDists(datacoords = count.data[,c('x.pos', 'y.pos')], 
+                   knotcoords = kg, 
+                   knotmat = TRUE)
+k2k <- dists$knotDist
+d2k <- dists$dataDist
+
+salsa2dlist<-list(fitnessMeasure = 'BICtweedie', 
+                   knotgrid = kg, 
+                   startKnots = 5,
+                   minKnots=4,  
+                   maxKnots=100, 
+                   gap=0) 
+
+salsa2dOutput<-runSALSA2D(model = initialModel,
+                          salsa2dlist = salsa2dlist,
+                          d2k = d2k,
+                          k2k = k2k,
+                          panels =  count.data$TransectID,
+                          suppress.printout = TRUE)
+
+simplemodel <- salsa2dOutput$bestModel
+
+saveRDS(simplemodel, file = "data/simplespatialmodel.rds")
+```
+
+
+```{r}
+simplemodel <- readRDS("data/simplespatialmodel.rds")
+```
+
+```{r}
+simplemodel$call
+```
+
+```{r warning=FALSE, message=FALSE}
+impdata.ny<-genChangeData(pct.change = c(20), 
+                          model = simplemodel, 
+                          data = count.data,
+                          panels = "TransectID",
+                          eventsite.bnd = bndwf_buf)
+```
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+rdf1<-make.raster(ncell.y=50, 
+                  xyzdata=impdata.ny %>% filter(eventphase==0) %>%
+                    dplyr::select("x.pos", "y.pos", "truth"), 
+                  z.name = "Mean.count")
+
+rdf2<-make.raster(ncell.y=50, 
+                  xyzdata=filter(impdata.ny, eventphase==1) %>%
+                    dplyr::select("x.pos", "y.pos", "truth"),
+                  z.name="Mean.count")
+
+rdf<-rbind(data.frame(rdf1, evph=0), data.frame(rdf2, evph=1))
+
+pct.change<-((rdf$Mean.count[rdf$evph==1] - rdf$Mean.count[rdf$evph==0])/
+               rdf$Mean.count[rdf$evph==0])*100
+```
+
+
+```{r, fig.height=6, fig.width=10, fig.cap="Figure showing the percentage change imposed for each grid cell."}
+ggplot( NULL ) + 
+  geom_raster( data = rdf1 , aes( x , y , fill = pct.change ) ) +
+  scale_fill_gradientn(colours=mypalette, values=c(0,1), space = "Lab", 
+                       na.value = "grey50", guide = "colourbar", name="Pct Difference") + 
+  theme_bw() + coord_equal() +
+  geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +
+    geom_path(data = bndwf_buf, aes(x.pos, y.pos)) +
+  geom_path(data = nysted.studybnd, aes(x.pos, y.pos)) + 
+  xlab("Easting") + ylab("Northing")
+```
+
+```{r, fig.height=4, fig.width=10, fig.cap="Figure showing the mean count for the baseline (0) and post impact (1)."}
+ggplot() +
+  geom_raster(data = rdf , aes(x , y , fill = Mean.count)) +
+  facet_wrap(~evph) +
+  coord_equal() +
+  scale_fill_distiller(palette = "Spectral",name="Animal Counts") +
+  geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +
+  geom_path(data = bndwf_buf, aes(x.pos, y.pos)) +
+  geom_path(data = nysted.studybnd, aes(x.pos, y.pos))+ 
+  xlab("Easting") + ylab("Northing") + theme_bw()
+```
+```{r}
+nsim=500
+# add noise
+newdata.ny.imp<-generateNoise(nsim, 
+                              impdata.ny$truth, family='tweedie', 
+                               phi=summary(simplemodel)$dispersion,
+                              xi = 1.52)
+
+```
+
+
+```{r}
+corrs<-getCorrelationMat(panel = impdata.ny$TransectID, data=impdata.ny$truth, dots = FALSE)
+
+# quicker to do pre only and then bind the correlation matrices
+corrs<-getCorrelationMat(panel = count.data$TransectID, data=count.data$Count, dots = FALSE)
+
+# add correlation
+newdatcor.ny.imp<-generateIC(data = impdata.ny, 
+                             corrs = rbind(corrs, corrs), 
+                            panels = 'panels', 
+                            newdata = newdata.ny.imp, 
+                            nsim = nsim, 
+                              dots = FALSE)
+```
+
+## 4) Update baseline model
+
+To prepare for the power analysis, we must update the baseline model to use the new data (`newdatcor.ny.imp`), the `eventphase` term and the panel structure for the new data (twice as many panels).  
+
+```{r}
+siminitial <- simplemodel
+# update distance matrix to be duplicated (like the data)
+siminitial$splineParams[[1]]$dist <- rbind(siminitial$splineParams[[1]]$dist,
+                                           siminitial$splineParams[[1]]$dist)
+siminitial<- update(siminitial,newdatcor.ny.imp[,1] ~.+as.factor(eventphase) - 
+                      LRF.g(radiusIndices, dists, radii, aR),
+                    data=impdata.ny)
+#siminitial$splineParams[[1]] <- NULL
+
+salsa2dlist<-list(fitnessMeasure = 'BICtweedie', 
+                   knotgrid = siminitial$splineParams[[1]]$knotgrid, 
+                   startKnots = 5,
+                   minKnots=4,  
+                   maxKnots=100, 
+                   gap=0,
+                  interactionTerm = "as.factor(eventphase)") # ***
+
+salsa2dOutput<-runSALSA2D(model = siminitial,
+                          salsa2dlist = salsa2dlist,
+                          d2k = siminitial$splineParams[[1]]$dist,
+                          k2k = siminitial$splineParams[[1]]$knotDist,
+                          panels =  impdata.ny$panels, # ***
+                          suppress.printout = TRUE)
+simmodel <- salsa2dOutput$bestModel
+```
+
+
+## 5) Power analysis
+
+The power analysis takes each of the simulated data sets and re-fits the spatial model (with impact term included). Predictions are made from these models to the whole study region.  At the same time, models are fitted to data where no change has been imposed (the null models).  
+
+
+```{r, echo=FALSE}
+nsim=300
+empdistpower.ny<-getEmpDistribution(n.sim = nsim,
+                                    simData=newdata.ny.imp, 
+                                    model = simmodel, 
+                                    data = impdata.ny, 
+                                    plot=FALSE, returnDist = TRUE,
+                                    dots=FALSE)
+```
+
+```{r}
+data("nysted.predgrid")
+nysted.predgrid <- nysted.predgrid %>%
+  rename(Area = area) %>%
+  mutate(Depth = abs(Depth),
+         x.pos = x.pos/1000,
+         y.pos = y.pos/1000)
+
+predictdata<-rbind(data.frame(nysted.predgrid[,2:8], YearMonth='2001/2', 
+                              Area=nysted.predgrid$Area, eventphase=0), 
+                   data.frame(nysted.predgrid[,2:8], YearMonth='2001/2', 
+                              Area=nysted.predgrid$Area, eventphase=1))
+
+g2k <- makeDists(predictdata[,c("x.pos", "y.pos")], 
+                 knotcoords = simmodel$splineParams[[1]]$knotgrid,
+                 knotmat = FALSE)$dataDist
+
+```
+
+
+
+```{r}
+powerout.nysted.re<-powerSimPll(newdat = newdatcor.ny.imp, 
+                                model = simmodel, 
+                                empdistribution = empdistpower.ny, 
+                                nsim=nsim, powercoefid=length(coef(simmodel)),
+                                predictionGrid=predictdata, g2k = g2k, 
+                                n.boot=10, nCores = 2)
+```
+```{r}
+null.output.nysted.re <- pval.coverage.null(newdat.ind=newdatcor.ny.imp,
+                                      newdat.corr=NULL, model=simmodel, nsim=nsim,
+                                      powercoefid=length(coef(simmodel)))
+```
+
+
+The power to detect the redistribution of birds in this example is `r summary.gamMRSea.power(powerout.nysted.re)$power$model`. 
+
+
+```{r}
+summary(powerout.nysted.re, null.output.nysted.re)
+```
+
+
+```{r powaukpowerplot, fig.cap='Figure showing how the power to detect change varies with the error rate chosen.  The first grey dashed line is at 1% and the second at 5%, traditionally values used as $p$-value cutoffs. The blue dashed lines indicate the error rate required to get a power of 80%.  The value is given in the title.', fig.height=6, fig.width=8}
+powerPlot(powerout.nysted.re)
+```
+
+
+```{r powaukpredplot, fig.height=8, fig.width=8, fig.cap='Figure showing the mean (middle), lower 2.5% (top) and upper 97.5% (bottom) of predicted animal counts before (left) and after (right) the event.', echo=FALSE}
+plot.preds(powerout.nysted.re, cellsize=c(1,1)) +
+    geom_path(data = bndwf_buf, aes(x.pos, y.pos)) 
+```
+
+
+```{r powaukdiffsplot, fig.cap='Figure showing the mean (middle), lower 2.5% (left) and upper 97.5% (right) of estimated differences between before and after the event. (difference = post - pre)', fig.height=4, fig.width=10, echo=FALSE}
+plot.diffs(powerout.nysted.re, cellsize=c(1, 1)) +
+    geom_path(data = bndwf_buf, aes(x.pos, y.pos))
+```
+
+```{r powaukresigdiffre, fig.cap='Figure showing, for every grid cell, the proportion of simulations that showed a significant difference.', fig.height=4, fig.width=8, echo=FALSE}
+plot.sigdiff(powerout.nysted.re, 
+             coordinates = predictdata[predictdata$eventphase==0,c('x.pos', 'y.pos')],
+             tailed='two', error.rate = 0.05, gridcell.dim = c(1,1)) +
+  scale_fill_gradient(low="darkgreen", high = "purple", name = "% Power") +
+    geom_path(data = bndwf_buf, aes(x.pos, y.pos)) 
+  
+```
+

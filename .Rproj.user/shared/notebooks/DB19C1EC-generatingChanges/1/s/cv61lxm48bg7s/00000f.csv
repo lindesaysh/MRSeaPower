@@ -1,0 +1,6 @@
+"0","# generate a 50% decline in the windfarm footprint:"
+"0",""
+"0","ggplot() + "
+"0","  geom_point(data = count.data, aes(x.pos, y.pos), colour = ""grey"") +"
+"0","  theme_bw() + "
+"0","  geom_path(data = nysted.bndwf, aes(x.pos, y.pos))"

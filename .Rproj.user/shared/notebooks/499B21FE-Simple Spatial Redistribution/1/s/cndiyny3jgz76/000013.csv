@@ -1,0 +1,5 @@
+"0","saveRDS(simplemodel, file = ""vignettes/web/data/simplespatialmodel.rds"")
+"
+"2","Warning: cannot open compressed file 'vignettes/web/data/simplespatialmodel.rds', probable reason 'No such file or directory'"
+"2","Error in gzfile(file, mode) : cannot open the connection
+"
