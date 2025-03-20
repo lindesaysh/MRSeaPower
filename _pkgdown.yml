@@ -25,9 +25,11 @@ navbar:
       - text: Introduction to the package
         href: articles/IntroductiontoMRSeaPower.html
       - text: Introduction to analysis
-        href: articles/UsingMRSeaPower_v2.0.html
+        href: articles/web/UsingMRSeaPower.html
       - text: Generating Changes
         href: articles/web/generatingChanges.html
+      - text: Spatial Model with Redistribution
+        href: articles/web/Simple Spatial Redistribution.html
       - text: ---
       - text: Publications
         href: articles/web/Publications.html
