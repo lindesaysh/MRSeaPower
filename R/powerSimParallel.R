@@ -78,6 +78,8 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       require(Matrix)
       require(mvtnorm)
       require(MRSeaPower)
+      require(statmod)
+      require(tweedie)
     })
 
     # only do parametric boostrap if no data re-sampling and no nhats provided
@@ -88,7 +90,8 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~
       #dists<<-splineParams[[1]]$dists
       data$response<-newdat[,i]
-      sim_glm<-update(model, response ~ ., data=data)
+      splineParams = model$splineParams
+      sim_glm<-update(model, response ~ ., data=data, splineParams = splineParams)
 
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~
       # ~~ power p-value ~~~~~~~~~
@@ -203,7 +206,8 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
           }
         }
 
-        if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
+        if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson' |
+           sim_glm$family[[1]] == "Tweedie"){
           #if(i==1){bsum=asum=vector(length=nsim)}
           bsum<-sum(bootPreds[predictionGrid$eventphase==0,])/ncol(bootPreds)
           asum<-sum(bootPreds[predictionGrid$eventphase==1,])/ncol(bootPreds)
@@ -276,7 +280,8 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     #dists<<-splineParams[[1]]$dists
     data$response<-newdat[,i]
-    sim_glm<-update(model, response ~ ., data=data)
+    splineParams = model$splineParams
+    sim_glm<-update(model, response ~ ., data=data, splineParams = splineParams)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~ power p-value ~~~~~~~~~
@@ -391,7 +396,8 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
         }
       }
 
-      if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson'){
+      if(sim_glm$family[[1]]=='poisson' | sim_glm$family[[1]]=='quasipoisson' |
+         sim_glm$family[[1]] == "Tweedie"){
         if(i==1){bsum=asum=vector(length=nsim)}
         bsum[i]<-sum(bootPreds[predictionGrid$eventphase==0,])/nrow(bootPreds)
         asum[i]<-sum(bootPreds[predictionGrid$eventphase==1,])/nrow(bootPreds)
@@ -428,7 +434,7 @@ powerSimPll<-function(newdat, model, empdistribution, nsim, powercoefid, predict
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~~~ Abundance/mean proportion ~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if(model$family[[1]]=='poisson' | model$family[[1]]=='quasipoisson'){
+    if(model$family[[1]]=='poisson' | model$family[[1]]=='quasipoisson' | model$family[[1]] == "Tweedie"){
       quants<-c(0.025, 0.975)
       abund<-matrix(NA, 2, 3)
       abund[,1]<-c(mean(na.omit(bsum)), mean(na.omit(asum)))
@@ -502,7 +508,7 @@ estdiffs<-data.frame(mean=bootdiffmean, bootdiffcis, predictionGrid[predictionGr
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~
   output<-list(rawrob=rawrob, imppvals=imppvals, betacis=betacis, powsimfits=powsimfits, significant.differences=list(individual=indpvals), bootdifferences=estdiffs, bootpreds=estpreds, linkfunction=list(link=model$family$linkfun, linkinv=model$family$linkinv))
 
-  if(model$family[[1]]=='poisson' | model$family[[1]]=='quasipoisson'){
+  if(model$family[[1]]=='poisson' | model$family[[1]]=='quasipoisson' | model$family[[1]] == "Tweedie"){
     output$Abundance = abund
   }
   if(model$family[[1]]=='binomial' | model$family[[1]]=='quasibinomial'){
