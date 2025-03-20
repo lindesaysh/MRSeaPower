@@ -7,9 +7,9 @@
 under construction/development. Please contact the author if you would
 like any help/guidance.**
 
-The latest version is **1.0.99-beta** (10/03/2025)
+The latest version is **1.2** (21/03/2025)
 
-The latest development version is **1.0.99-beta** (10/03/2025)
+The latest development version is **1.2** (21/03/2025)
 
 The [MRSeaPower](https://lindesaysh.github.io/MRSeaPower) package allows
 the estimation of spatially explicit power for `gamMRSea` models.

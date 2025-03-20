@@ -1,7 +1,7 @@
 Package: MRSeaPower
 Type: Package
 Title: Package for Running Power Analysis on gamMRSea models.
-Version: 1.00.99
+Version: 1.2
 Authors@R: c(person("Lindesay",  "Scott-Hayward", email="lass@st-andrews.ac.uk", role=c('aut', 'cre')),
    person("Monique",  "Mackenzie", role=c('aut')))
 Description: Suite of functions for simulating post "impact" data and assessing spatially explicit power.  Developed under contract to the Scottish Government (USA/012/15)
