@@ -1,6 +1,6 @@
 ---
 title: "Post Impact Changes"
-author: "LAS Scott-Hayward and ML Mackenzie"
+author: "LAS Scott-Hayward"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -23,11 +23,14 @@ library(ggplot2)
 ```
 
 
-1. Load data (when loaded the dataframe is called `nysted`)
+1. Load data
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 count.data <- readRDS("data/nystedphaseA.rds")
 panelid <- as.numeric(count.data$TransectID)
+nysted.bndwf <- nysted.bndwf/1000
+nysted.studybnd <- nysted.studybnd/1000
+
 ```
 
 ```{r}
@@ -86,24 +89,24 @@ pct.change<-((rdf$Mean.count[rdf$evph==1] - rdf$Mean.count[rdf$evph==0])/
 
 + Plot the data
 
-```{r, fig.height=6, fig.width=8}
+```{r, fig.height=4, fig.width=8, warning=FALSE, message=FALSE}
 ggplot( NULL ) + geom_raster( data = rdf1 , aes( x , y , fill = pct.change ) ) +
   scale_fill_gradientn(colours=mypalette,values=c(0,1), space = "Lab", 
                        na.value = "grey50", guide = "colourbar") + 
   theme_bw() + coord_equal() +
   geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +
-  geom_path(data = nysted.studybnd/1000, aes(x.pos, y.pos))
+  geom_path(data = nysted.studybnd, aes(x.pos, y.pos))
 
 ```
 
-```{r}
+```{r fig.height=4, fig.width=10, warning=FALSE, message=FALSE}
 ggplot() +
   geom_raster(data = rdf , aes(x , y , fill = Mean.count)) +
   facet_wrap(~evph) +
-  coord_equal() +
+  coord_equal() + theme_bw() +
   scale_fill_distiller(palette = "Spectral",name="Animal Counts") +
   geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +
-  geom_path(data = nysted.studybnd/1000, aes(x.pos, y.pos))
+  geom_path(data = nysted.studybnd, aes(x.pos, y.pos))
 ```
 
 
@@ -111,11 +114,8 @@ ggplot() +
 
 To maintain the same number of animals in the study area but generate a decline in and around the footprint with re-distribution elsewhere we use the `pct.change` parameter to specify the decline and the `eventsite.bnd` parameter to specify the region for that decline. 
  
-```{r}
-  # generate a 50% decline in the windfarm footprint:
- data("nysted.bndwf")
-# convert to km (same coordinates as count.data)
-nysted.bndwf <- nysted.bndwf/1000
+```{r fig.height=4, fig.width=8, warning=FALSE, message=FALSE}
+# generate a 50% decline in the windfarm footprint:
 
 ggplot() + 
   geom_point(data = count.data, aes(x.pos, y.pos), colour = "grey") +
@@ -124,7 +124,7 @@ ggplot() +
 ```
 
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 changedata.re<-genChangeData(pct.change=60,
                             eventsite.bnd=nysted.bndwf, 
                             model=initialModel, 
@@ -166,24 +166,24 @@ pct.change.re<-((rdf.re$Mean.count[rdf.re$evph==1] - rdf.re$Mean.count[rdf.re$ev
 
 + Plot the data
 
-```{r, fig.height=6, fig.width=8}
+```{r, fig.height=4, fig.width=8, warning=FALSE, message=FALSE}
 ggplot( NULL ) + geom_raster( data = rdf1.re , aes( x , y , fill = pct.change.re ) ) +
   scale_fill_gradientn(colours=mypalette,values=c(0,1), space = "Lab", 
                        na.value = "grey50", guide = "colourbar") + 
   theme_bw() + coord_equal() +
   geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +
-  geom_path(data = nysted.studybnd/1000, aes(x.pos, y.pos))
+  geom_path(data = nysted.studybnd, aes(x.pos, y.pos))
 
 ```
 
-```{r}
+```{r fig.height=4, fig.width=10, warning=FALSE, message=FALSE}
 ggplot() +
   geom_raster(data = rdf.re , aes(x , y , fill = Mean.count)) +
   facet_wrap(~evph) +
-  coord_equal() +
+  coord_equal() + theme_bw() +
   scale_fill_distiller(palette = "Spectral",name="Animal Counts")+
   geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +
-  geom_path(data = nysted.studybnd/1000, aes(x.pos, y.pos))
+  geom_path(data = nysted.studybnd, aes(x.pos, y.pos))
 ```
 
 
@@ -191,7 +191,7 @@ ggplot() +
 
 Combining an overall change and a redistribution needs two parameters for `pct.change`.  The first is the redistribution and the second the overall change. Here we show a decline in the footprint of 40%, with redistribution and an overall change of 10%. 
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # generate a 50% decline in the windfarm footprint:
 changedata.ocre<-genChangeData(pct.change=c(60, 90),
                             eventsite.bnd=nysted.bndwf, 
@@ -234,22 +234,22 @@ pct.change.ocre<-((rdf.ocre$Mean.count[rdf.ocre$evph==1] - rdf.ocre$Mean.count[r
 
 + Plot the data
 
-```{r, fig.height=6, fig.width=8}
+```{r,fig.height=4, fig.width=8, warning=FALSE, message=FALSE}
 ggplot( NULL ) + geom_raster( data = rdf1.ocre , aes( x , y , fill = pct.change.ocre) ) +
   scale_fill_gradientn(colours=mypalette,values=c(0,1), space = "Lab", 
                        na.value = "grey50", guide = "colourbar") + 
   theme_bw() + coord_equal() +
   geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +
-  geom_path(data = nysted.studybnd/1000, aes(x.pos, y.pos))
+  geom_path(data = nysted.studybnd, aes(x.pos, y.pos))
 
 ```
 
-```{r}
+```{r fig.height=4, fig.width=10, warning=FALSE, message=FALSE}
 ggplot() +
   geom_raster(data = rdf.ocre, aes(x , y , fill = Mean.count)) +
   facet_wrap(~evph) +
-  coord_equal() +
+  coord_equal() + theme_bw() + 
   scale_fill_distiller(palette = "Spectral",name="Animal Counts")+
   geom_path(data = nysted.bndwf, aes(x.pos, y.pos)) +
-  geom_path(data = nysted.studybnd/1000, aes(x.pos, y.pos))
+  geom_path(data = nysted.studybnd, aes(x.pos, y.pos))
 ```
