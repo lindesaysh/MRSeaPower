@@ -15,9 +15,6 @@ vignette: >
 #### This vignette constitutes work carried out at the Centre for Research into Ecological and Environmental Modelling (CREEM) at the University of St. Andrews.
 
 
-**Please reference this document as:**
-Scott-Hayward, L.A.S. and Mackenzie, M.L. (2017). Vignette for the MRSeaPower Package v2.0: Software for analysing the Power to Detect Change. Centre for Research into Ecological and Environmental Modelling, University of St Andrews.
-
 *******
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}

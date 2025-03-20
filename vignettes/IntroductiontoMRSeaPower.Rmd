@@ -1,6 +1,6 @@
 ---
 title: "Introduction to MRSeaPower"
-author: "LAS Scott-Hayward and ML Mackenzie"
+author: "LAS Scott-Hayward"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -14,7 +14,7 @@ vignette: >
 
 
 **Please reference this document as:**
-Scott-Hayward, L.A.S. and Mackenzie, M.L. (2017). Vignette for the MRSeaPower Package v2.0: Software for analysing the Power to Detect Change. Centre for Research into Ecological and Environmental Modelling, University of St Andrews.
+Scott-Hayward, L.A.S. and Mackenzie, M.L. (2017). Vignette for the MRSeaPower Package v1.2: Software for analysing the Power to Detect Change. Centre for Research into Ecological and Environmental Modelling, University of St Andrews.
 
 *******
 
